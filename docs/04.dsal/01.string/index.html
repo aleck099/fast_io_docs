@@ -153,12 +153,12 @@ int main() {
     char first = s.front();   // first character
     char last  = s.back();    // last character
 
-    println("First: ", first); // H
-    println("Last: ", last);   // o
+    println("First: ", chvw(first)); // H
+    println("Last: ", chvw(last));   // o
 
     // access by index
     char middle = s[2];       // third character (index starts at 0)
-    println("Middle: ", middle); // l
+    println("Middle: ", chvw(middle)); // l
 }
       </code></pre>
 
@@ -200,13 +200,13 @@ int main() {
     ::fast_io::string s{"Hello"};
 
     if(!s.is_empty()) {
-        println("First: ", s.front(), "\n",
-                "Last: ", s.back());
+        println("First: ", chvw(s.front()), "\n"
+                "Last: ", chvw(s.back()));
     }
 
     std::size_t i = 2;
     if(i &lt; s.size()) {
-        println("Index ", i, ": ", s[i]);
+        println("Index ", i, ": ", chvw(s[i]));
     }
 }
       </code></pre>
@@ -359,31 +359,31 @@ int main() {
     ::fast_io::string s{"Hello"};
 
     auto it = s.begin();          // points to 'H'
-    println("First: ", *it);
+    println("First: ", chvw(*it));
 
     // Move forward with +n
     println("Third: ", *(it + 2)); // 'l'
 
     // Negative indexing relative to a valid position
     auto it2 = s.begin() + 2;     // points to 'l'
-    println("Second via negative index: ", it2[-1]); // 'e'
+    println("Second via negative index: ", chvw(it2[-1])); // 'e'
 
     // Random access with operator[]
-    println("Fourth via []: ", it[3]); // 'l'
+    println("Fourth via []: ", chvw(it[3])); // 'l'
 
     // Comparisons
     if(it &lt; s.end()) {
-        println("Iterator is before end()");
+        print("Iterator is before end()\n");
     }
 
     // ⚠️ Buffer overflow example: stepping past end()
     auto bad = s.end();
-    // println(*bad); // undefined behavior, like a buffer overflow
+    // println(chvw(*bad)); // undefined behavior, like a buffer overflow
 
     // ⚠️ Use-after-free example: iterator invalidation
     auto it3 = s.begin();
     s.append(" world"); // may reallocate, invalidates it3
-    // println(*it3);   // undefined behavior, like use-after-free
+    // println(chvw(*it3));   // undefined behavior, like use-after-free
 }
 </code></pre>
 
@@ -402,7 +402,7 @@ int main() {
     ::fast_io::string s{"Hello"};
     auto it = s.begin();
 
-    println("Character: ", *it);
+    println("Character: ", chvw(*it));
     println("Address: ", ::fast_io::mnp::pointervw(it));
 }
 </code></pre>
