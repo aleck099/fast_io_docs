@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v14"; // bump version here
+const CACHE_NAME = "fast_io-docs-v15"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -17,8 +17,8 @@ const urlsToCache = [
   "/docs/01.compile/02.vscode/",
   "/docs/01.compile/02.vscode/autosavedisable.webp",
   "/docs/01.compile/03.compilers/",
-  "/docs/03.dsal/",
-  "/docs/03.dsal/01.string/",
+  "/docs/04.dsal/",
+  "/docs/04.dsal/01.string/",
 ];
 
 // Install: pre-cache resources
