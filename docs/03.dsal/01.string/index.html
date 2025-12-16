@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ch3.1: string - fast_io Documentation</title>
+  <title>Ch3.1: string - C++ Tutorial with fast_io</title>
   <link rel="stylesheet" href="/style.css">
   <link rel="manifest" href="/manifest.json">
 </head>
@@ -14,7 +14,7 @@
     <section>
       <h2>1. Creating a string</h2>
       <p>
-        A <code>fast_io::string</code> is a container for text. You can construct one directly:
+        A <code>::fast_io::string</code> is a container for text. You can construct one directly:
       </p>
       <pre><code class="language-cpp">
 #include &lt;fast_io.h&gt;
@@ -229,7 +229,7 @@ int main() {
     ::fast_io::string s{"Hello"};
 
     for(char c : s) {
-        print(c, ' ');
+        print(chvw(c), ' ');
     }
     // Output: H e l l o
 }
@@ -249,7 +249,7 @@ int main() {
     ::fast_io::string s{"Hello"};
 
     for(std::size_t i{}, n{s.size()}; i != n; ++i) {
-        println("Index ", i, ": ", s[i]);
+        println("Index ", i, ": ", chvw(s[i]));
     }
 }
       </code></pre>
@@ -275,8 +275,8 @@ int main() {
     // begin() points to the first element ('H')
     // end() points just past the last element (not valid to dereference)
 
-    for(auto it = s.begin(); it != s.end(); ++it) {
-        print(*it, ' ');
+    for(auto it = s.begin(), ed = s.end(); it != ed; ++it) {
+        print(chvw(*it), ' ');
     }
     // Output: H e l l o
 }
