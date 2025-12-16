@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.3: Compilers - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.3: Compilers</h1>
+
+    <section>
+      <h2>Why Do We Need a Compiler?</h2>
+      <p>
+        A compiler is the tool that transforms human‑readable C++ source code into machine instructions.  
+        Without a compiler, our programs would remain text files and could never be executed by the CPU.
+      </p>
+      <p>
+        Compilers do much more than just translation. They also <strong>link</strong> your program with system libraries,  
+        dynamic link libraries (DLLs), and other parts of the operating system. This allows your program to call functions  
+        like <code>malloc</code>, <code>printf</code>, or system APIs.
+      </p>
+      <p>
+        Beyond linking, the <strong>compiler and toolchain make assumptions about the platform itself</strong>:  
+        how system calls work, how memory is laid out, how threads and processes are managed, and which Application Binary Interface (ABI) conventions are followed.  
+        These assumptions are baked into the generated binary.
+      </p>
+      <p>
+        That is why binaries are not portable across operating systems even if they share the same format.  
+        For example, a GNU/Linux binary will not run on FreeBSD, musl‑based systems, or Android,  
+        despite all of them using ELF binaries. The difference lies in the libraries, ABIs, and platform conventions each system provides.
+      </p>
+    </section>
+
+    <section>
+    <h2>Installation</h2>
+    <p>
+        You can install these compilers directly by visiting their release pages:
+    </p>
+    <ul>
+        <li><a href="https://github.com/trcrsired/gcc-releases/releases" target="_blank" rel="noopener noreferrer">GCC Releases</a></li>
+        <li><a href="https://github.com/trcrsired/llvm-releases/releases" target="_blank" rel="noopener noreferrer">Clang/LLVM Releases</a></li>
+        <li><a href="https://github.com/trcrsired/windows-msvc-sysroot" target="_blank" rel="noopener noreferrer">Windows MSVC Sysroot (required if using Clang to compile Windows programs)</a></li>
+    </ul>
+    <p>
+        These compilers are also built and maintained by the author of the <strong>fast_io</strong> library,  
+        ensuring they are tailored to work seamlessly with the examples in this tutorial.
+    </p>
+    <p>
+        In the next chapters, we will explain how to set up <strong>Clang</strong> first in <em>Ch1.4</em>
+        and <strong>GCC</strong> in <em>Ch1.5</em>. You can pick either compiler to use — both are supported.
+    </p>
+    </section>
+
+    <section>
+      <h2>Set Environment Variables</h2>
+      <p>
+        After downloading, you should set environment variables so your shell can locate the compiler binaries:
+      </p>
+      <ul>
+        <li><strong>PATH:</strong> add the compiler’s <code>bin</code> directory so commands like <code>gcc</code> or <code>clang</code> can be found.</li>
+        <li><strong>LD_LIBRARY_PATH:</strong> (Linux/BSD/Android, etc) add the compiler’s library directory so dynamic libraries can be resolved.</li>
+        <li><strong>DYLD_LIBRARY_PATH:</strong> (macOS) add the compiler’s library directory for dynamic linking.</li>
+        <li><strong>Windows:</strong> only <code>PATH</code> is needed; no <code>LD_LIBRARY_PATH</code>.</li>
+      </ul>
+      <p>
+        Setting these variables ensures that your terminal can find both the compiler executables and the libraries they depend on.
+      </p>
+    </section>
+
+    <div class="page-navigation">
+      <a href="/docs/01.compile/02.vscode/" class="prev-button">← Previous: Ch1.2 VS Code</a>
+      <a href="/" class="main-button">↑ Back to Main Page</a>
+      <!--a href="/docs/compile/04.clang/" class="next-button">Next: Ch1.4 Clang Setup →</a>-->
+    </div>
+  </main>
+</body>
+</html>

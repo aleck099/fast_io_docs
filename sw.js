@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v11"; // bump version here
+const CACHE_NAME = "fast_io-docs-v12"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -7,15 +7,18 @@ const urlsToCache = [
   "/manifest.json",
   "/icons/logo.webp",
   "/docs/intro/",
+  "/docs/introfastio/",
   // "/docs/api/",
-  "/docs/01.io/",
-  "/docs/01.io/01.helloworld/",
-  "/docs/01.io/02.aplusb/",
-  "/docs/01.io/03.pointer/",
-  "/docs/01.io/04.fileio/",
-  "/docs/01.io/05.filetypelayers/",
-  "/docs/02.dsal/",
-  "/docs/02.dsal/01.string/",
+  "/docs/01.compile/",
+  "/docs/01.compile/01.pwastore/",
+  "/docs/01.compile/01.pwastore/01.webp",
+  "/docs/01.compile/01.pwastore/02.webp",
+  "/docs/01.compile/01.pwastore/03.webp",
+  "/docs/01.compile/02.vscode/",
+  "/docs/01.compile/02.vscode/autosavedisable.webp",
+  "/docs/01.compile/03.compilers/",
+  "/docs/03.dsal/",
+  "/docs/03.dsal/01.string/",
 ];
 
 // Install: pre-cache resources

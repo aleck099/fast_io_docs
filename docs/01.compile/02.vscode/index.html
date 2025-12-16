@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.2: VS Code (PWA) - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.2: VS Code (PWA)</h1>
+
+    <section>
+      <p>
+        Visual Studio Code (VS Code) is available as a Progressive Web App (PWA).  
+        This allows you to run VS Code directly in your browser, with the same look and feel as the desktop version.
+      </p>
+      <p>
+        We use <strong>Microsoft Edge</strong> because it has the best PWA support on Windows, macOS, Android, and Linux.  
+        <strong>Do not use Firefox or Safari</strong> — they do not support filesystem access, which is required for VS Code PWA to work properly.
+      </p>
+    </section>
+
+    <section>
+      <h2>Install via PWA Store</h2>
+      <p>
+        Open the <strong>PWA Store</strong> and type <code>vscode</code> into the <strong>"Search Apps..."</strong> input box.  
+        Use the PWA Store to open the website of <strong>Visual Studio Code</strong> or <strong>VS Code Insider</strong>.  
+        Then, use the same method we used to install the PWA Store itself:  
+        click the <strong>“Install App”</strong> button on the right side of the address bar in Microsoft Edge.
+      </p>
+    </section>
+
+    <section>
+      <h2>Direct Installation</h2>
+      <p>
+        You can also install VS Code directly by visiting its URLs:
+      </p>
+      <ul>
+        <li><a href="https://vscode.dev/" target="_blank" rel="noopener noreferrer">VS Code Stable (PWA)</a></li>
+        <li><a href="https://insiders.vscode.dev/" target="_blank" rel="noopener noreferrer">VS Code Insiders (PWA)</a></li>
+      </ul>
+      <p>
+        However, the PWA Store is more convenient since it provides access to many other applications in one place.
+      </p>
+    </section>
+
+    <section>
+    <h2>Disable Auto Save</h2>
+    <p>
+        After installing VS Code as a PWA, disable the <strong>Auto Save</strong> feature.  
+        Auto Save can be problematic in PWAs because of limited file system permissions and may not behave correctly.
+    </p>
+    <ol>
+        <li>Open VS Code (PWA).</li>
+        <li>Go to <strong>File → Auto Save</strong>.</li>
+        <li>Uncheck the option to turn it off.</li>
+    </ol>
+
+    <figure>
+        <img src="/docs/01.compile/02.vscode/autosavedisable.webp" alt="Disable Auto Save in VS Code PWA">
+        <figcaption>Disabling Auto Save in VS Code PWA.</figcaption>
+    </figure>
+    </section>
+
+    <div class="page-navigation">
+      <a href="/docs/01.compile/01.pwastore/" class="prev-button">← Previous: Ch1.1 PWA Store</a>
+      <a href="/" class="main-button">↑ Back to Main Page</a>
+      <a href="/docs/01.compile/03.compilers/" class="next-button">Next: Ch1.3 Compilers →</a>
+    </div>
+  </main>
+</body>
+</html>
