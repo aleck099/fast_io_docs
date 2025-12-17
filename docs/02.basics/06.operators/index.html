@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.6: Operators - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.6: Operators</h1>
+
+    <section>
+      <h2>What Are Operators?</h2>
+      <p>
+        In C++, an <strong>operator</strong> is a symbol that performs an action on one or more objects.  
+        Operators include arithmetic (<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>), relational (<code>&lt;</code>, <code>&gt;</code>, <code>==</code>), logical (<code>&amp;&amp;</code>, <code>||</code>, <code>!</code>), assignment (<code>=</code>, <code>+=</code>, etc.), and more.  
+        Operators work on <strong>objects</strong>, not “variables.”
+      </p>
+    </section>
+
+    <section>
+      <h2>Arithmetic Operators with <code>::std::size_t</code></h2>
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t a{10};
+    ::std::size_t b{3};
+
+    println("a + b = ", a + b); // 13
+    println("a - b = ", a - b); // 7
+    println("a * b = ", a * b); // 30
+    println("a / b = ", a / b); // 3
+    println("a % b = ", a % b); // 1
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>The Modulo Operator <code>%</code></h2>
+      <p>
+        The <code>%</code> operator computes the remainder after division.  
+        With unsigned types, the result is straightforward.  
+        With signed types, the remainder has the same sign as the dividend (left operand).
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstdint&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::int32_t x = 10;
+    ::std::int32_t y = -3;
+
+    println("10 % 3 = ", x % 3);   // 1
+    println("10 % -3 = ", x % y);  // 1 (same sign as 10)
+    println("-10 % 3 = ", -x % 3); // -1 (same sign as -10)
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Overflow and Wrapping</h2>
+      <p>
+        With signed integer types like <code>::std::int32_t</code>, arithmetic overflow is <strong>undefined behavior (UB)</strong>.  
+        With unsigned types like <code>::std::uint32_t</code> or <code>::std::size_t</code>, arithmetic wraps around modulo 2<sup>N</sup>, which is well-defined.
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstdint&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    // Signed overflow: UB (do not rely on this!)
+    ::std::int32_t si = 2147483647; // max 32-bit signed
+    // si = si + 1; // UB: signed overflow
+
+    // Unsigned wrapping: well-defined
+    ::std::uint32_t ui = 4294967295u; // max 32-bit unsigned
+    println("ui = ", ui);             // 4294967295
+    ui = ui + 1;                      // wraps to 0
+    println("ui after wrap = ", ui);  // 0
+}
+</code></pre>
+    </section>
+    <section>
+      <h2>Unary Plus and Unary Minus</h2>
+      <p>
+        The <strong>unary plus</strong> (<code>+a</code>) and <strong>unary minus</strong> (<code>-a</code>) operators act on a single operand.  
+        They are different from the binary <code>+</code> and <code>-</code> operators, which require both a left and right operand.
+      </p>
+      <ul>
+        <li><code>+a</code> simply yields the value of <code>a</code> unchanged. It is rarely used explicitly.</li>
+        <li><code>-a</code> produces the additive inverse of <code>a</code> (negation). For signed integers, this flips the sign.</li>
+      </ul>
+
+    <section>
+      <h2>Unary Plus and Unary Minus</h2>
+      <p>
+        The <strong>unary plus</strong> (<code>+a</code>) and <strong>unary minus</strong> (<code>-a</code>) operators act on a single operand.  
+        They are different from the binary <code>+</code> and <code>-</code> operators, which require both a left and right operand.
+      </p>
+      <ul>
+        <li><code>+a</code> simply yields the value of <code>a</code> unchanged. It is rarely used explicitly.</li>
+        <li><code>-a</code> produces the additive inverse of <code>a</code> (negation). For signed integers, this flips the sign.</li>
+      </ul>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstdint&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::int32_t x{42};
+
+    println("+x = ", +x); // 42 (unary plus does nothing)
+    println("-x = ", -x); // -42 (unary minus negates the value)
+
+    // With unsigned types, -a wraps modulo 2^N
+    ::std::size_t u{5};
+    println("-u = ", -u); // wraps around (large value depending on size_t width)
+
+    // Special case: INT_LEAST32_MIN
+    ::std::int_least32_t mn{INT_LEAST32_MIN};
+    // println(-mn); // UB: negating INT_LEAST32_MIN cannot be represented in 32-bit signed
+}
+</code></pre>
+
+      <p>
+        <strong>Key takeaway:</strong> Unary plus is effectively a no‑op, while unary minus negates the operand.  
+        For unsigned types, negation is performed modulo 2<sup>N</sup>, so <code>-u</code> results in wrapping rather than a true negative number.  
+        For signed types, beware of <code>INT_LEAST32_MIN</code>: its absolute value cannot be represented in 32 bits, so <code>-INT_LEAST32_MIN</code> is <strong>undefined behavior</strong>.
+      </p>
+    </section>
+
+
+    <section>
+      <h2>Special Case: <code>INT_LEAST32_MIN</code></h2>
+      <p>
+        The constant <code>INT_LEAST32_MIN</code> represents the smallest value that can be stored in a 
+        <code>::std::int_least32_t</code>. On most systems this is <code>-2147483648</code>.
+      </p>
+      <p>
+        Negating this value with the unary minus operator (<code>-mn</code>) is a dangerous edge case:
+      </p>
+      <ul>
+        <li>Mathematically, <code>-(-2147483648)</code> would be <code>+2147483648</code>.</li>
+        <li>But <code>::std::int_least32_t</code> can only represent values up to <code>+2147483647</code>.</li>
+        <li>This means the result cannot be represented, and in C++ this is <strong>undefined behavior (UB)</strong>.</li>
+        <li>Use a wider type, e.g. <code>::std::int64_t safe = -static_cast&lt;::std::int64_t&gt;(mn);</code> — this will be explained in later chapters.</li>
+      </ul>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstdint&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::int_least32_t mn{INT_LEAST32_MIN};
+    println("mn = ", mn); // prints -2147483648
+
+    // println(-mn); // UB: cannot represent +2147483648 in 32-bit signed
+}
+</code></pre>
+
+      <p>
+        <strong>Key takeaway:</strong> Negating <code>INT_LEAST32_MIN</code> in a 32-bit signed type is undefined behavior.  
+        The safe solution is to use a wider type or an unsigned type, but the details of these strategies will be covered later in this tutorial.
+      </p>
+    </section>
+
+
+    <section>
+      <h2>Increment and Decrement</h2>
+      <p>
+        C++ provides <code>++</code> and <code>--</code> operators.  
+        We should prefer <strong><code>++i</code></strong> (pre-increment) over <code>i++</code> (post-increment), because <code>i++</code> creates a temporary copy and is less efficient.
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t i{5};
+
+    println("i = ", i);   // 5
+    ++i;                  // pre-increment
+    println("++i = ", i); // 6
+
+    // Post-increment pseudo-code:
+    // auto temp = i;
+    // ++i;
+    // return temp;
+
+    i = 5;
+    println("i++ returns ", i++); // prints 5 (old value)
+    println("i after i++ = ", i); // prints 6
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Comparison Operators</h2>
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t a{10};
+    ::std::size_t b{20};
+
+    println("a == b: ", a == b); // 0
+    println("a != b: ", a != b); // 1
+    println("a &lt; b: ", a &lt; b);   // 1
+    println("a &gt; b: ", a &gt; b);   // 0
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>The Spaceship Operator <code>&lt;=&gt;</code></h2>
+      <p>
+        The <strong>spaceship operator</strong> (<code>&lt;=&gt;</code>) performs a three-way comparison.  
+        It returns an ordering result: less, equal, or greater.  
+        With <code>fast_io</code>, you can directly print the result as <code>&lt;</code>, <code>=</code>, or <code>&gt;</code>.
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;compare&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t a{10};
+    ::std::size_t b{20};
+
+    auto result = (a &lt;=&gt; b);
+
+    println(result); // fast_io prints &lt; (since a &lt; b)
+
+    a = 20;
+    b = 20;
+    println(a &lt;=&gt; b); // prints =
+
+    a = 30;
+    b = 20;
+    println(a &lt;=&gt; b); // prints &gt;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>The Conditional Operator <code>?:</code></h2>
+      <p>
+        The <strong>conditional operator</strong> (<code>?:</code>) chooses between two expressions based on a condition.  
+        It is sometimes called the “ternary operator.”
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t a{10};
+    ::std::size_t b{20};
+
+    ::std::size_t max = (a &gt; b) ? a : b;
+    println("max = ", max); // 20
+}
+</code></pre>
+    </section>
+
+      <h2>Operands and Precedence</h2>
+      <p>
+        Every operator acts on one or more <strong>operands</strong>.  
+        In a binary operator expression like <code>a + b</code>, <code>a</code> is the <strong>left operand</strong> and <code>b</code> is the <strong>right operand</strong>.  
+        Unary operators like <code>++i</code> act on a single operand.
+      </p>
+      <p>
+        Operators also have <strong>precedence</strong>, which determines the order in which operations are evaluated.  
+        Parentheses <code>()</code> have the highest precedence and can be used to explicitly control evaluation order.  
+        For the full precedence table, see  
+        <a href="https://en.cppreference.com/w/cpp/language/operator_precedence" target="_blank">
+          cppreference: Operator Precedence
+        </a>.
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t a{2};
+    ::std::size_t b{3};
+    ::std::size_t c{4};
+
+    println("a + b * c = ", a + b * c);   // multiplication first → 14
+    println("(a + b) * c = ", (a + b) * c); // parentheses force addition first → 20
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Summary Table</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Operators</th>
+            <th>Example</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Arithmetic</td>
+            <td><code>+ - * / %</code></td>
+            <td><code>a + b</code></td>
+            <td>Basic math on objects.</td>
+          </tr>
+          <tr>
+            <td>Modulo</td>
+            <td><code>%</code></td>
+            <td><code>-10 % 3</code></td>
+            <td>Remainder has same sign as dividend.</td>
+          </tr>
+          <tr>
+            <td>Comparison</td>
+            <td><code>== != &lt; &gt; &lt;= &gt;=</code></td>
+            <td><code>a &lt; b</code></td>
+            <td>Return boolean results.</td>
+          </tr>
+          <tr>
+            <td>Spaceship</td>
+            <td><code>&lt;=&gt;</code></td>
+            <td><code>println(a &lt;=&gt; b)</code></td>
+            <td>Prints &lt;, =, or &gt; with fast_io.</td>
+          </tr>
+          <tr>
+            <td>Logical</td>
+            <td><code>&amp;&amp; || !</code></td>
+            <td><code>x &amp;&amp; y</code></td>
+            <td>Work with boolean objects.</td>
+          </tr>
+          <tr>
+            <td>Assignment</td>
+            <td><code>= += -= *= /=</code></td>
+            <td><code>a += 5</code></td>
+            <td>Combine arithmetic with assignment.</td>
+          </tr>
+          <tr>
+            <td>Increment/Decrement</td>
+            <td><code>++ --</code></td>
+            <td><code>++i</code></td>
+            <td>Prefer pre-increment <code>++i</code> over post-increment <code>i++</code>.</td>
+          </tr>
+          <tr>
+            <td>Conditional</td>
+            <td><code>?:</code></td>
+            <td><code>(a &gt; b) ? a : b</code></td>
+            <td>Ternary operator chooses between two values.</td>
+          </tr>
+          <tr>
+            <td>Overflow</td>
+            <td>—</td>
+            <td><code>::std::int32_t</code></td>
+            <td>Signed overflow is UB; unsigned wraps modulo 2<sup>N</sup>.</td>
+          </tr>
+          <tr>
+            <td>Precedence</td>
+            <td><code>()</code></td>
+            <td><code>(a + b) * c</code></td>
+            <td>Parentheses have highest precedence.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/05.assignment/" class="prev-button">← Ch2.5: Assignment</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/02.basics/07.sizeof/" class="next-button">Ch2.7: sizeof →</a>
+    </div>
+  </main>
+</body>
+</html>

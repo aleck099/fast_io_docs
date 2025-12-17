@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.8: const - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.8: <code>const</code></h1>
+
+    <section>
+      <h2>What is <code>const</code>?</h2>
+      <p>
+        The keyword <code>const</code> marks a variable as immutable: once initialized, its value cannot change.  
+        It improves correctness and clarity, but it does not affect performance.
+      </p>
+    </section>
+
+    <section>
+      <h2>The Rule of <code>const</code></h2>
+      <p>
+        The full rule is: <code>const</code> applies to what is on its left.  
+        If there is nothing on the left, then it applies to what is on its right.
+      </p>
+      <p>
+        Because of this, we can simplify the rule to:  
+        <code>const</code> applies to the left. Full stop.
+      </p>
+      <p>
+        Therefore, the preferred style is to write <code>T const</code> instead of <code>const T</code>.  
+        The type comes first, then the qualifier.
+      </p>
+      <p>
+        Some people believe tools like <code>clang-tidy</code> should even provide a toggle to warn users  
+        if they write <code>const T</code> instead of <code>T const</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Examples</h2>
+      <pre><code class="language-cpp">
+#include &lt;cstddef&gt;
+#include &lt;cstdint&gt;
+
+::std::int32_t  const a{42};     // constant 32-bit integer
+::std::size_t   const n{100};    // constant size_t
+double          const pi{3.14};  // constant double
+char            const nl{'\n'};  // constant char
+
+// Do NOT write: const ::std::int32_t wrong{42};
+// Preferred:    ::std::int32_t const a{42};
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>const</code> and Performance</h2>
+      <p>
+        A common misconception is that using <code>const</code> makes your code faster.  
+        This is false. Modern compilers already perform optimizations based on usage and lifetimes,  
+        regardless of whether a variable is declared <code>const</code>.
+      </p>
+      <p>
+        The purpose of <code>const</code> is correctness and clarity — it prevents accidental modification  
+        and communicates intent. It is not a performance feature.
+      </p>
+      <p>
+        For more discussion, see  
+        <a href="https://theartofmachinery.com/2019/08/12/c_const_isnt_for_performance.html" target="_blank">
+          The Art of Machinery: C const isn’t for performance
+        </a>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key Takeaways</h2>
+      <ul>
+        <li><code>const</code> applies to the left. Full stop.</li>
+        <li>Always declare constants as <code>T const</code>, not <code>const T</code>.</li>
+        <li>Constants must be initialized at declaration.</li>
+        <li><code>const</code> improves correctness and clarity, not performance.</li>
+        <li>Some developers want tools like <code>clang-tidy</code> to enforce this style.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/07.sizeof/" class="prev-button">← Ch2.7: sizeof</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/02.basics/09.typeid/" class="next-button">Ch2.9: typeid →</a>
+    </div>
+  </main>
+</body>
+</html>

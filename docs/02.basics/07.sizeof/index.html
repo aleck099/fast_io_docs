@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.7: sizeof - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.7: <code>sizeof</code></h1>
+
+    <section>
+      <h2>What is <code>sizeof</code>?</h2>
+      <p>
+        The <code>sizeof</code> operator in C++ returns the size of a type or object in bytes.  
+        Its result type is always <code>::std::size_t</code>, an unsigned integer type guaranteed to hold any object size.  
+        For fundamental types, <code>sizeof</code> is evaluated at compile time and is a constant expression.
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Examples</h2>
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
+#include &lt;cstdint&gt;
+#include &lt;cstdfloat&gt;
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    ::std::size_t sz1 = sizeof(::std::size_t);
+    ::std::size_t sz2 = sizeof(::std::int32_t);
+    ::std::size_t sz3 = sizeof(double);
+    ::std::size_t sz4 = sizeof(::std::float64_t);
+    ::std::size_t sz5 = sizeof(::std::float32_t);
+    ::std::size_t sz6 = sizeof(::std::bfloat_t);
+
+    println("sizeof(::std::size_t) = ", sz1);   // equals architecture byte size (8 on 64-bit, 4 on 32-bit)
+    println("sizeof(::std::int32_t) = ", sz2);  // formula: 32/8 = 4
+    println("sizeof(double) = ", sz3);          // typically 8
+    println("sizeof(::std::float64_t) = ", sz4); // 64/8 = 8
+    println("sizeof(::std::float32_t) = ", sz5); // 32/8 = 4
+    println("sizeof(::std::bfloat_t) = ", sz6);  // 16/8 = 2
+}
+</code></pre>
+
+      <p>
+        <strong>Key takeaway:</strong> The result of <code>sizeof</code> is always a <code>::std::size_t</code> value.  
+        On typical 64‑bit systems:
+      </p>
+      <ul>
+        <li><code>sizeof(::std::size_t)</code> = 8 bytes (architecture word size)</li>
+        <li><code>sizeof(::std::int32_t)</code> = 32/8 = 4 bytes</li>
+        <li><code>sizeof(double)</code> = 8 bytes</li>
+        <li><code>sizeof(::std::float64_t)</code> = 64/8 = 8 bytes</li>
+        <li><code>sizeof(::std::float32_t)</code> = 32/8 = 4 bytes</li>
+        <li><code>sizeof(::std::bfloat_t)</code> = 16/8 = 2 bytes</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Formulas</h2>
+      <p>
+        For fixed-width integer and floating-point types, the size follows a simple formula:
+      </p>
+      <ul>
+        <li><code>sizeof(::std::intXX_t)</code> = XX / 8</li>
+        <li><code>sizeof(::std::float32_t)</code> = 32 / 8 = 4</li>
+        <li><code>sizeof(::std::float64_t)</code> = 64 / 8 = 8</li>
+        <li><code>sizeof(::std::bfloat_t)</code> = 16 / 8 = 2</li>
+      </ul>
+      <p>
+        For <code>::std::size_t</code>, the size equals the architecture’s byte size:  
+        4 bytes on 32‑bit systems, 8 bytes on 64‑bit systems.
+      </p>
+    </section>
+
+    <section>
+      <h2>Operator Characteristics</h2>
+      <ul>
+        <li><code>sizeof</code> is evaluated at compile time for fundamental types.</li>
+        <li>It does not evaluate its operand — no runtime side effects.</li>
+        <li>Result type is always <code>::std::size_t</code>.</li>
+        <li>Parentheses are required when applied to a type, optional for objects.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Further Reading</h2>
+      <p>
+        For complete details, see  
+        <a href="https://en.cppreference.com/w/cpp/language/sizeof" target="_blank">
+          cppreference: sizeof
+        </a> and  
+        <a href="https://en.cppreference.com/w/cpp/types/floating-point" target="_blank">
+          cppreference: Fixed-width floating-point types
+        </a>.
+      </p>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/06.operators/" class="prev-button">← Ch2.6: Operators</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/02.basics/08.const/" class="next-button">Ch2.8: const →</a>
+    </div>
+  </main>
+</body>
+</html>
