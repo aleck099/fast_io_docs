@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v23.2"; // bump version here
+const CACHE_NAME = "fast_io-docs-v24"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -17,6 +17,11 @@ const urlsToCache = [
   "/docs/01.compile/02.vscode/",
   "/docs/01.compile/02.vscode/autosavedisable.webp",
   "/docs/01.compile/03.compilers/",
+  "/docs/01.compile/04.clang/",
+  "/docs/01.compile/05.testinstallation/",
+  "/docs/01.compile/06.gcc/",
+  "/docs/01.compile/07.msvc/",
+  "/docs/01.compile/08.fastio/",
   "/docs/02.basics/",
   "/docs/02.basics/01.helloworld/",
   "/docs/02.basics/02.datatypes/",

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.8: fast_io - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.8: fast_io</h1>
+
+    <section>
+      <h2>Using fast_io (Header-Only)</h2>
+      <p>
+        In <em>Ch1.5</em>, we cloned the <strong>fast_io</strong> repository.  
+        fast_io is a <strong>header-only</strong> library, so you do not need to build anything.  
+        You simply add the <code>include</code> directory to your compiler flags.
+      </p>
+
+      <p>
+        Suppose you cloned fast_io into:
+      </p>
+
+      <pre><code>$HOME/libraries/fast_io</code></pre>
+
+      <p>
+        Then you can include it in your program:
+      </p>
+
+      <pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+
+int main() {
+    print("Hello from fast_io!\n");
+}
+</code></pre>
+
+      <p>
+        And compile it by adding:
+      </p>
+
+      <pre><code>-I$HOME/libraries/fast_io/include</code></pre>
+
+      <p>
+        This tells the compiler where to find <code>fast_io.h</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Compile with Clang</h2>
+      <p>
+        Example: building a Windows MSVC binary using Clang and the MSVC sysroot:
+      </p>
+
+      <pre><code>
+clang++ -o hello.exe hello.cpp \
+  -O3 \
+  --sysroot=$HOME/toolchains/windows-msvc-sysroot \
+  -fuse-ld=lld \
+  -flto=thin \
+  --target=x86_64-windows-msvc \
+  -I$HOME/libraries/fast_io/include
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Compile with GCC</h2>
+      <p>
+        GCC works the same way.  
+        Just add the include directory:
+      </p>
+
+      <pre><code>
+g++ -o hello hello.cpp \
+  -O3 \
+  -I$HOME/libraries/fast_io/include
+</code></pre>
+
+    </section>
+
+    <section>
+      <h2>Compile with MSVC (cl.exe)</h2>
+      <p>
+        In the Visual Studio Developer Command Prompt:
+      </p>
+
+      <pre><code>
+cl /EHsc /Ox hello.cpp ^
+  /I %USERPROFILE%\\libraries\\fast_io\\include
+</code></pre>
+
+      <p>
+        This produces <code>hello.exe</code> using MSVC.
+      </p>
+    </section>
+
+    <section>
+      <h2>Using fast_io Modules</h2>
+      <p>
+        fast_io also provides C++20 module files.  
+        They are located in:
+      </p>
+
+      <pre><code>{fast_io_cloned_dir}/share/fast_io</code></pre>
+
+      <p>Example directory:</p>
+
+      <pre><code>
+/Users/username/libraries/fast_io/share/fast_io
+</code></pre>
+
+      <p>Contents:</p>
+
+      <pre><code>
+fast_io.cppm
+fast_io_crypto.cppm
+fast_io_legacy.cppm
+fast_io_inc/
+</code></pre>
+
+      <h3>How to import the module</h3>
+
+      <p>
+        Create a file <code>hello.cpp</code>:
+      </p>
+
+      <pre><code class="language-cpp">
+import fast_io;
+
+int main() {
+    using namespace ::fast_io::io;
+    print("Hello from fast_io module!\n");
+}
+</code></pre>
+
+      <h3>Compile fast_io module with Clang</h3>
+
+      <p>
+        First, compile the module interface:
+      </p>
+
+      <pre><code>
+clang++ -std=c++26 --precompile \
+  $HOME/libraries/fast_io/share/fast_io/fast_io.cppm \
+  -O3 \
+  --sysroot=$HOME/toolchains/windows-msvc-sysroot \
+  -fuse-ld=lld \
+  -flto=thin \
+  --target=x86_64-windows-msvc \
+  -I$HOME/libraries/fast_io/include \
+  -o fast_io.pcm
+</code></pre>
+
+      <p>
+        Then compile your program using the PCM:
+      </p>
+
+      <pre><code>
+clang++ -std=c++26 hello.cpp \
+  -O3 \
+  --sysroot=$HOME/toolchains/windows-msvc-sysroot \
+  -fuse-ld=lld \
+  -flto=thin \
+  --target=x86_64-windows-msvc \
+  -fmodule-file=fast_io=fast_io.pcm \
+  -o hello.exe
+</code></pre>
+
+      <p>
+        Clang will now import the module instead of using headers.
+      </p>
+
+      <h3>Compile fast_io module with GCC</h3>
+
+      <p>
+        GCC’s module support is still experimental, but the process is similar:
+      </p>
+
+      <pre><code>
+g++ -std=c++26 -fmodules -c \
+  $HOME/libraries/fast_io/share/fast_io/fast_io.cppm \
+  -I$HOME/libraries/fast_io/include \
+  -o fast_io.gcm -O3
+
+g++ -std=c++26 -fmodules hello.cpp \
+  fast_io.gcm \
+  -I$HOME/libraries/fast_io/include \
+  -o hello -s -flto -O3
+</code></pre>
+
+      <h3>Compile fast_io module with MSVC</h3>
+
+      <p>
+        MSVC supports modules via <code>/interface</code> and <code>/module</code> flags:
+      </p>
+
+      <pre><code>
+cl /std:c++latest /EHsc /GL /MD /Ox /interface \
+  %USERPROFILE%\\libraries\\fast_io\\share\\fast_io\\fast_io.cppm \
+  /I %USERPROFILE%\\libraries\\fast_io\\include \
+  /Fo:fast_io.ifc
+
+cl /std:c++latest /EHsc /GL /MD /Ox hello.cpp \
+  /module:reference fast_io.ifc \
+  /I %USERPROFILE%\\libraries\\fast_io\\include \
+  /Fe:hello.exe
+</code></pre>
+
+      <p>
+        This builds and imports the fast_io module using MSVC.
+      </p>
+    </section>
+    <section>
+      <h2>Summary</h2>
+      <ul>
+        <li>fast_io is header-only — no build step required.</li>
+        <li>Add <code>-I{fast_io}/include</code> to your compiler flags.</li>
+        <li>Clang, GCC, and MSVC all work with fast_io.</li>
+        <li>fast_io also provides modules in <code>share/fast_io</code>.</li>
+        <li>Modules require a separate compile step to generate <code>.pcm</code>, <code>.gcm</code>, or <code>.ifc</code>.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/01.compile/07.msvc/" class="prev-button">← Ch1.7: MSVC</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/02.basics/" class="next-button">Ch2: Basics →</a>
+    </div>
+  </main>
+</body>
+</html>

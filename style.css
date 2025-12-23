@@ -97,3 +97,15 @@ li a {
   text-decoration: none;
   color: #0066cc;
 }
+
+.screenshots img {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  border-radius: 8px; /* optional */
+}
+
+.screenshots figure {
+  margin: 0 0 1.5rem 0;
+}

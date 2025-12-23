@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.4: Clang - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.4: Clang</h1>
+
+    <section>
+    <h2>What Is Clang?</h2>
+    <p>
+        Clang is a modern C and C++ compiler front‑end from the LLVM project. It is designed to be fast,
+        modular, and highly portable. Unlike GCC, Clang allows you to freely specify
+        <code>--target</code> at compile time, which makes cross‑compilation extremely easy.
+    </p>
+
+    <p>
+        Clang is widely used in industry because of its:
+    </p>
+
+    <ul>
+        <li>excellent diagnostics and error messages</li>
+        <li>fast compilation speed</li>
+        <li>clean architecture and modular design</li>
+        <li>support for many platforms (Windows, Linux, macOS, Android, WebAssembly, etc.)</li>
+        <li>compatibility with both GNU and MSVC toolchains</li>
+    </ul>
+
+    <p>
+        In this tutorial, Clang is our primary compiler because it can generate binaries for nearly every
+        platform, including Windows MSVC binaries, Linux binaries, macOS binaries, Android binaries, and
+        WebAssembly binaries. Clang also integrates cleanly with the <code>windows-msvc-sysroot</code>
+        provided in this tutorial, allowing you to build MSVC‑compatible Windows executables on any OS.
+    </p>
+    </section>
+
+    <section>
+      <h2>Install Git</h2>
+      <p>
+        Before downloading the toolchain scripts, ensure that <strong>Git</strong> is installed on your system.
+      </p>
+      <ul>
+        <li><strong>Linux:</strong> install via your package manager (e.g., <code>sudo apt install git</code>)</li>
+        <li><strong>macOS:</strong> install via Homebrew (<code>brew install git</code>) or Xcode Command Line Tools</li>
+        <li><strong>Windows:</strong> install from <a href="https://git-scm.com" target="_blank" rel="noopener noreferrer">git-scm.com</a></li>
+        <li><strong>Android (Termux):</strong> install via <code>pkg install git</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Clone the Toolchain Build Scripts</h2>
+      <p>
+        The Clang toolchains used in this tutorial are built using the author's automated build scripts.  
+        Clone the repository using one of the following commands:
+      </p>
+      <ul>
+        <li><code>git clone https://github.com/trcrsired/toolchainbuildscripts.git</code></li>
+        <li>
+          <code>git@github.com:trcrsired/toolchainbuildscripts.git</code>  
+          <br>(Note: SSH cloning may be blocked by the Great Firewall in China.)
+        </li>
+      </ul>
+      <p>
+        After cloning, enter the repository directory to access the installation scripts.
+      </p>
+    </section>
+
+    <section>
+      <h2>Download Native Toolchains</h2>
+      <p>
+        To download the toolchains for your current host system, run the appropriate script:
+      </p>
+      <ul>
+        <li><strong>Linux / macOS / BSD / Android:</strong> <code>./installs/host_download.sh</code></li>
+        <li>
+          <strong>Windows PowerShell:</strong> <code>./installs/windows/host_download.ps1</code>  
+          <br>You may need to run PowerShell as Administrator or temporarily bypass execution restrictions:
+          <br><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass</code>
+        </li>
+      </ul>
+      <p>
+        You can also enable optional components by setting environment variables:
+      </p>
+      <ul>
+        <li><code>CLONE_WINDOWS_MSVC_SYSROOT=yes</code> — clones the Windows MSVC sysroot for building Windows binaries</li>
+        <li><code>CLONE_FAST_IO=yes</code> — automatically clones the <strong>fast_io</strong> library</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Download All Toolchains</h2>
+      <p>
+        If you want every supported toolchain (not just the native one), use the <strong>all_download</strong> scripts:
+      </p>
+      <ul>
+        <li><strong>POSIX systems:</strong> <code>./installs/all_download.sh</code></li>
+        <li><strong>Windows:</strong> <code>./installs/windows/all_download.ps1</code></li>
+      </ul>
+      <p>
+        These scripts download all available toolchains.  
+        In this case, you do <strong>not</strong> need to run <code>host_download</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Troubleshooting</h2>
+      <p>
+        If you encounter issues during installation:
+      </p>
+      <ul>
+        <li>Verify your network connection and proxy settings</li>
+        <li>Ensure Git and PowerShell permissions are configured correctly</li>
+        <li>Check that your shell has permission to execute the scripts</li>
+        <li>Ask AI assistants such as Microsoft Copilot or ChatGPT for help diagnosing errors</li>
+      </ul>
+      <p>
+        Once the toolchains are downloaded, you are ready to begin compiling with <strong>Clang</strong>.
+      </p>
+    </section>
+
+  <section>
+    <h2>Manual Installation (If Auto‑Install Fails)</h2>
+    <p>
+      If the automated installation scripts fail due to network issues, proxy configuration, or platform restrictions,  
+      you can install the toolchains manually by downloading the prebuilt releases directly.
+    </p>
+
+    <ul>
+      <li>
+        <a href="https://github.com/trcrsired/llvm-releases/releases" target="_blank" rel="noopener noreferrer">
+          llvm-releases
+        </a>
+        — fast_io author's latest Clang/LLVM builds
+      </li>
+      <li>
+        <a href="https://github.com/trcrsired/wavm-releases/releases" target="_blank" rel="noopener noreferrer">
+          wavm-releases
+        </a>
+        — includes WebAssembly Memory Tagging support (ACM CCSW 2025 publication:
+        <a href="https://dl.acm.org/doi/10.1145/3733812.3765536" target="_blank" rel="noopener noreferrer">link</a>)
+      </li>
+      <li>
+        <a href="https://github.com/trcrsired/windows-msvc-sysroot" target="_blank" rel="noopener noreferrer">
+          windows-msvc-sysroot
+        </a>
+        — required for building Windows binaries with Clang
+      </li>
+      <li>
+        <a href="https://github.com/cppfastio/fast_io" target="_blank" rel="noopener noreferrer">
+          fast_io Library
+        </a>
+        — clone with <code>-b next</code> to use the development branch
+      </li>
+    </ul>
+
+    <p>
+      After downloading the archives or cloning the repositories, extract them and configure your environment variables manually:
+    </p>
+
+    <ul>
+      <li><strong>PATH:</strong> add the compiler’s <code>bin</code> directory</li>
+      <li><strong>LD_LIBRARY_PATH:</strong> (Linux/BSD/Android) add the toolchain’s <code>lib</code> directory</li>
+      <li><strong>DYLD_LIBRARY_PATH:</strong> (macOS) add the toolchain’s <code>lib</code> directory</li>
+      <li><strong>WINEPATH:</strong> if using Wine to run Windows binaries</li>
+    </ul>
+
+    <p>
+      If you are unsure how to replicate the automated steps manually, you can open the  
+      <code>host_download.sh</code> or <code>host_download.ps1</code> scripts and feed them to an AI assistant  
+      (such as Microsoft Copilot or ChatGPT). It will explain exactly what each step does so you can reproduce it by hand.
+    </p>
+  </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/01.compile/03.compilers/" class="prev-button">← Ch1.3: Compilers</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/01.compile/05.testinstallation/" class="next-button">Ch1.5: Test Installation →</a>
+    </div>
+  </main>
+</body>
+</html>

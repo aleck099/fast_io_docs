@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.6: GCC - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.6: GCC</h1>
+    <p>
+        GCC (GNU Compiler Collection) is one of the oldest and most widely used C and C++ compilers in the world. It is the default compiler on many Linux distributions and is known for its stability, portability, and long history in the open‑source ecosystem.
+    </p>
+    <section>
+      <h2>Understanding GCC’s Toolchain Model</h2>
+      <p>
+        GCC uses a three‑tuple configuration model described in its documentation:
+      </p>
+      <p>
+        <a href="https://gcc.gnu.org/onlinedocs/gccint/Configure-Terms.html" target="_blank" rel="noopener noreferrer">
+          GCC Configure Terms
+        </a>
+      </p>
+      <p>
+        GCC distinguishes between:
+      </p>
+      <ul>
+        <li><strong>--build</strong>: the machine GCC is built on</li>
+        <li><strong>--host</strong>: the machine GCC runs on</li>
+        <li><strong>--target</strong>: the machine GCC generates binaries for</li>
+      </ul>
+      <p>
+        Unlike Clang, GCC <strong>cannot</strong> freely set <code>--target</code> at compile time.  
+        This means GCC must be built separately for every target architecture and sysroot combination.  
+        As a result, GCC cross‑compilers are heavier, more rigid, and more difficult to maintain than Clang’s.
+      </p>
+    </section>
+
+    <section>
+      <h2>Download GCC Toolchains</h2>
+      <p>
+        Prebuilt GCC toolchains are available here:
+      </p>
+      <p>
+        <a href="https://github.com/trcrsired/gcc-releases/releases" target="_blank" rel="noopener noreferrer">
+          gcc-releases
+        </a>
+      </p>
+
+      <p>
+        Each archive follows the naming pattern:
+      </p>
+
+      <pre><code>target.host.tar.xz</code></pre>
+
+      <p>
+        For example:
+      </p>
+
+      <pre><code>x86_64-linux-gnu.x86_64-w64-mingw32.tar.xz</code></pre>
+
+      <p>
+        This means:
+      </p>
+      <ul>
+        <li><strong>host:</strong> <code>x86_64-w64-mingw32</code> → runs on Windows</li>
+        <li><strong>target:</strong> <code>x86_64-linux-gnu</code> → produces Linux binaries</li>
+      </ul>
+
+      <p>
+        After extracting the archive, add the <code>bin</code> directory (containing
+        <code>x86_64-linux-gnu-g++</code>) to your Windows <code>PATH</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Compile a Linux Binary Using GCC on Windows</h2>
+      <p>
+        Once the toolchain is in your <code>PATH</code>, you can compile Linux binaries directly from Windows:
+      </p>
+
+      <pre><code>x86_64-linux-gnu-g++ -o hello hello.cpp -O3 -s -flto</code></pre>
+
+      <p>
+        Then copy <code>hello</code> to your Linux machine, mark it executable:
+      </p>
+
+      <pre><code>chmod +x hello</code></pre>
+
+      <p>
+        And run it normally.
+      </p>
+    </section>
+
+    <section>
+      <h2>Compile Windows Binaries Using GCC</h2>
+      <p>
+        The simplest GCC toolchain to use is:
+      </p>
+
+      <pre><code>x86_64-w64-mingw32.x86_64-w64-mingw32.tar.xz</code></pre>
+
+      <p>
+        This toolchain runs on Windows and produces Windows binaries.  
+        You can use it in two ways:
+      </p>
+
+      <h3>1. Compile on Windows</h3>
+      <p>
+        Add the toolchain’s <code>bin</code> directory to your Windows <code>PATH</code>, then compile:
+      </p>
+
+      <pre><code>g++ -o hello.exe hello.cpp -O3 -std=c++26 -s -flto</code></pre>
+
+      <p>
+        You can run <code>hello.exe</code> directly on Windows.
+      </p>
+
+      <h3>2. Compile on Linux using Wine</h3>
+      <p>
+        On Linux, you can run the Windows GCC compiler through Wine.  
+        Set <code>WINEPATH</code> to include the toolchain’s <code>bin</code> directory:
+      </p>
+
+      <pre><code>wine g++ -o hello.exe hello.cpp -O3 -std=c++26 -s -flto</code></pre>
+
+      <p>
+        This produces a Windows executable, which you can run with:
+      </p>
+
+      <pre><code>wine ./hello.exe</code></pre>
+
+      <p>
+        This method is often simpler than configuring a native GCC cross‑compiler on Linux.
+      </p>
+    </section>
+
+    <section>
+      <h2>About Linux‑Target GCC Toolchains</h2>
+      <p>
+        You may also try toolchains such as:
+      </p>
+
+      <pre><code>x86_64-linux-gnu.x86_64-linux-gnu.tar.xz</code></pre>
+
+      <p>
+        However, Linux binaries built this way may fail to run on your distribution if your system uses an older version of
+        <code>glibc</code>. This is a common issue with GCC‑built Linux binaries.
+      </p>
+
+      <p>
+        Clang avoids this problem because it does not depend on the host system’s glibc version when cross‑compiling.
+      </p>
+    </section>
+
+    <section>
+      <h2>Runtime Libraries</h2>
+      <p>
+        GCC binaries depend on the GNU C++ runtime (<code>libstdc++</code>) and sometimes other GCC runtime libraries.
+        When running a GCC‑built binary, you may need to set:
+      </p>
+
+      <ul>
+        <li><strong>LD_LIBRARY_PATH</strong> (Linux / BSD / Android)</li>
+        <li><strong>WINEPATH</strong> (if running Windows binaries under Wine on Linux)</li>
+      </ul>
+
+      <p>
+        These environment variables ensure the runtime libraries are found correctly.
+      </p>
+    </section>
+
+    <section>
+      <h2>Building GCC Yourself</h2>
+      <p>
+        GCC officially encourages users to build GCC from source.  
+        They do not provide official prebuilt binaries.
+      </p>
+
+      <p>
+        If you attempt to build GCC yourself, you can simplify the process by using:
+      </p>
+
+      <pre><code>--disable-bootstrap</code></pre>
+
+      <p>
+        This avoids the multi‑stage self‑rebuild process and speeds up compilation significantly.
+      </p>
+
+      <p>
+        Alternatively, you can simply use the Windows GCC binaries under Wine, which is often easier and avoids glibc compatibility issues.
+      </p>
+    </section>
+    <section>
+    <h2>Future Chapter: Building Your Own GCC and LLVM Toolchains</h2>
+    <p>
+        In this chapter, we focused on using prebuilt GCC toolchains.  
+        However, both GCC and LLVM can also be built entirely from source, including full cross‑compilers.
+    </p>
+    <p>
+        In a future chapter, we will explain how to create your own GCC and LLVM toolchains using
+        <strong>Canadian Compilation</strong> — a technique where the build machine, host machine, and target machine
+        are all different. This is the standard method for producing portable and reproducible toolchains for any
+        architecture or operating system.
+    </p>
+    <p>
+        Once you understand Canadian Compilation, you will be able to build toolchains for Linux, Windows, macOS,
+        Android, WebAssembly, and more, entirely on your own systems.
+    </p>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/01.compile/05.testinstallation/" class="prev-button">← Ch1.5: Test Installation</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/01.compile/07.msvc/" class="next-button">Ch1.7: MSVC (Windows Only) →</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -29,11 +29,11 @@
 #include &lt;bit&gt;
 
 int main() {
-    print("my machine is little endian? ",
-          boolalpha(::std::endian::native == ::std::endian::little), "\n");
+    println("my machine is little endian? ",
+          boolalpha(::std::endian::native == ::std::endian::little), "\n"
 
-    print("my machine is big endian? ",
-          boolalpha(::std::endian::native == ::std::endian::big), "\n");
+          "my machine is big endian? ",
+          boolalpha(::std::endian::native == ::std::endian::big));
 }
 </code></pre>
     </section>
@@ -73,6 +73,40 @@ int main() {
         After byteswap, it prints as <code>0b11101111101110101010110111011110</code>.
       </p>
     </section>
+
+<section>
+  <h2>Visualizing <code>std::byteswap</code></h2>
+  <p>
+    A byteswap reverses the order of bytes in a multi‑byte value.  
+    The following diagram shows how <code>0xDEADBEEF</code> is stored in memory on a little‑endian machine,
+    and how <code>std::byteswap</code> reverses the byte order.
+  </p>
+
+  <pre class="byteswap-diagram">
+Original (0xDEADBEEF):
+
+Memory bytes (little endian):
+┌────┬────┬────┬────┐
+│ EF │ BE │ AD │ DE │
+└────┴────┴────┴────┘
+  ^    ^    ^    ^
+  LSB              MSB
+
+After std::byteswap(value):
+
+Memory bytes:
+┌────┬────┬────┬────┐
+│ DE │ AD │ BE │ EF │
+└────┴────┴────┴────┘
+  ^              ^
+  MSB            LSB
+  </pre>
+
+  <p>
+    The numerical value stays the same, but the byte order in memory is reversed.  
+    This is required when converting between little‑endian CPUs and big‑endian protocols (network packets, crypto formats, etc.).
+  </p>
+</section>
 
     <section>
       <h2>Discussion: RISC-V and Endianness</h2>

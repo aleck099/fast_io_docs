@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch1.7: MSVC (Windows Only) - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch1.7: MSVC (Windows Only)</h1>
+    <section>
+        <h2>What Is MSVC?</h2>
+        <p>
+            MSVC (Microsoft Visual C++) is Microsoft’s official C and C++ compiler, included with Visual Studio.
+            It is the default compiler for Windows development and is tightly integrated with the Windows SDK,
+            Microsoft’s debugger, and the Visual Studio IDE.
+        </p>
+    </section>
+
+    <section>
+      <h2>Install Visual Studio (MSVC)</h2>
+      <p>
+        If you are on Windows, you can use Microsoft’s official C++ compiler:
+        <strong>MSVC (Microsoft Visual C++)</strong>, which is included with Visual Studio.
+      </p>
+
+      <p>
+        We recommend installing <strong>Visual Studio Insider</strong> instead of the stable channel.  
+        The Insider version provides the newest MSVC toolchain, updated headers, and the latest C++ features.
+      </p>
+
+      <p>
+        Download Visual Studio Insider here:
+      </p>
+
+      <p>
+        <a href="https://visualstudio.microsoft.com/insiders/" target="_blank" rel="noopener noreferrer">
+          https://visualstudio.microsoft.com/insiders/
+        </a>
+      </p>
+
+      <p>To install:</p>
+      <ul>
+        <li>Download and run the Visual Studio Installer</li>
+        <li>Select <strong>Desktop development with C++</strong></li>
+        <li>Install the MSVC toolchain and Windows SDK</li>
+      </ul>
+
+      <p>
+        After installation, you must use the <strong>Visual C++ Developer Command Prompt</strong> for your architecture:
+      </p>
+
+      <ul>
+        <li><strong>x64 Native Tools Command Prompt</strong> (most common)</li>
+        <li><strong>x86 Native Tools Command Prompt</strong></li>
+        <li><strong>ARM64 Native Tools Command Prompt</strong> (Surface Pro 11, Surface Laptop 7, etc.)</li>
+      </ul>
+
+      <p>
+        These command prompts configure all required environment variables such as <code>INCLUDE</code>,
+        <code>LIB</code>, and <code>PATH</code>.  
+        Running <code>cl.exe</code> from a normal command prompt will not work correctly.
+      </p>
+    </section>
+
+    <section>
+      <h2>Compile a Windows Binary Using MSVC</h2>
+      <p>
+        Once inside the correct Developer Command Prompt, you can compile a Windows binary using:
+      </p>
+
+      <pre><code>cl /EHsc /Ox hello.cpp /std:c++latest /GL /MD</code></pre>
+
+      <p>
+        This produces <code>hello.exe</code>, linked against the Microsoft Visual C++ runtime.
+      </p>
+    </section>
+
+    <section>
+      <h2>You Do Not Need MSVC to Create MSVC-Compatible Windows Binaries</h2>
+      <p>
+        Although MSVC is the official Microsoft compiler, you do <strong>not</strong> need MSVC to create Windows
+        binaries that use the MSVC runtime.
+      </p>
+
+      <p>
+        In <em>Ch1.4</em> and <em>Ch1.5</em>, we showed how to use Clang with the
+        <strong>windows-msvc-sysroot</strong> package.  
+        This sysroot contains all MSVC headers and libraries, extracted and packaged by the author of this tutorial.
+      </p>
+
+      <p>
+        With this sysroot, you can build MSVC-compatible Windows binaries on:
+      </p>
+
+      <ul>
+        <li>Linux</li>
+        <li>macOS</li>
+        <li>Android</li>
+        <li>FreeBSD</li>
+        <li>Windows</li>
+        <li>Any platform where Clang runs</li>
+      </ul>
+
+      <p>
+        This means you do <strong>not</strong> need Visual Studio or MSVC installed at all.
+      </p>
+
+      <p>
+        Many C++ developers consider MSVC’s compiler front-end and diagnostics inferior to Clang and GCC.  
+        You are welcome to try MSVC, but for this tutorial we strongly encourage using <strong>Clang</strong> or
+        <strong>GCC</strong> instead.
+      </p>
+    </section>
+
+    <section>
+      <h2>Why This Tutorial Uses Clang</h2>
+      <p>
+        In this tutorial, we primarily use <strong>Clang</strong> because:
+      </p>
+
+      <ul>
+        <li>It cross-compiles easily across all platforms</li>
+        <li>It can target Windows, Linux, macOS, Android, and WebAssembly</li>
+        <li>It integrates cleanly with <code>windows-msvc-sysroot</code></li>
+        <li>It produces WebAssembly binaries</li>
+        <li>It supports advanced tools such as <strong>WebAssembly Memory Tagging</strong></li>
+      </ul>
+
+      <p>
+        If you have not yet read <em>Ch1.4</em> and <em>Ch1.5</em>, we recommend reviewing them to understand how
+        Clang cross-compilation works.
+      </p>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/01.compile/06.gcc/" class="prev-button">← Ch1.6: GCC</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/08.fastio/" class="next-button">Ch1.8: fast_io →</a>
+    </div>
+  </main>
+</body>
+</html>
