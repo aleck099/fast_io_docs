@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.12: #ifdef / #ifndef - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.12: #ifdef / #ifndef</h1>
+
+    <section>
+      <h2>Conditional Compilation</h2>
+      <p>
+        The preprocessor can include or exclude parts of your code based on
+        whether a macro is defined. This is called <strong>conditional
+        compilation</strong>.
+      </p>
+
+      <p>It is used for:</p>
+      <ul>
+        <li>platform-specific code</li>
+        <li>compiler-specific code</li>
+        <li>conditional includes</li>
+        <li>include guards</li>
+        <li>feature detection (<code>__has_include</code>, <code>__has_embed</code>)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><code>#ifdef</code> and <code>#ifndef</code></h2>
+      <p>
+        <code>#ifdef</code> checks whether a macro is defined.  
+        <code>#ifndef</code> checks whether a macro is <strong>not</strong> defined.
+      </p>
+
+      <pre><code class="language-cpp">
+#ifdef DEBUG
+println("debug mode");
+#endif
+
+#ifndef RELEASE
+println("not release mode");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Multi-branch Conditional Compilation</h2>
+      <p>You can chain multiple conditions using <code>#elif</code>.</p>
+
+      <pre><code class="language-cpp">
+#if defined(FAST_IO)
+println("fast_io enabled");
+#elif defined(USE_SIMD)
+println("SIMD enabled");
+#else
+println("default configuration");
+#endif
+</code></pre>
+
+      <p>
+        Only the first matching branch is included.
+      </p>
+    </section>
+
+    <section>
+      <h2>Include Guards</h2>
+      <p>
+        Include guards prevent a header file from being included more than once.
+        They are the traditional alternative to <code>#pragma once</code>.
+      </p>
+
+      <pre><code class="language-cpp">
+// myheader.h
+#ifndef MYHEADER_H
+#define MYHEADER_H
+
+void f();
+
+#endif
+</code></pre>
+
+      <p>
+        When the header is included again, <code>MYHEADER_H</code> is already
+        defined, so the contents are skipped.
+      </p>
+    </section>
+
+    <section>
+      <h2>Platform-Specific Includes</h2>
+      <p>
+        You can conditionally include headers depending on the platform.
+      </p>
+
+      <pre><code class="language-cpp">
+#if defined(_WIN32)
+#include <windows.h>
+#undef min
+#undef max
+#endif
+</code></pre>
+
+      <p>
+        <code>windows.h</code> defines macros <code>min</code> and <code>max</code>,
+        which conflict with C++ functions of the same name.  
+        <code>#undef</code> removes these macros so you can use the real functions.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>#undef</code></h2>
+      <p>
+        The <code>#undef</code> directive removes a macro definition.
+      </p>
+
+      <pre><code class="language-cpp">
+#define PI 3.14
+#undef PI   // PI no longer defined
+</code></pre>
+
+      <p>
+        This is often used to undo macros from system headers.
+      </p>
+    </section>
+
+    <section>
+      <h2>Conditional Include</h2>
+      <p>
+        Some compilers support <code>__has_include</code> to check whether a header
+        exists before including it.
+      </p>
+
+      <pre><code class="language-cpp">
+#if __has_include(<optional>)
+#include <optional>
+#endif
+</code></pre>
+
+      <p>
+        This allows portable code that adapts to available headers.
+      </p>
+    </section>
+
+    <section>
+      <h2>Feature Detection: <code>__has_embed</code></h2>
+      <p>
+        <code>__has_embed</code> checks whether the <code>#embed</code> directive
+        is supported by the compiler.
+      </p>
+
+      <pre><code class="language-cpp">
+#if __has_embed("resource.bin")
+static constexpr auto data =
+#embed "resource.bin";
+#else
+println("embed not supported");
+#endif
+</code></pre>
+
+      <p>
+        This allows portable use of <code>#embed</code> when available.
+      </p>
+    </section>
+
+    <section>
+      <h2>Assertions and <code>-DNDEBUG</code></h2>
+      <p>
+        The header <code>&lt;cassert&gt;</code> provides the <code>assert</code>
+        macro. It checks a condition at runtime and aborts the program if the
+        condition is false.
+      </p>
+
+      <pre><code class="language-cpp">
+#include <cassert>
+
+void f(int x) {
+    assert(x != 0);
+    println(100 / x);
+}
+</code></pre>
+
+      <p>
+        In debug builds, this prints an error message and terminates the program
+        if <code>x == 0</code>.
+      </p>
+
+      <h3>Disabling assertions with <code>-DNDEBUG</code></h3>
+      <p>
+        If the macro <code>NDEBUG</code> is defined, all <code>assert</code> calls
+        are removed by the preprocessor.
+      </p>
+
+      <pre><code class="language-cpp">
+// compile with:
+// g++ -DNDEBUG main.cpp
+
+assert(x != 0);   // expands to nothing
+</code></pre>
+
+      <p>
+        This is why release builds typically define <code>NDEBUG</code>.
+      </p>
+
+      <h3>Warning: no side effects inside <code>assert</code></h3>
+      <p>
+        Because <code>assert</code> disappears when <code>NDEBUG</code> is defined,
+        the expression inside it must not have side effects.
+      </p>
+
+      <pre><code class="language-cpp">
+assert(++i != 0);   // BAD: increments only in debug builds
+</code></pre>
+
+      <p>
+        This leads to different behavior between debug and release builds.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>#ifdef / #ifndef:</strong> include or exclude code based on macro definitions.</li>
+        <li><strong>#elif:</strong> multi-branch conditional compilation.</li>
+        <li><strong>Include guards:</strong> prevent multiple inclusion of headers.</li>
+        <li><strong>Platform-specific includes:</strong> include headers only where valid.</li>
+        <li><strong>#undef:</strong> remove macros (e.g., <code>min</code>, <code>max</code> from <code>windows.h</code>).</li>
+        <li><strong>__has_include:</strong> check if a header exists before including it.</li>
+        <li><strong>__has_embed:</strong> check if <code>#embed</code> is supported.</li>
+        <li><strong>assert + NDEBUG:</strong> assertions disappear in release builds.</li>
+        <li><strong>No side effects in assert:</strong> behavior differs between debug and release.</li>
+        <li><strong>Conditional compilation happens before C++:</strong> the preprocessor only sees tokens.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/11.preprocessor/" class="prev-button">← Ch3.11: Preprocessor</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/13.attribute/" class="next-button">Ch3.13: attribute →</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.13: attribute - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.13: attribute</h1>
+
+    <section>
+      <h2>What Attributes Are</h2>
+      <p>
+        Attributes provide additional information to the compiler. They do not
+        change the meaning of the program, but they can enable warnings,
+        optimizations, or special behavior.
+      </p>
+
+      <p>
+        Attributes use the syntax:
+      </p>
+
+      <pre><code class="language-cpp">
+[[attribute]]
+</code></pre>
+
+      <p>
+        Attributes are part of the C++ language, not macros.
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Syntax</h2>
+
+      <pre><code class="language-cpp">
+[[nodiscard]]
+int compute();
+</code></pre>
+
+      <p>
+        You can apply attributes to functions, variables, types, and statements.
+      </p>
+    </section>
+
+    <section>
+      <h2>Multiple Attributes</h2>
+      <p>
+        You can list multiple attributes inside the same pair of brackets:
+      </p>
+
+      <pre><code class="language-cpp">
+[[nodiscard, maybe_unused]]
+int f();
+</code></pre>
+
+      <p>
+        Or write them separately:
+      </p>
+
+      <pre><code class="language-cpp">
+[[nodiscard]]
+[[maybe_unused]]
+int f();
+</code></pre>
+
+      <p>
+        Both forms are equivalent.
+      </p>
+    </section>
+
+    <section>
+      <h2>Attribute Namespaces</h2>
+      <p>
+        Standard attributes use the <code>std</code> namespace implicitly:
+      </p>
+
+      <pre><code class="language-cpp">
+[[nodiscard]]
+[[maybe_unused]]
+[[deprecated]]
+</code></pre>
+
+      <p>
+        Vendor-specific attributes use explicit namespaces:
+      </p>
+
+      <pre><code class="language-cpp">
+[[gnu::always_inline]]
+[[clang::fallthrough]]
+[[msvc::noinline]]
+</code></pre>
+
+      <p>
+        Namespaces prevent collisions between different compilers.
+      </p>
+    </section>
+
+    <section>
+      <h2>Using Attribute Syntax</h2>
+      <p>
+        C++ also supports a <strong>using-attribute</strong> syntax that applies a
+        namespace to multiple attributes at once.
+      </p>
+
+      <pre><code class="language-cpp">
+[[using CC: opt(1), debug]]
+void f();
+</code></pre>
+
+      <p>
+        This is equivalent to:
+      </p>
+
+      <pre><code class="language-cpp">
+[[CC::opt(1), CC::debug]]
+void f();
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Standard C++ Attributes (C++11 → C++26)</h2>
+      <p>
+        The C++ standard defines a growing set of attributes. Below is a summary
+        of the most important ones. For full details, see:
+      </p>
+
+      <p>
+        <a href="https://en.cppreference.com/w/cpp/language/attributes.html">
+          cppreference.com: C++ attributes
+        </a>
+      </p>
+
+      <h3>C++11</h3>
+        <li><strong>[[noreturn]]</strong> — function never returns</li>
+        <li><strong>[[carries_dependency]]</strong> — memory-order dependency hint (removed in C++26)</li>
+        <li><strong>[[deprecated]]</strong></li>
+        <li><strong>[[deprecated("reason")]]</strong></li>
+        <li><strong>[[fallthrough]]</strong> — intentional switch fallthrough</li>
+        <li><strong>[[maybe_unused]]</strong> — suppress unused warnings</li>
+        <li><strong>[[nodiscard]]</strong> — warn if return value ignored</li>
+        <li><strong>[[nodiscard("reason")]]</strong></li>
+        <li><strong>[[likely]]</strong> — branch prediction hint</li>
+        <li><strong>[[unlikely]]</strong> — branch prediction hint</li>
+        <li><strong>[[no_unique_address]]</strong> — allow overlapping member storage</li>
+        <li><strong>[[assume(expression)]]</strong> — compiler may assume expression is true</li>
+        <li><strong>[[indeterminate]]</strong> — object has indeterminate value</li>
+    </section>
+
+    <section>
+      <h2>Attributes on Statements</h2>
+      <p>
+        Some attributes apply directly to statements. The most common are
+        <code>[[likely]]</code> and <code>[[unlikely]]</code>.
+      </p>
+
+      <p>
+        The correct syntax places the attribute <strong>after</strong> the
+        condition and <strong>before</strong> the statement body:
+      </p>
+
+      <pre><code class="language-cpp">
+if (x > 0) [[likely]] {
+    println("positive");
+} else [[unlikely]] {
+    println("non-positive");
+}
+</code></pre>
+
+      <p>
+        The attribute applies to the <strong>statement</strong>, not the
+        condition.
+      </p>
+    </section>
+
+    <section>
+      <h2>Clang Attributes</h2>
+      <p>
+        Clang supports a very large set of additional attributes for diagnostics,
+        optimization, ABI control, code generation, and more.
+      </p>
+
+      <p>
+        Examples:
+      </p>
+
+      <pre><code class="language-cpp">
+[[clang::always_inline]]
+[[clang::noinline]]
+[[clang::reinitializes]]
+[[clang::trivial_abi]]
+</code></pre>
+
+      <p>
+        Clang provides far more attributes than the C++ standard.  
+        Full list:
+      </p>
+
+      <p>
+        <a href="https://clang.llvm.org/docs/AttributeReference.html">
+          Clang Attribute Reference
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Warnings About Attributes</h2>
+      <ul>
+        <li>Attributes do not change program semantics.</li>
+        <li>Compilers may ignore attributes they do not recognize.</li>
+        <li>Attributes should not be used to hide logic errors.</li>
+        <li>Vendor attributes reduce portability.</li>
+      </ul>
+
+      <p>
+        Attributes are hints, not guarantees.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>Attributes provide hints:</strong> they do not change program meaning.</li>
+        <li><strong>Standard syntax:</strong> <code>[[attribute]]</code>.</li>
+        <li><strong>Multiple attributes:</strong> <code>[[a, b]]</code> or stacked blocks.</li>
+        <li><strong>Namespaces:</strong> <code>std::</code>, <code>gnu::</code>, <code>clang::</code>, <code>msvc::</code>.</li>
+        <li><strong>Using-attribute syntax:</strong> <code>[[using CC: opt(1), debug]]</code>.</li>
+        <li><strong>Statement attributes:</strong> <code>if (cond) [[likely]] { ... }</code>.</li>
+        <li><strong>Standard attributes:</strong> list included.</li>
+        <li><strong>Clang provides many more attributes:</strong> see Clang docs.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/12.ifdefifndef/" class="prev-button">← Ch3.12: #ifdef / #ifndef</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/14.stringify/" class="next-button">Ch3.14: stringify →</a>
+    </div>
+  </main>
+</body>
+</html>

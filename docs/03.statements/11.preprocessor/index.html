@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.11: Preprocessor - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.11: Preprocessor</h1>
+
+    <section>
+      <h2>What the Preprocessor Is</h2>
+      <p>
+        Before the compiler sees your C++ code, it is first processed by the
+        <strong>preprocessor</strong>. The preprocessor performs simple text
+        transformations on your source code. It does not understand C++ types,
+        scopes, or semantics. It only manipulates tokens.
+      </p>
+
+      <p>
+        Preprocessor directives begin with <code>#</code> and are handled
+        line-by-line before compilation.
+      </p>
+
+      <ul>
+        <li>copying files (<code>#include</code>)</li>
+        <li>defining macros (<code>#define</code>)</li>
+        <li>conditional compilation (<code>#ifdef</code>, <code>#ifndef</code>)</li>
+        <li>embedding external data (<code>#embed</code>)</li>
+        <li>compiler-specific directives (<code>#pragma</code>)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><code>#include</code></h2>
+      <p>
+        The <code>#include</code> directive literally copies the entire contents of
+        another file into the current file.
+      </p>
+
+      <pre><code class="language-cpp">
+#include <fast_io.h>
+#include <fast_io.h>   // included twice
+</code></pre>
+
+      <h3>Why this does not break compilation</h3>
+      <p>
+        The <code>fast_io</code> library uses <code>#pragma once</code> at the top of
+        every header. When the preprocessor sees the header the second time, it
+        ignores its contents entirely.
+      </p>
+
+      <p>
+        This prevents duplicate definitions and makes repeated inclusion safe.
+      </p>
+
+      <h3>What happens without <code>#pragma once</code></h3>
+      <p>
+        If a header does <strong>not</strong> use <code>#pragma once</code> (or an
+        include guard), including it twice inserts the same text twice:
+      </p>
+
+      <pre><code class="language-cpp">
+// myheader.h (no pragma once)
+void f();
+</code></pre>
+
+      <pre><code class="language-cpp">
+#include "myheader.h"
+#include "myheader.h"   // inserted twice → duplicate definition error
+</code></pre>
+
+      <p>
+        This breaks compilation because the function is defined twice.
+      </p>
+
+      <h3>Why <code>#include</code> Is Slow</h3>
+      <p>
+        Because <code>#include</code> performs a full <strong>copy‑paste</strong> of the
+        header text, including all of its own <code>#include</code> directives,
+        large projects can become slow to compile.
+      </p>
+
+      <p>
+        A single header may expand into thousands of lines of code, and this
+        expansion happens in every translation unit that includes it.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>#pragma once</code></h2>
+      <p>
+        <code>#pragma once</code> ensures that a header file is included only once
+        per translation unit.
+      </p>
+
+      <pre><code class="language-cpp">
+// myheader.h
+#pragma once
+
+void f();
+</code></pre>
+
+      <p>
+        This prevents duplicate definitions and speeds up compilation.  
+        All major compilers support it.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>#define</code></h2>
+      <p>
+        The <code>#define</code> directive creates a macro.  
+        Macros are simple text substitutions performed before compilation.
+      </p>
+
+      <h3>Object-like macros</h3>
+
+      <pre><code class="language-cpp">
+#define PI 3.141592653589793
+#define BUFFER_SIZE 1024
+</code></pre>
+
+      <p>
+        When the preprocessor sees <code>PI</code>, it replaces it with the text
+        <code>3.141592653589793</code>.
+      </p>
+
+      <h3>Function-like macros</h3>
+
+      <pre><code class="language-cpp">
+#define SQR(x) ((x) * (x))
+</code></pre>
+
+      <p>
+        Parentheses are essential to avoid precedence bugs.
+      </p>
+
+      <h3>Macro side effects</h3>
+      <p>
+        Macros do not evaluate arguments once. They substitute text.  
+        This can cause dangerous side effects:
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+println(SQR(++i));
+</code></pre>
+
+      <p>
+        The macro expands to:
+      </p>
+
+      <pre><code>
+((++i) * (++i))
+</code></pre>
+
+      <p>
+        This increments <code>i</code> twice, which is almost never what you want.
+      </p>
+
+      <h3>Warnings about macros</h3>
+      <ul>
+        <li>no type checking</li>
+        <li>no scope (macros are global)</li>
+        <li>hard to debug</li>
+        <li>side effects when arguments contain <code>++</code> or <code>--</code></li>
+        <li>prefer <code>constexpr</code> and <code>inline</code> in modern C++</li>
+      </ul>
+
+      <p>
+        Macros are still necessary for conditional compilation and include guards.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>#embed</code></h2>
+      <p>
+        The <code>#embed</code> directive embeds the contents of a file directly into
+        your program as data at compile time.
+      </p>
+
+      <pre><code class="language-cpp">
+static constexpr auto data =
+#embed "resource.bin";
+</code></pre>
+
+      <p>
+        Unlike <code>#include</code>, which pastes C++ code, <code>#embed</code> is used
+        for binary or text resources.
+      </p>
+
+      <p>
+        Support for <code>#embed</code> depends on the compiler and standard version.
+      </p>
+    </section>
+
+    <section>
+      <h2>Preprocessor Directives Summary</h2>
+
+      <pre><code>
+#include        // copy-paste another file
+#pragma once    // include only once
+#define         // define a macro
+#embed          // embed external data
+#ifdef/#ifndef  // conditional compilation (next chapter)
+#endif
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>The preprocessor runs before compilation:</strong> it performs text substitution.</li>
+        <li><strong>#include copies files:</strong> can be slow due to expansion.</li>
+        <li><strong>#pragma once:</strong> prevents multiple inclusion and avoids duplicate definitions.</li>
+        <li><strong>#define:</strong> simple but dangerous; watch out for side effects.</li>
+        <li><strong>Macros substitute text:</strong> <code>SQR(++i)</code> expands to <code>((++i)*(++i))</code>.</li>
+        <li><strong>#embed:</strong> embed binary/text data at compile time.</li>
+        <li><strong>Preprocessor has no understanding of C++:</strong> it only manipulates tokens.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/10.goto/" class="prev-button">← Ch3.10: goto</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/12.ifdefifndef/" class="next-button">Ch3.12: #ifdef / #ifndef →</a>
+    </div>
+  </main>
+</body>
+</html>

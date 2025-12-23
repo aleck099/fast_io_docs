@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.15: Feature Testing - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.15: Feature Testing</h1>
+
+    <section>
+      <h2>What Feature Testing Is</h2>
+      <p>
+        Different compilers, platforms, and standard libraries support different
+        features. Feature testing allows your program to adapt to what is
+        available at compile time.
+      </p>
+
+      <p>
+        All feature testing is done by the <strong>preprocessor</strong>, before
+        the compiler sees your code.
+      </p>
+
+      <ul>
+        <li>detecting headers</li>
+        <li>detecting compiler features</li>
+        <li>detecting platform</li>
+        <li>detecting C++ standard version</li>
+        <li>detecting library features</li>
+        <li>detecting C-level macros from your toolchain</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Detecting Headers: <code>__has_include</code></h2>
+      <p>
+        <code>__has_include</code> checks whether a header exists before including it.
+      </p>
+
+      <pre><code class="language-cpp">
+#if __has_include(<span>)
+#include <span>
+#else
+println("std::span not available");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Detecting <code>#embed</code>: <code>__has_embed</code></h2>
+      <p>
+        <code>__has_embed</code> checks whether the compiler supports the
+        <code>#embed</code> directive.
+      </p>
+
+      <pre><code class="language-cpp">
+#if __has_embed("resource.bin")
+static constexpr auto data =
+#embed "resource.bin";
+#else
+println("embed not supported");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Detecting the C++ Standard Version: <code>__cplusplus</code></h2>
+      <p>
+        The macro <code>__cplusplus</code> indicates which C++ standard the
+        compiler is using.
+      </p>
+
+      <pre><code class="language-cpp">
+#if __cplusplus >= 202002L
+println("C++20 or later");
+#elif __cplusplus >= 201703L
+println("C++17");
+#else
+println("older C++");
+#endif
+</code></pre>
+
+      <p>
+        This macro is defined by the compiler, not the standard library.
+      </p>
+    </section>
+
+    <section>
+      <h2>Compiler Feature Macros</h2>
+      <p>
+        Compilers define macros that indicate whether certain language features
+        are enabled.
+      </p>
+
+      <h3><code>__cpp_exceptions</code></h3>
+      <p>
+        Defined if exception handling is enabled.
+      </p>
+
+      <pre><code class="language-cpp">
+#ifdef __cpp_exceptions
+println("exceptions enabled");
+#else
+println("exceptions disabled");
+#endif
+</code></pre>
+
+      <p>
+        Many environments <strong>ban exceptions entirely</strong> due to
+        implementation complexity or runtime cost — including Android,
+        WebAssembly, embedded systems, and operating system kernels.
+        We will discuss this in detail in future chapters.
+      </p>
+
+      <h3><code>__cpp_rtti</code></h3>
+      <p>
+        Defined if run-time type information (RTTI) is enabled.
+      </p>
+
+      <pre><code class="language-cpp">
+#ifdef __cpp_rtti
+println("RTTI enabled");
+#else
+println("RTTI disabled");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Platform Detection</h2>
+      <p>
+        Compilers define macros that identify the operating system.
+      </p>
+
+      <pre><code class="language-cpp">
+#ifdef _WIN32
+println("Windows");
+#endif
+
+#ifdef __linux__
+println("Linux");
+#endif
+
+#ifdef __APPLE__
+println("macOS");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Compiler Detection</h2>
+
+      <pre><code class="language-cpp">
+#ifdef __clang__
+println("Clang");
+#endif
+
+#ifdef __GNUC__
+println("GCC");
+#endif
+
+#ifdef _MSC_VER
+println("MSVC");
+#endif
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Detecting Library Features: &lt;version&gt; Header</h2>
+      <p>
+        The C++ standard library provides feature-test macros of the form
+        <code>__cpp_feature</code>. These macros indicate which library features
+        are available.
+      </p>
+
+      <p>
+        They are all defined in the <code>&lt;version&gt;</code> header.
+      </p>
+
+      <pre><code class="language-cpp">
+#include <version>
+
+#ifdef __cpp_lib_span
+println("std::span available");
+#else
+println("std::span not available");
+#endif
+</code></pre>
+
+      <p>
+        The complete and authoritative list of feature-test macros is here:
+      </p>
+
+      <p>
+        <a href="https://en.cppreference.com/w/cpp/feature_test.html">
+          https://en.cppreference.com/w/cpp/feature_test.html
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Detecting C Macros: <code>features.h</code></h2>
+      <p>
+        Your toolchain also provides many C-level feature macros. These are not
+        part of C++, but they affect portability and low-level behavior.
+      </p>
+
+      <p>
+        They are usually defined in a header named:
+      </p>
+
+      <pre><code>
+features.h
+</code></pre>
+
+      <p>
+        This header is part of your C library implementation (glibc, musl, BSD
+        libc, etc.). It contains macros such as:
+      </p>
+
+      <ul>
+        <li><code>_GNU_SOURCE</code></li>
+        <li><code>_POSIX_C_SOURCE</code></li>
+        <li><code>_XOPEN_SOURCE</code></li>
+        <li><code>_FORTIFY_SOURCE</code></li>
+      </ul>
+
+      <p>
+        These macros control which C and POSIX APIs are available.  
+        Check your toolchain’s <code>features.h</code> for the exact list.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>Feature testing happens before compilation.</strong></li>
+        <li><strong>__has_include / __has_embed:</strong> detect headers and embed support.</li>
+        <li><strong>__cplusplus:</strong> detect the C++ language version.</li>
+        <li><strong>__cpp_exceptions / __cpp_rtti:</strong> detect compiler-level features.</li>
+        <li><strong>Platform macros:</strong> detect the operating system.</li>
+        <li><strong>Compiler macros:</strong> detect the compiler.</li>
+        <li><strong>&lt;version&gt;:</strong> provides C++ standard library feature-test macros.</li>
+        <li><strong>features.h:</strong> contains C-level feature macros from your toolchain.</li>
+        <li><strong>cppreference feature-test list:</strong><br>
+          <a href="https://en.cppreference.com/w/cpp/feature_test.html">
+            https://en.cppreference.com/w/cpp/feature_test.html
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/14.stringify/" class="prev-button">← Ch3.14: stringify</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/04.dsal/" class="next-button">Ch4: dsal →</a>
+    </div>
+  </main>
+</body>
+</html>

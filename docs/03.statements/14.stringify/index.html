@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.14: stringify - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.14: stringify</h1>
+
+    <section>
+      <h2>Macros and Token Manipulation</h2>
+      <p>
+        The C++ preprocessor provides two special operators that manipulate
+        tokens:
+      </p>
+
+      <ul>
+        <li><strong><code>#</code></strong> — stringification</li>
+        <li><strong><code>##</code></strong> — token pasting</li>
+      </ul>
+
+      <p>
+        These operators work only inside <code>#define</code> macros. They are
+        powerful but must be used carefully.
+      </p>
+    </section>
+
+    <section>
+      <h2>Stringification: <code>#</code></h2>
+      <p>
+        The <code>#</code> operator converts a macro argument into a string
+        literal.
+      </p>
+
+      <pre><code class="language-cpp">
+#define STR(x) #x
+
+println(STR(hello world));
+</code></pre>
+
+      <p>
+        Output:
+      </p>
+
+      <pre><code>
+hello world
+</code></pre>
+
+      <p>
+        The argument is not evaluated — it is turned into text exactly as written.
+      </p>
+
+      <h3>Example: printing expressions</h3>
+
+      <pre><code class="language-cpp">
+#define SHOW(expr) println(#expr, " = ", (expr))
+
+SHOW(2 + 3);
+SHOW(10 * 20);
+</code></pre>
+
+      <p>
+        Output:
+      </p>
+
+      <pre><code>
+2 + 3 = 5
+10 * 20 = 200
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Token Pasting: <code>##</code></h2>
+      <p>
+        The <code>##</code> operator concatenates two tokens into one.
+      </p>
+
+      <pre><code class="language-cpp">
+#define MAKE_NAME(prefix, id) prefix##id
+
+int MAKE_NAME(var, 1) = 42;   // becomes: int var1 = 42;
+</code></pre>
+
+      <p>
+        Token pasting is often used to generate variable names or function names.
+      </p>
+
+      <h3>Example: generating enum-to-string helpers</h3>
+
+      <pre><code class="language-cpp">
+#define CASE_TO_STRING(x) case x: return #x;
+
+    switch (c) {
+        CASE_TO_STRING(red)
+        CASE_TO_STRING(green)
+        CASE_TO_STRING(blue)
+    }
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Combining <code>#</code> and <code>##</code></h2>
+      <p>
+        You can combine both operators to build more complex macros.
+      </p>
+
+      <pre><code class="language-cpp">
+#define MAKE_GETTER(name) \
+    int get_##name() { \
+        println("getting " #name); \
+        return name; \
+    }
+
+int value = 123;
+MAKE_GETTER(value)
+</code></pre>
+
+      <p>
+        Expands to:
+      </p>
+
+      <pre><code>
+int get_value() {
+    println("getting " "value");
+    return value;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Macro Pitfalls</h2>
+
+      <h3>1. No type checking</h3>
+      <p>
+        Macros operate on text, not types. Errors may appear only after expansion.
+      </p>
+
+      <h3>2. Side effects</h3>
+      <p>
+        Macros may evaluate arguments multiple times.
+      </p>
+
+      <pre><code class="language-cpp">
+#define SQR(x) ((x) * (x))
+
+SQR(++i);   // expands to ((++i) * (++i))
+</code></pre>
+
+      <p>
+        This increments <code>i</code> twice — almost never intended.
+      </p>
+
+      <h3>3. Hard to debug</h3>
+      <p>
+        Debuggers show expanded code, not macro definitions.
+      </p>
+
+      <h3>4. Token pasting can create invalid code</h3>
+
+      <pre><code class="language-cpp">
+#define BAD(x) x##123abc   // invalid token
+</code></pre>
+
+      <p>
+        The compiler will error after expansion.
+      </p>
+    </section>
+
+    <section>
+      <h2>Safe Usage Patterns</h2>
+      <ul>
+        <li>Use parentheses around macro arguments.</li>
+        <li>Use <code>#</code> for debugging helpers.</li>
+        <li>Use <code>##</code> only when necessary.</li>
+        <li>Prefer <code>constexpr</code> and templates in modern C++.</li>
+      </ul>
+
+      <p>
+        Macros are powerful but should be used sparingly.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>#</strong> turns macro arguments into string literals.</li>
+        <li><strong>##</strong> pastes tokens together.</li>
+        <li>Macros operate on text, not types.</li>
+        <li>Side effects and multiple evaluations are common pitfalls.</li>
+        <li>Prefer modern C++ features when possible.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/13.attribute/" class="prev-button">← Ch3.13: attribute</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/15.featuretesting/" class="next-button">Ch3.15: featuretesting →</a>
+    </div>
+  </main>
+</body>
+</html>
