@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.7: continue - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.7: continue</h1>
+
+    <section>
+      <h2>The <code>continue</code> Statement</h2>
+      <p>
+        A <code>continue</code> statement skips the rest of the loop body and jumps
+        directly to the next iteration.
+      </p>
+
+      <pre><code class="language-cpp">
+continue;
+</code></pre>
+
+      <p>
+        It does <strong>not</strong> exit the loop.  
+        It only skips the remaining statements in the current iteration.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>continue</code> in a <code>while</code> Loop</h2>
+      <p>
+        This loop prints only even numbers.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+while (i != 10) {
+    if (i % 2 == 1) {
+        ++i;
+        continue;   // skip odd numbers
+    }
+    println("even: ", i);
+    ++i;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>continue</code> in a <code>for</code> Loop</h2>
+      <p>
+        <code>continue</code> jumps directly to the loop’s step expression.
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::uint_least32_t i{}; i != 10; ++i) {
+    if (i % 3 != 0) {
+        continue;   // skip non-multiples of 3
+    }
+    println("multiple of 3: ", i);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>continue</code> in Dead Loops</h2>
+      <p>
+        In a dead loop, <code>continue</code> simply restarts the loop.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+for (;;) {
+    ++i;
+    if (i < 5) {
+        continue;   // restart the loop
+    }
+    println("i reached 5");
+    break;          // stop the loop
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>continue</code> with Init-statement Loops</h2>
+      <p>
+        <code>continue</code> behaves normally even when the loop uses an init-statement.
+      </p>
+
+      <pre><code class="language-cpp">
+for (auto i = 0; i < 10; ++i) {
+    if (i == 4) {
+        continue;
+    }
+    println("i=", i);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Nested Loops</h2>
+      <p>
+        <code>continue</code> affects only the <strong>innermost</strong> loop.
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::uint_least32_t i{}; i != 3; ++i) {
+    for (::std::uint_least32_t j{}; j != 3; ++j) {
+        if (j == 1) {
+            continue;   // skips only the inner loop's iteration
+        }
+        println("i=", i, ", j=", j);
+    }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Pseudo-graph: Where <code>continue</code> Goes</h2>
+
+      <pre><code>
+          ┌───────────────┐
+          │     loop       │
+          │    begins      │
+          └───────┬───────┘
+                  │
+                  ▼
+          ┌───────────────┐
+          │     cond       │─── false ───▶ loop ends
+          └───────┬───────┘
+                  │ true
+                  ▼
+          ┌───────────────┐
+          │     body       │
+          └───────┬───────┘
+                  │
+                  ├──▶ if (continue) ───────▶ step ─────▶ cond
+                  │
+                  ▼
+          ┌───────────────┐
+          │      step      │
+          └───────┬───────┘
+                  │
+                  └─────────────── back to cond
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>continue skips the rest of the loop body:</strong> it does not exit the loop.</li>
+        <li><strong>continue jumps to the next iteration:</strong> in <code>for</code>, it jumps to the step expression.</li>
+        <li><strong>Nested loops:</strong> only the innermost loop is affected.</li>
+        <li><strong>Dead loops:</strong> <code>continue</code> simply restarts the loop.</li>
+        <li><strong>Clarity:</strong> use <code>continue</code> intentionally; avoid hiding it deep inside complex logic.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/06.break/" class="prev-button">← Ch3.6: break</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/08.dowhile/" class="next-button">Ch3.8: do while →</a>
+    </div>
+  </main>
+</body>
+</html>

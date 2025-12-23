@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.4: while - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.4: while</h1>
+
+    <section>
+      <h2>The <code>while</code> Statement</h2>
+      <p>
+        A <code>while</code> statement repeats one statement as long as a condition is true.
+      </p>
+
+      <pre><code class="language-cpp">
+while (cond)
+    ;
+</code></pre>
+
+      <p>
+        Here the body is just an empty statement (<code>;</code>).  
+        This loop repeatedly checks the condition but does nothing.
+      </p>
+    </section>
+
+    <section>
+      <h2>Always Use <code>{ }</code></h2>
+      <p>
+        As with <code>if</code>, beginners should <strong>always</strong> use braces.  
+        Without braces, only one statement belongs to the loop.
+      </p>
+
+      <h3>❌ Wrong (only one statement is inside the loop)</h3>
+      <pre><code class="language-cpp">
+while (x < 5)
+    x = x + 1;
+    print("looping\n");   // this is NOT inside the loop
+</code></pre>
+
+      <h3>✔️ Correct</h3>
+      <pre><code class="language-cpp">
+while (x < 5) {
+    x = x + 1;
+    print("looping\n");
+}
+</code></pre>
+
+      <p>
+        Braces make it clear which statements repeat.
+      </p>
+    </section>
+
+    <section>
+      <h2>Dead Loop</h2>
+      <p>
+        A <strong>dead loop</strong> (infinite loop) is a loop whose condition is always true.
+      </p>
+
+      <pre><code class="language-cpp">
+while (true) {
+    ;
+}
+</code></pre>
+
+      <p>
+        This loop never ends.  
+        It is sometimes useful in low-level code, servers, or event loops, but beginners should use it carefully.
+      </p>
+
+      <p>
+        You can also write an infinite loop using an init-statement:
+      </p>
+
+      <pre><code class="language-cpp">
+while (auto flag = true; flag) {
+    ;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Init-statement</h2>
+      <p>
+        A <code>while</code> loop may declare a variable before the condition.  
+        C++ allows two different ways to write this.  
+        The variable exists only inside the loop.
+      </p>
+
+      <h3>Form 1</h3>
+      <pre><code class="language-cpp">
+::std::uint_least32_t a{3};
+::std::uint_least32_t b{9};
+
+while (::std::int_least32_t sum = a + b) {   // condition is: sum != 0
+    println("sum != 0, a=", a, ", b=", b, ", sum=", sum);
+    break;  // avoid infinite loop in this example
+}
+</code></pre>
+
+      <p>
+        In this form, the condition is simply whether the variable is nonzero.
+      </p>
+
+      <h3>Form 2</h3>
+      <pre><code class="language-cpp">
+while (auto sum = a + b; sum > 10) {
+    println("sum > 10, a=", a, ", b=", b, ", sum=", sum);
+    break;  // avoid infinite loop in this example
+}
+</code></pre>
+
+      <p>
+        In this form, the variable is declared first, and then a separate condition is checked.
+      </p>
+
+      <p>
+        In both forms, the variable (<code>sum</code>) is destroyed at the end of each loop iteration.
+      </p>
+    </section>
+
+    <section>
+      <h2>Example: Summing Numbers in <code>[0, 100)</code></h2>
+      <p>
+        A common pattern is to loop over a range.  
+        In C++, we prefer to write the condition using <code>!=</code> instead of <code>&lt;</code> when possible.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+::std::uint_least32_t sum{};
+
+while (i != 100) {   // preferred over i < 100
+    sum = sum + i;
+    ++i;
+}
+
+println("sum of [0,100) = ", sum);
+</code></pre>
+
+      <p>
+        Using <code>!=</code> avoids off-by-one mistakes and makes the loop clearer.
+      </p>
+    </section>
+
+    <section>
+      <h2>Example: Summing Only Multiples of 3</h2>
+      <p>
+        You can combine <code>while</code> with <code>if</code> to filter values.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+::std::uint_least32_t sum{};
+
+while (i != 100) {
+    if (i % 3 == 0) {
+        sum = sum + i;
+    }
+    ++i;
+}
+
+println("sum of multiples of 3 in [0,100) = ", sum);
+</code></pre>
+
+      <p>
+        This pattern is very common: loop over a range, and use <code>if</code> to select values.
+      </p>
+    </section>
+
+    <section>
+      <h2>Style Note</h2>
+      <p>
+        In C++, we generally prefer:
+      </p>
+
+      <ul>
+        <li><code>!=</code> instead of <code>&lt;</code> when looping to a fixed limit</li>
+        <li><code>&lt;</code> instead of <code>&gt;</code> because it reads more naturally and avoids mistakes</li>
+      </ul>
+
+      <p>
+        These conventions make loops easier to read and less error‑prone.
+      </p>
+    </section>
+
+    <section>
+      <h2>Empty-Body Loops</h2>
+      <p>
+        Sometimes all the work happens in the condition or increment.  
+        In such cases, the loop body is intentionally empty:
+      </p>
+
+      <pre><code class="language-cpp">
+while (++x < 10)
+    ;   // empty body
+</code></pre>
+
+      <p>
+        This is valid, but should be used carefully.  
+        Most loops should use <code>{ }</code> for clarity.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>while repeats one statement:</strong> without braces, only a single statement is inside the loop.</li>
+        <li><strong>Init-statement:</strong> both forms of <code>while (init)</code> and <code>while (init; cond)</code> declare a variable valid only inside the loop.</li>
+        <li><strong>Dead loops:</strong> <code>while(true)</code> never ends.</li>
+        <li><strong>Range loops:</strong> prefer <code>!=</code> for fixed limits.</li>
+        <li><strong>Filtering:</strong> combine <code>while</code> with <code>if</code> to select values.</li>
+        <li><strong>Empty-body loops:</strong> allowed, but should be used intentionally and sparingly.</li>
+        <li><strong>Clarity:</strong> always use <code>{ }</code> to avoid mistakes.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/03.ifelse/" class="prev-button">← Ch3.3: if-else</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/05.for/" class="next-button">Ch3.5: for →</a>
+    </div>
+  </main>
+</body>
+</html>

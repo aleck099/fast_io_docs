@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.10: goto - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.10: goto</h1>
+
+    <section>
+      <h2>The <code>goto</code> Statement</h2>
+      <p>
+        The <code>goto</code> statement jumps directly to a label in the same function.
+        It does not check conditions and does not follow normal control flow.
+      </p>
+
+      <pre><code class="language-cpp">
+goto label;
+
+label:
+    statement;
+</code></pre>
+
+      <p>
+        Labels are identifiers followed by a colon.  
+        They must appear in the same function as the <code>goto</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Example</h2>
+
+      <pre><code class="language-cpp">
+println("A");
+goto skip;
+println("B");   // skipped
+
+skip:
+println("C");
+</code></pre>
+
+      <p>
+        This prints:
+      </p>
+
+      <pre><code>
+A
+C
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Forward and Backward Jumps</h2>
+      <p>
+        <code>goto</code> can jump forward or backward.
+      </p>
+
+      <h3>Forward jump</h3>
+      <pre><code class="language-cpp">
+goto end;
+
+println("never printed");
+
+end:
+println("done");
+</code></pre>
+
+      <h3>Backward jump (loop-like)</h3>
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+start:
+println("i=", i);
+++i;
+if (i != 5) {
+    goto start;   // jump back
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Restrictions: No Jumping Into a Scope</h2>
+      <p>
+        A <code>goto</code> statement cannot jump <strong>into</strong> a scope where
+        automatic variables would be skipped.  
+        This prevents using uninitialized variables.
+      </p>
+
+      <pre><code class="language-cpp">
+goto label;
+
+{
+    ::std::int_least32_t x{42};   // initialization skipped
+label:
+    println(x);                   // illegal: x not initialized
+}
+</code></pre>
+
+      <p>
+        Jumping <strong>out of</strong> a scope is allowed; destructors still run normally.
+      </p>
+    </section>
+
+    <section>
+      <h2>Restrictions: Not Allowed in <code>constexpr</code> Functions</h2>
+      <p>
+        <code>goto</code> cannot appear inside a <code>constexpr</code> or
+        <code>consteval</code> function.  
+        These functions must have strictly structured control flow.
+      </p>
+
+      <pre><code class="language-cpp">
+constexpr int f(int x) {
+    if (x == 0)
+        goto fail;   // error: goto not allowed in constexpr
+    return x;
+fail:
+    return -1;
+}
+</code></pre>
+
+      <p>
+        We will explain <code>constexpr</code> functions in detail in
+        <strong>Ch7: Compile Time Programming</strong>.
+      </p>
+
+      <p>
+        This restriction is one of the motivations for the proposal to add
+        <strong>labeled <code>break</code> and <code>continue</code></strong> to C++:
+        they provide structured multi-level exits that are allowed in
+        <code>constexpr</code> contexts, unlike <code>goto</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Valid Use Case: Breaking Multiple Loops</h2>
+      <p>
+        <code>goto</code> can exit several nested loops at once.
+        This is sometimes clearer than using flags.
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::uint_least32_t i{}; i != 3; ++i) {
+    for (::std::uint_least32_t j{}; j != 3; ++j) {
+        if (i == 1 && j == 1) {
+            goto done;   // exit both loops
+        }
+        println("i=", i, ", j=", j);
+    }
+}
+
+done:
+println("finished");
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Why <code>goto</code> Should Be Used Sparingly</h2>
+      <p>
+        <code>goto</code> makes control flow harder to follow.  
+        Modern C++ provides safer alternatives:
+      </p>
+
+      <ul>
+        <li><code>while</code>, <code>for</code>, <code>do while</code></li>
+        <li><code>break</code> and <code>continue</code></li>
+        <li><code>switch</code></li>
+        <li>functions and early returns</li>
+      </ul>
+
+      <p>
+        Use <code>goto</code> only when it improves clarity.
+      </p>
+    </section>
+
+    <section>
+      <h2>Pseudo-graph: <code>goto</code></h2>
+
+      <pre><code>
+          ┌───────────────┐
+          │   normal flow  │
+          └───────┬───────┘
+                  │
+                  ├──▶ goto label ───────────────▶ label:
+                  │
+                  ▼
+          ┌───────────────┐
+          │   next stmt    │
+          └───────────────┘
+      </code></pre>
+    </section>
+
+    <section>
+    <h2>Historical Warning: Dijkstra Criticised <code>goto</code></h2>
+    <p>
+        In a famous essay, computer scientist Edsger W. Dijkstra argued that
+        <code>goto</code> makes programs harder to understand and reason about.
+        His criticism was that arbitrary jumps break the structured flow of a
+        program, making it difficult to see how control moves through the code.
+    </p>
+
+    <p>
+        This argument strongly influenced the design of modern programming
+        languages, including C++, which encourages structured control flow using
+        loops, <code>if</code> statements, and functions instead of unrestricted jumps.
+    </p>
+
+    <p>
+        Dijkstra’s critique remains relevant today: <code>goto</code> should be used
+        only when it genuinely improves clarity, and avoided when structured
+        alternatives express the intent more clearly.
+    </p>
+    </section>
+
+    <section>
+    <h2>Key takeaways</h2>
+    <ul>
+        <li><strong>goto jumps to a label:</strong> no conditions, no checks.</li>
+        <li><strong>Labels must be in the same function.</strong></li>
+        <li><strong>No jumping into a scope:</strong> cannot bypass variable initialization.</li>
+        <li><strong>goto is forbidden in constexpr:</strong> structured control flow required.</li>
+        <li><strong>Motivation for labeled break:</strong> constexpr-safe multi-level exits.</li>
+        <li><strong>Use sparingly:</strong> prefer structured control flow.</li>
+        <li><strong>Dijkstra’s warning:</strong> unrestricted jumps harm readability and make reasoning about code harder.</li>
+    </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/09.switch/" class="prev-button">← Ch3.9: switch</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/11.preprocessor/" class="next-button">Ch3.11: preprocessor →</a>
+    </div>
+  </main>
+</body>
+</html>

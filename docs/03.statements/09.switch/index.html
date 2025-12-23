@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.9: switch - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.9: switch</h1>
+
+    <section>
+      <h2>The <code>switch</code> Statement</h2>
+      <p>
+        A <code>switch</code> statement selects one branch based on the value of an
+        expression.  
+        It is often clearer than writing many <code>if</code> / <code>else if</code> chains.
+      </p>
+
+      <pre><code class="language-cpp">
+switch (expr) {
+    case value1:
+        stmt1;
+        break;
+    case value2:
+        stmt2;
+        break;
+    default:
+        stmt_default;
+        break;
+}
+</code></pre>
+
+      <p>
+        Each <code>case</code> label matches a constant value.  
+        <code>break</code> prevents execution from falling through to the next case.
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Example</h2>
+
+      <pre><code class="language-cpp">
+::std::int_least32_t x{2};
+
+switch (x) {
+    case 1:
+        println("one");
+        break;
+    case 2:
+        println("two");
+        break;
+    default:
+        println("other");
+        break;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Fallthrough Behavior</h2>
+      <p>
+        If a <code>case</code> does not end with <code>break</code>, execution continues
+        (“falls through”) into the next case.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::int_least32_t x{1};
+
+switch (x) {
+    case 1:
+        println("one");
+        // no break here → fallthrough
+    case 2:
+        println("two");
+        break;
+}
+</code></pre>
+
+      <p>
+        This prints:
+      </p>
+
+      <pre><code>
+one
+two
+</code></pre>
+
+      <p>
+        Fallthrough is allowed, but should be used intentionally.
+      </p>
+    </section>
+
+    <section>
+      <h2>C++ Attributes</h2>
+      <p>
+        C++ provides a standard syntax for attaching extra information to code:
+      </p>
+
+      <pre><code class="language-cpp">
+[[attribute_name]]
+</code></pre>
+
+      <p>
+        Attributes do not change the meaning of the program, but they can give
+        hints to the compiler or improve clarity for readers.
+      </p>
+    </section>
+
+    <section>
+      <h2>The <code>[[fallthrough]]</code> Attribute</h2>
+      <p>
+        When you intentionally allow fallthrough in a <code>switch</code>, you should
+        mark it with <code>[[fallthrough]]</code>.  
+        This makes the intent clear and avoids compiler warnings.
+      </p>
+
+      <pre><code class="language-cpp">
+switch (x) {
+    case 1:
+        println("one");
+        [[fallthrough]];   // intentional fallthrough
+    case 2:
+        println("two");
+        break;
+}
+</code></pre>
+
+      <p>
+        The attribute must appear as a standalone statement.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>default</code> Case</h2>
+      <p>
+        The <code>default</code> label runs when no other case matches.
+      </p>
+
+      <pre><code class="language-cpp">
+switch (x) {
+    case 0:
+        println("zero");
+        break;
+    default:
+        println("not zero");
+        break;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Multiple Cases for One Branch</h2>
+
+      <pre><code class="language-cpp">
+switch (x) {
+    case 1:
+    case 3:
+    case 5:
+        println("odd small number");
+        break;
+    default:
+        println("other");
+        break;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Nested <code>switch</code></h2>
+
+      <pre><code class="language-cpp">
+switch (x) {
+    case 1:
+        switch (y) {
+            case 0:
+                println("x=1, y=0");
+                break;
+            default:
+                println("x=1, y!=0");
+                break;
+        }
+        break;
+    default:
+        println("x!=1");
+        break;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Pseudo-graph: <code>switch</code></h2>
+
+      <pre><code>
+          ┌───────────────┐
+          │   switch(expr) │
+          └───────┬───────┘
+                  │
+                  ▼
+        ┌──────────────────────┐
+        │   match a case?       │─── no ───▶ default
+        └──────────┬───────────┘
+                   │ yes
+                   ▼
+          ┌───────────────┐
+          │   case block   │
+          └───────┬───────┘
+                  │
+                  ├──▶ break ─────────────▶ end
+                  │
+                  └──▶ fallthrough ───────▶ next case
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>switch selects a branch:</strong> based on the value of an expression.</li>
+        <li><strong>case labels:</strong> must be constant expressions.</li>
+        <li><strong>break prevents fallthrough:</strong> without it, execution continues.</li>
+        <li><strong>[[fallthrough]]:</strong> marks intentional fallthrough.</li>
+        <li><strong>default:</strong> runs when no case matches.</li>
+        <li><strong>Multiple cases:</strong> can share the same block.</li>
+        <li><strong>Nested switches:</strong> allowed but should be used carefully.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/08.dowhile/" class="prev-button">← Ch3.8: do while</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/10.goto/" class="next-button">Ch3.10: goto →</a>
+    </div>
+  </main>
+</body>
+</html>

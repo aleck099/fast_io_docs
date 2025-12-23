@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.5: for - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.5: for</h1>
+
+<section>
+  <h2>The <code>for</code> Statement</h2>
+  <p>
+    A <code>for</code> loop is another way to repeat a statement.  
+    It has three parts:
+  </p>
+
+<pre><code class="language-cpp">
+for (init; cond; step) {
+    body
+};
+</code></pre>
+
+    <ul>
+    <li><strong>init</strong>: runs once before the loop starts</li>
+    <li><strong>cond</strong>: checked before each iteration</li>
+    <li><strong>step</strong>: runs after each iteration</li>
+    <li><strong>body</strong>: the statement that runs each time the condition is true</li>
+    </ul>
+
+    <p>
+        As before, <code>;</code> can be an empty statement if the body does nothing.
+    </p>
+
+<pre><code>
+        ┌───────────────┐
+        │     init       │   (runs once)
+        └───────┬───────┘
+                │
+                ▼
+        ┌───────────────┐
+┌────▶│     cond       │─── false ───▶ loop ends
+│     └───────┬───────┘
+│             │ true
+│             ▼
+│     ┌───────────────┐
+│     │     body       │
+│     └───────┬───────┘
+│             │
+│             ▼
+│     ┌───────────────┐
+└─────│      step      │
+        └───────┬───────┘
+                │
+                └─────────────── back to cond
+</code></pre>
+    </section>
+
+
+    <section>
+      <h2>Always Use <code>{ }</code></h2>
+      <p>
+        As with <code>if</code> and <code>while</code>, beginners should <strong>always</strong> use braces.
+      </p>
+
+      <h3>❌ Wrong</h3>
+      <pre><code class="language-cpp">
+for (i = 0; i != 5; ++i)
+    print(i, "\n");
+    print("done\n");   // NOT inside the loop
+</code></pre>
+
+      <h3>✔️ Correct</h3>
+      <pre><code class="language-cpp">
+for (i = 0; i != 5; ++i) {
+    print(i, "\n");
+}
+print("done\n");
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Init-statement</h2>
+      <p>
+        A <code>for</code> loop may declare a variable in the init part. 
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::int_least32_t i = 0; i != 5; ++i) {
+    println("i=", i);
+}
+</code></pre>
+
+      <p>
+        The variable (<code>i</code>) exists only inside the loop.
+      </p>
+    </section>
+
+    <section>
+      <h2>Example: Summing Numbers in <code>[0, 100)</code></h2>
+      <p>
+        A <code>for</code> loop is ideal for iterating over a range.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t sum{};
+
+for (::std::uint_least32_t i{}; i != 100; ++i) {
+    sum = sum + i;
+}
+
+println("sum of [0,100) = ", sum);
+</code></pre>
+
+      <p>
+        As before, we prefer <code>!=</code> for fixed limits.
+      </p>
+    </section>
+
+    <section>
+      <h2>Example: Summing Only Multiples of 3</h2>
+      <p>
+        You can combine <code>for</code> with <code>if</code> to filter values.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t sum{};
+
+for (::std::uint_least32_t i{}; i != 100; ++i) {
+    if (i % 3 == 0) {
+        sum = sum + i;
+    }
+}
+
+println("sum of multiples of 3 in [0,100) = ", sum);
+</code></pre>
+    </section>
+
+<section>
+  <h2>Dead Loop</h2>
+  <p>
+    A <strong>dead loop</strong> (infinite loop) can be written using <code>for</code>:
+  </p>
+
+  <pre><code class="language-cpp">
+for (;;) {
+    ;
+}
+</code></pre>
+
+  <p>
+    All three parts are omitted, so nothing stops the loop.
+  </p>
+
+  <p>
+    According to the C++ standard, this form behaves the same as:
+  </p>
+
+  <pre><code class="language-cpp">
+while (true) {
+    ;
+}
+</code></pre>
+
+  <p>
+    Both loops run forever unless something inside the body breaks out.
+  </p>
+</section>
+
+
+    <section>
+      <h2>Empty-Body Loops</h2>
+      <p>
+        Sometimes all the work happens in the step expression:
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::uint_least32_t i{}; i != 10; ++i)
+    ;   // empty body
+</code></pre>
+
+      <p>
+        This is valid, but should be used carefully.
+      </p>
+    </section>
+
+    <section>
+      <h2>Style Note</h2>
+      <p>
+        In C++, we generally prefer:
+      </p>
+
+      <ul>
+        <li><code>!=</code> instead of <code>&lt;</code> when looping to a fixed limit</li>
+        <li><code>&lt;</code> instead of <code>&gt;</code> because it reads more naturally</li>
+      </ul>
+
+      <p>
+        These conventions make loops easier to read and less error‑prone.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>for has four parts:</strong> init-statement, condition, step, and the body statement.</li>
+        <li><strong>Init-statement:</strong> both forms of variable declaration are allowed.</li>
+        <li><strong>Range loops:</strong> <code>!=</code> is preferred for fixed limits.</li>
+        <li><strong>Filtering:</strong> combine <code>for</code> with <code>if</code> to select values.</li>
+        <li><strong>Dead loops:</strong> <code>for(;;)</code> never ends.</li>
+        <li><strong>Empty-body loops:</strong> allowed but should be used intentionally.</li>
+        <li><strong>Clarity:</strong> always use <code>{ }</code> to avoid mistakes.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/04.while/" class="prev-button">← Ch3.4: while</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/06.rangefor/" class="next-button">Ch3.6: range-for →</a>
+    </div>
+  </main>
+</body>
+</html>

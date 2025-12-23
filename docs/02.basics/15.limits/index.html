@@ -45,10 +45,11 @@
 #include &lt;fast_io.h&gt;
 
 int main() {
-    print("sizeof(double) = ", sizeof(double), " bytes\n"
+    using namespace ::fast_io::iomnp;
+    println("sizeof(double) = ", sizeof(double), " bytes\n"
         "digits (binary) = ", ::std::numeric_limits&lt;double&gt;::digits, "\n"
         "digits10 (decimal) = ", ::std::numeric_limits&lt;double&gt;::digits10, "\n"
-        "max_digits10 (decimal) = ", ::std::numeric_limits&lt;double&gt;::max_digits10, "\n");
+        "max_digits10 (decimal) = ", ::std::numeric_limits&lt;double&gt;::max_digits10);
 }
 </code></pre>
       <p>
@@ -66,8 +67,9 @@ int main() {
 #include &lt;fast_io.h&gt;
 
 int main() {
-    print("::std::size_t max = ", ::std::numeric_limits&lt;::std::size_t&gt;::max(), "\n"
-        "::std::size_t min = ", ::std::numeric_limits&lt;::std::size_t&gt;::min(), "\n");
+    using namespace ::fast_io::iomnp;
+    println("::std::size_t max = ", ::std::numeric_limits&lt;::std::size_t&gt;::max(), "\n"
+        "::std::size_t min = ", ::std::numeric_limits&lt;::std::size_t&gt;::min());
 }
 </code></pre>
       <p>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.2: Compound - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.2: Compound</h1>
+
+    <section>
+      <h2>Compound Statement</h2>
+      <p>
+        A <strong>compound statement</strong> is a group of statements enclosed in braces:
+      </p>
+
+      <pre><code>{
+    ;
+    ;
+}
+</code></pre>
+
+      <p>
+        The braces <code>{ }</code> make several statements behave as one single statement.
+      </p>
+    </section>
+
+    <section>
+      <h2>Local Variables Inside a Compound Statement</h2>
+      <p>
+        A compound statement also creates a <strong>scope</strong>.  
+        Variables declared inside the braces are destroyed when the closing <code>}</code> is reached.
+      </p>
+
+      <pre><code class="language-cpp">
+{
+    ::std::uint_least32_t v{};
+    v = 5;   // OK: v exists here
+}
+
+v = 6;       // ERROR: v was destroyed at the }
+</code></pre>
+
+      <p>
+        After the block ends, <code>v</code> no longer exists.
+      </p>
+    </section>
+
+    <section>
+      <h2>Shadowing</h2>
+      <p>
+        If you declare a variable with the same name in an inner scope,  
+        it <strong>shadows</strong> the outer one:
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t v{1};
+
+{
+    ::std::uint_least32_t v{2}; // shadows the outer v
+    // this v is different
+}
+</code></pre>
+
+      <p>
+        Shadowing is legal, but often confusing.  
+        Compilers can warn you about this if you enable:
+      </p>
+
+      <pre><code>-Wshadow</code></pre>
+
+      <p>
+        We recommend always enabling this warning.
+      </p>
+    </section>
+    <section>
+    <h2>Key takeaways</h2>
+    <ul>
+        <li><strong>Compound statement:</strong> <code>{ }</code> groups multiple statements into one.</li>
+        <li><strong>Scope:</strong> a compound statement creates a new scope.</li>
+        <li><strong>Lifetime:</strong> variables declared inside <code>{ }</code> are destroyed at the closing brace.</li>
+        <li><strong>Shadowing:</strong> inner variables can hide outer ones; this is legal but confusing.</li>
+        <li><strong>Warnings:</strong> enable <code>-Wshadow</code> to detect accidental shadowing.</li>
+    </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/01.empty/" class="prev-button">← Ch3.1: empty</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/03.if/" class="next-button">Ch3.3: if-else →</a>
+    </div>
+  </main>
+</body>
+</html>

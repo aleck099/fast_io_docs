@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.8: do while - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.8: do while</h1>
+
+    <section>
+      <h2>The <code>do while</code> Statement</h2>
+      <p>
+        A <code>do while</code> loop is similar to a <code>while</code> loop, except the
+        body runs <strong>at least once</strong> before the condition is checked.
+      </p>
+
+      <pre><code class="language-cpp">
+do {
+    body
+} while (cond);
+</code></pre>
+
+      <p>
+        The condition is checked <strong>after</strong> the body executes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Example</h2>
+      <p>
+        This loop prints numbers from 0 to 4.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+do {
+    println("i=", i);
+    ++i;
+} while (i != 5);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Difference from <code>while</code></h2>
+      <p>
+        A <code>while</code> loop may not run at all if the condition is false at the start.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{5};
+
+while (i != 5) {   // false immediately
+    println("never printed");
+}
+</code></pre>
+
+      <p>
+        But <code>do while</code> always runs the body once:
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{5};
+
+do {
+    println("printed once");
+} while (i != 5);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Summing Example</h2>
+      <p>
+        This sums numbers in <code>[0, 100)</code>.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+::std::uint_least32_t sum{};
+
+do {
+    sum = sum + i;
+    ++i;
+} while (i != 100);
+
+println("sum of [0,100) = ", sum);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Input Validation Example</h2>
+      <p>
+        A classic use of <code>do while</code> is to repeat until valid input is received.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::int_least32_t x{};
+
+do {
+    print("Enter a number between 1 and 5: ");
+    scan(x);
+} while (x < 1 || x > 5);
+
+println("You entered: ", x);
+</code></pre>
+
+      <p>
+        The prompt always appears at least once.
+      </p>
+    </section>
+
+    <section>
+      <h2>Empty-body <code>do while</code></h2>
+      <p>
+        An empty-body loop is allowed, though rarely needed.
+      </p>
+
+      <pre><code class="language-cpp">
+do {
+    ;
+} while (false);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Pseudo-graph: <code>do while</code></h2>
+
+      <pre><code>
+          ┌───────────────┐
+          │     body       │   (runs once)
+          └───────┬───────┘
+                  │
+                  ▼
+          ┌───────────────┐
+          │     cond       │─── false ───▶ loop ends
+          └───────┬───────┘
+                  │ true
+                  ▼
+                  └─────────────── back to body
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>do while runs the body first:</strong> condition is checked afterward.</li>
+        <li><strong>Always runs at least once:</strong> unlike <code>while</code>.</li>
+        <li><strong>Useful for input validation:</strong> prompt must appear at least once.</li>
+        <li><strong>Same rules for braces:</strong> always use <code>{ }</code> for clarity.</li>
+        <li><strong>Condition ends with a semicolon:</strong> required syntax.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/07.continue/" class="prev-button">← Ch3.7: continue</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/09.switch/" class="next-button">Ch3.9: switch →</a>
+    </div>
+  </main>
+</body>
+</html>

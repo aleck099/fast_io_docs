@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.6: break - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.6: break</h1>
+
+    <section>
+      <h2>The <code>break</code> Statement</h2>
+      <p>
+        A <code>break</code> statement immediately stops the nearest loop and continues
+        execution after the loop.
+      </p>
+
+      <pre><code class="language-cpp">
+break;
+</code></pre>
+
+      <p>
+        <code>break</code> only exits <strong>one</strong> loop — the innermost one.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>break</code> in a <code>while</code> Loop</h2>
+      <p>
+        This loop stops early when <code>i == 50</code>.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+::std::uint_least32_t sum{};
+
+while (i != 100) {
+    if (i == 50) {
+        break;   // exit the loop
+    }
+    sum = sum + i;
+    ++i;
+}
+
+println("sum of [0,50) = ", sum);
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>break</code> in a <code>for</code> Loop</h2>
+      <p>
+        <code>break</code> works the same way in a <code>for</code> loop.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t sum{};
+
+for (::std::uint_least32_t i{}; i != 100; ++i) {
+    if (i == 10) {
+        break;
+    }
+    sum = sum + i;
+}
+
+println("sum of [0,10) = ", sum);
+</code></pre>
+    </section>
+
+    <section>
+      <h2><code>break</code> in Dead Loops</h2>
+      <p>
+        A dead loop runs forever unless something inside it stops the loop.
+      </p>
+
+      <pre><code class="language-cpp">
+::std::uint_least32_t i{};
+
+for (;;) {   // infinite loop
+    if (i == 5) {
+        break;   // exit the loop
+    }
+    println("i=", i);
+    ++i;
+}
+</code></pre>
+
+      <p>
+        This loop ends only because of <code>break</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>break</code> with Init-statement Loops</h2>
+      <p>
+        <code>break</code> works normally even when the loop uses an init-statement.
+      </p>
+
+      <pre><code class="language-cpp">
+for (auto i = 0; i < 100; ++i) {
+    if (i == 3) {
+        break;
+    }
+    println("i=", i);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Nested Loops</h2>
+      <p>
+        <code>break</code> only exits the <strong>innermost</strong> loop.
+      </p>
+
+      <pre><code class="language-cpp">
+for (::std::uint_least32_t i{}; i != 3; ++i) {
+    for (::std::uint_least32_t j{}; j != 3; ++j) {
+        if (j == 1) {
+            break;   // exits only the inner loop
+        }
+        println("i=", i, ", j=", j);
+    }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Future Proposal: Labeled <code>break</code> (P3568)</h2>
+      <p>
+        The C++ committee is discussing a proposal (P3568) that would add
+        <strong>labeled <code>break</code></strong> to the language.  
+        This feature is <strong>not part of C++ yet</strong>, but it may appear in a future standard.
+      </p>
+
+      <p>
+        The idea is to allow <code>break</code> to exit an <em>outer</em> loop directly.
+        The label must appear <strong>before</strong> the loop you want to break.
+      </p>
+
+      <h3>Example (proposed syntax)</h3>
+
+      <pre><code class="language-cpp">
+outer:
+for (::std::uint_least32_t i{}; i != 3; ++i) {
+    for (::std::uint_least32_t j{}; j != 3; ++j) {
+        if (j == 1) {
+            break outer;   // exits the loop labeled "outer"
+        }
+        println("i=", i, ", j=", j);
+    }
+}
+</code></pre>
+
+      <p>
+        The label must be placed <strong>before</strong> the loop header.  
+        You cannot put the label after the loop or after the <code>for</code> keyword.
+      </p>
+
+      <p>
+        Again, this is <strong>not valid C++ today</strong>.  
+        It is shown only to illustrate how <code>break</code> may evolve in the future.
+      </p>
+    </section>
+
+    <section>
+      <h2>Pseudo-graph: Where <code>break</code> Goes</h2>
+
+      <pre><code>
+          ┌───────────────┐
+          │     loop       │
+          │    begins      │
+          └───────┬───────┘
+                  │
+                  ▼
+          ┌───────────────┐
+          │     cond       │─── false ───▶ loop ends
+          └───────┬───────┘
+                  │ true
+                  ▼
+          ┌───────────────┐
+          │     body       │
+          └───────┬───────┘
+                  │
+                  ├──▶ if (break) ───────────────▶ loop ends
+                  │
+                  ▼
+          ┌───────────────┐
+          │      step      │
+          └───────┬───────┘
+                  │
+                  └─────────────── back to cond
+      </code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>break exits the nearest loop:</strong> it does not exit outer loops.</li>
+        <li><strong>break stops dead loops:</strong> useful for <code>for(;;)</code> and <code>while(true)</code>.</li>
+        <li><strong>break works with any loop:</strong> <code>while</code>, <code>for</code>, and <code>do while</code>.</li>
+        <li><strong>break with init-statement:</strong> behaves normally.</li>
+        <li><strong>Nested loops:</strong> only the innermost loop is exited.</li>
+        <li><strong>Labeled break (P3568):</strong> proposed feature; label must appear before the loop.</li>
+        <li><strong>Clarity:</strong> use <code>break</code> intentionally; avoid hiding it deep inside complex logic.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/05.for/" class="prev-button">← Ch3.5: for</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/07.continue/" class="next-button">Ch3.7: continue →</a>
+    </div>
+  </main>
+</body>
+</html>

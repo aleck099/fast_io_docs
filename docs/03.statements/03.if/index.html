@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch3.3: if-else - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch3.3: if-else</h1>
+
+    <section>
+      <h2>The <code>if-else</code> Statement</h2>
+      <p>
+        An <code>if</code> chooses whether to run a statement.  
+        An <code>if-else</code> chooses between two statements:
+      </p>
+
+      <pre><code class="language-cpp">
+if (cond) {
+    ;
+} else {
+    ;
+}
+</code></pre>
+
+      <p>
+        As before, <code>;</code> is just an empty statement.
+      </p>
+    </section>
+
+    <section>
+      <h2><code>else if</code></h2>
+      <p>
+        For more than two cases, you can chain conditions using <code>else if</code>:
+      </p>
+
+      <pre><code class="language-cpp">
+if (x < 0) {
+    print("negative\n");
+} else if (x == 0) {
+    print("zero\n");
+} else {
+    print("positive\n");
+}
+</code></pre>
+
+      <p>
+        Only the first matching branch runs.
+      </p>
+    </section>
+
+    <section>
+      <h2>Init-statement</h2>
+      <p>
+        An <code>if</code> or <code>else if</code> may declare a variable before the condition.
+        C++ allows two different ways to write this.  
+        The variable exists only inside the entire <code>if / else if / else</code> chain.
+      </p>
+
+      <h3>Form 1</h3>
+      <pre><code class="language-cpp">
+::std::uint_least32_t a{3};
+::std::uint_least32_t b{9};
+
+if (::std::int_least32_t sum = a + b) {   // condition is: sum != 0
+    println("sum != 0, a=", a, ", b=", b, ", sum=", sum);
+} else {
+    println("sum == 0, a=", a, ", b=", b, ", sum=", sum);
+}
+</code></pre>
+
+      <p>
+        In this form, the condition is simply whether the variable is nonzero.
+      </p>
+
+      <h3>Form 2</h3>
+      <pre><code class="language-cpp">
+if (auto sum = a + b; sum > 10) {
+    println("sum > 10, a=", a, ", b=", b, ", sum=", sum);
+} else if (sum == 10) {
+    println("sum == 10, a=", a, ", b=", b, ", sum=", sum);
+} else {
+    println("sum < 10, a=", a, ", b=", b, ", sum=", sum);
+}
+</code></pre>
+
+      <p>
+        In this form, the variable is declared first, and then a separate condition is checked.
+      </p>
+
+      <p>
+        In both forms, the variable (<code>sum</code>) is destroyed after the whole chain ends.
+      </p>
+    </section>
+
+    <section>
+      <h2>Always Use <code>{ }</code></h2>
+      <p>
+        Beginners should <strong>always</strong> use braces for <code>if</code>, <code>else if</code>, and <code>else</code>.  
+        Without braces, it is extremely easy to attach the <code>else</code> to the wrong <code>if</code>.
+      </p>
+
+      <h3>❌ Wrong (ambiguous)</h3>
+      <pre><code class="language-cpp">
+if (a)
+    if (b)
+        ;
+    else
+        ;   // attaches to the inner if, not the outer one
+</code></pre>
+
+      <p>
+        This is the classic “dangling else” problem.
+      </p>
+
+      <h3>✔️ Correct</h3>
+      <pre><code class="language-cpp">
+if (a) {
+    if (b) {
+        ;
+    } else {
+        ;
+    }
+}
+</code></pre>
+
+      <p>
+        Braces make the structure clear and prevent mistakes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Another Confusing Example</h2>
+      <p>
+        Without braces, this code looks like the <code>else</code> belongs to the first <code>if</code>:
+      </p>
+
+      <h3>❌ Wrong</h3>
+      <pre><code class="language-cpp">
+if (x > 0)
+    if (x == 1)
+        print("one\n");
+    else
+        print("not one\n");  // actually belongs to the inner if
+</code></pre>
+
+      <p>
+        But the <code>else</code> always pairs with the <strong>nearest</strong> unmatched <code>if</code>.
+      </p>
+
+      <h3>✔️ Correct</h3>
+      <pre><code class="language-cpp">
+if (x > 0) {
+    if (x == 1) {
+        print("one\n");
+    } else {
+        print("not one\n");
+    }
+}
+</code></pre>
+
+      <p>
+        Always use braces. It removes all ambiguity.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><strong>if-else chooses:</strong> <code>if</code> picks one path; <code>if-else</code> picks between two.</li>
+        <li><strong>else if chains:</strong> use <code>else if</code> for multiple ordered conditions.</li>
+        <li><strong>Init-statement:</strong> both forms of <code>if (init) ...</code> and <code>if (init; cond)</code> declare a variable valid for the entire chain.</li>
+        <li><strong>Single-statement rule:</strong> without braces, each branch controls only one statement.</li>
+        <li><strong>Empty statement:</strong> <code>if (cond) ;</code> or <code>else ;</code> does nothing and is almost always a bug.</li>
+        <li><strong>Dangling else:</strong> <code>else</code> binds to the nearest <code>if</code>; braces prevent confusion.</li>
+        <li><strong>Clarity:</strong> consistent braces make code easier to read and safer to modify.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/03.statements/02.compound/" class="prev-button">← Ch3.2: Compound</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/04.while/" class="next-button">Ch3.4: while →</a>
+    </div>
+  </main>
+</body>
+</html>
