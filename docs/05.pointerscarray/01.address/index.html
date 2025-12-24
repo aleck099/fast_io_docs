@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.1: Memory & Addresses - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.1: Memory & Addresses</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        Before we talk about pointers, we need a simple mental model of memory.
+        In this chapter, “memory” just means a long sequence of bytes, and each byte
+        has a number called its <strong>address</strong>.
+      </p>
+
+      <p>
+        You can think of memory as a street with houses:
+      </p>
+
+<pre><code class="language-text">
+Address:   1000   1001   1002   1003   1004   1005   1006   1007
+Memory:   [ ?? ] [ ?? ] [ ?? ] [ ?? ] [ ?? ] [ ?? ] [ ?? ] [ ?? ]
+           ↑
+          a byte at address 1000
+</code></pre>
+
+      <p>
+        Every object in your program (integers, doubles, containers, etc.)
+        lives somewhere along this “street” and occupies one or more bytes.
+      </p>
+    </section>
+
+    <section>
+      <h2>Objects and their memory</h2>
+      <p>
+        When you create a variable, the compiler reserves space for it in memory.
+        The variable’s <em>value</em> is stored in this space, and its <em>address</em>
+        is the number of the first byte it uses.
+      </p>
+
+      <h3>Example: a simple integer</h3>
+
+<pre><code class="language-cpp">
+int x{42};
+</code></pre>
+
+      <p>
+        Imagine <code>x</code> uses 4 bytes starting at address 2000:
+      </p>
+
+<pre><code class="language-text">
+Address:   1996   1997   1998   1999   2000   2001   2002   2003   2004   2005
+Memory:    ....   ....   ....   ....  [ 42 ][ 42 ][ 42 ][ 42 ]   ....   ....
+                                        ↑
+                                      x starts here
+</code></pre>
+
+      <p>
+        You do not need the real numbers; this is just a model.
+        The important part is: <strong>every object occupies some bytes, and those bytes have an address</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Containers also live in memory</h2>
+      <p>
+        In Chapter 4, you learned about <code>::fast_io::string</code>,
+        <code>::fast_io::vector</code>, and <code>::fast_io::array</code>.
+        These are also objects, so they also occupy space in memory.
+      </p>
+
+      <h3>Example: ::fast_io::array</h3>
+
+<pre><code class="language-cpp">
+::fast_io::array<int, 4> a{10, 20, 30, 40};
+</code></pre>
+
+      <p>
+        You can imagine it like this:
+      </p>
+
+<pre><code class="language-text">
+Address:   3000   3004   3008   3012
+Memory:   [ 10 ] [ 20 ] [ 30 ] [ 40 ]
+           ↑
+         a[0] starts here
+</code></pre>
+
+      <p>
+        The elements are stored one after another in memory. The actual addresses
+        are decided by the compiler and system, but they form a continuous block.
+      </p>
+    </section>
+
+    <section>
+      <h2>string and vector: object plus elements</h2>
+      <p>
+        <code>::fast_io::string</code> and <code>::fast_io::vector</code> are a bit more complex.
+        They are objects that <em>manage</em> a separate block of memory where the elements live.
+      </p>
+
+      <h3>Example: ::fast_io::string</h3>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello"};
+</code></pre>
+
+      <p>
+        You can picture it like this:
+      </p>
+
+<pre><code class="language-text">
+           (object s)                     (characters managed by s)
+Address:   4000   4008   4016            5000   5001   5002   5003   5004
+Memory:   [ ... s header ... ]          [ 'H' ][ 'e' ][ 'l' ][ 'l' ][ 'o' ]
+           ↑                              ↑
+         s lives here              first character lives here
+</code></pre>
+
+      <p>
+        The details of the “header” do not matter yet. The key idea is:
+        <strong>the string object has its own address, and the characters it manages
+        have their own addresses as well</strong>.
+      </p>
+
+      <h3>Example: ::fast_io::vector</h3>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1, 2, 3};
+</code></pre>
+
+<pre><code class="language-text">
+           (object v)                     (elements managed by v)
+Address:   6000   6008   6016            7000   7004   7008
+Memory:   [ ... v header ... ]          [  1  ][  2  ][  3  ]
+           ↑                              ↑
+         v lives here             v[0] lives here
+</code></pre>
+
+      <p>
+        Again, the important point is that both the container object and the elements
+        it manages occupy space somewhere in memory.
+      </p>
+    </section>
+
+    <section>
+      <h2>Why we care about addresses</h2>
+      <p>
+        In the rest of Chapter 5, we will work with <strong>pointers</strong>.
+        A pointer is just a variable that stores an address, such as the address
+        of an <code>int</code>, or the address of the first element in a
+        <code>::fast_io::vector</code> or <code>::fast_io::array</code>.
+      </p>
+
+      <p>
+        This simple model of memory and addresses will help you understand:
+      </p>
+
+      <ul>
+        <li>how to ask “where” an object lives</li>
+        <li>how to follow an address to reach an object</li>
+        <li>how container functions like <code>data()</code> relate to memory</li>
+      </ul>
+
+      <p>
+        In the next chapter (Ch5.2), we will formally introduce pointers and see
+        how they store and work with these addresses.
+      </p>
+    </section>
+
+    <section>
+    <h2>Key takeaways</h2>
+    <ul>
+        <li>Memory is a long sequence of bytes, and each byte has an address.</li>
+        <li>Every object in your program occupies some number of bytes in memory.</li>
+        <li>The address of an object is the number of its first byte.</li>
+        <li><code>::fast_io::array</code> stores its elements directly inside the object in one continuous block.</li>
+        <li><code>::fast_io::vector</code> and <code>::fast_io::string</code> have their own object storage plus a separate block for their elements.</li>
+        <li>Both the container object and the elements it manages live somewhere in memory.</li>
+        <li>This chapter’s memory model prepares you to understand pointers, which store these addresses.</li>
+    </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/04.dsal/04.multidim/" class="prev-button">← Ch4.4: Multi‑Dimension Containers</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/02.pointerbasics/" class="next-button">Ch5.2: Pointer Basics →</a>
+    </div>
+  </main>
+</body>
+</html>

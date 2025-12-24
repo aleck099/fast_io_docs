@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.20: std::byte - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.20: ::std::byte</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        <code>::std::byte</code> is a type that represents a single byte of data.
+        Unlike <code>char</code> or <code>unsigned char</code>,
+        <code>::std::byte</code> is <strong>not</strong> a character type and cannot be
+        used for text. It is simply a small, strongly typed unit of storage.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>what <code>::std::byte</code> is</li>
+        <li>how to create and use <code>::std::byte</code> values</li>
+        <li>how to convert between <code>::std::byte</code> and integers</li>
+        <li>why <code>::std::byte</code> exists</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is ::std::byte?</h2>
+      <p>
+        <code>::std::byte</code> is an enumeration-like type that represents a single
+        byte. It does not store characters or numbers directly. Instead, it stores raw
+        byte values.
+      </p>
+
+<pre><code class="language-cpp">
+::std::byte b{};
+</code></pre>
+
+      <p>
+        This creates a <code>::std::byte</code> with value zero.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Initializing ::std::byte</h2>
+      <p>
+        You can initialize a <code>::std::byte</code> using <code>::std::byte{}</code>
+        or by converting from an integer.
+      </p>
+
+<pre><code class="language-cpp">
+::std::byte a{};                 // zero
+::std::byte b{static_cast<unsigned char>(42)};
+</code></pre>
+
+      <p>
+        <strong>Note:</strong> You must use an explicit cast when converting from an
+        integer. This prevents accidental misuse.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Converting ::std::byte to integers</h2>
+      <p>
+        To convert a <code>::std::byte</code> back to an integer, use
+        <code>::std::to_integer</code>.
+      </p>
+
+<pre><code class="language-cpp">
+::std::byte b{static_cast<unsigned char>(7)};
+unsigned int x = ::std::to_integer<unsigned int>(b);
+</code></pre>
+
+      <p>
+        This extracts the numeric value stored in the byte.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Why does ::std::byte exist?</h2>
+      <p>
+        Before <code>::std::byte</code> existed, programmers often used
+        <code>unsigned char</code> to represent raw bytes. But <code>unsigned char</code>
+        is still a character type, which can lead to confusion.
+      </p>
+
+      <p>
+        <code>::std::byte</code> solves this by providing a type that:
+      </p>
+
+      <ul>
+        <li>is clearly meant for raw data</li>
+        <li>cannot be mistaken for a character</li>
+        <li>does not behave like a number</li>
+        <li>supports only bitwise operations</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>5. Operations on ::std::byte</h2>
+      <p>
+        <code>::std::byte</code> supports bitwise operations such as:
+      </p>
+
+      <ul>
+        <li><code>|</code> (bitwise OR)</li>
+        <li><code>&amp;</code> (bitwise AND)</li>
+        <li><code>^</code> (bitwise XOR)</li>
+        <li><code>&lt;&lt;</code> (shift left)</li>
+        <li><code>&gt;&gt;</code> (shift right)</li>
+      </ul>
+
+<pre><code class="language-cpp">
+::std::byte b{static_cast<unsigned char>(1)};
+b = b << 2;   // shift left
+</code></pre>
+
+      <p>
+        These operations treat the byte as raw bits, not as a number.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>::std::byte</code> is a type representing a single byte.</li>
+        <li>It is not a character type and not a number.</li>
+        <li>It requires explicit conversion to and from integers.</li>
+        <li>It supports only bitwise operations.</li>
+        <li>It is useful when you want to express “this is raw data”.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/19.usingtypedef/" class="prev-button">← Ch2.19: using and typedef</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/" class="next-button">Ch3: statements →</a>
+    </div>
+  </main>
+</body>
+</html>

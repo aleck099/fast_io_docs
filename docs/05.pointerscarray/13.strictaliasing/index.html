@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.13: Strict Aliasing Rule - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.13: Strict Aliasing Rule</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        The <strong>strict aliasing rule</strong> is one of the most subtle and dangerous
+        parts of C++. It allows compilers to assume that pointers of
+        <strong>different, unrelated types</strong> never refer to the same memory.
+      </p>
+
+      <p class="important">
+        <strong>
+          In practice, the strict aliasing rule is often ignored by programmers,
+          misunderstood, or violated accidentally.
+        </strong>
+      </p>
+
+      <p>
+        Violating the rule results in undefined behavior that can silently produce
+        incorrect results even when the code “looks correct”.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>what aliasing means</li>
+        <li>what the strict aliasing rule says</li>
+        <li>why the rule is often ignored in real-world code</li>
+        <li>when aliasing is allowed</li>
+        <li>when aliasing is forbidden</li>
+        <li>why pointer-based type punning is dangerous</li>
+        <li>how to safely inspect raw bytes</li>
+        <li>how to safely reinterpret bits using <code>::std::bit_cast</code></li>
+        <li>how to use <code>[[__gnu__::__may_alias__]]</code> as a last-resort escape hatch</li>
+        <li>where to learn more (Timur Doumler’s CppCon 2019 talk)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is aliasing?</h2>
+      <p>
+        Two pointers <strong>alias</strong> when they refer to the same object.
+      </p>
+
+<pre><code class="language-cpp">
+int x{42};
+
+int *p = ::std::addressof(x);
+int *q = ::std::addressof(x);   // p and q alias the same int
+</code></pre>
+
+      <p>
+        If one modifies the object, the other sees the change.  
+        Aliasing becomes dangerous when the pointers have <strong>different types</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. What the strict aliasing rule says</h2>
+      <p class="important">
+        <strong>
+          The compiler may assume that pointers to unrelated types do not alias the same object.
+        </strong>
+      </p>
+
+      <p>
+        “Unrelated types” means types that are not:
+      </p>
+
+<ul>
+  <li>the same type (ignoring <code>const</code> / <code>volatile</code>)</li>
+  <li>qualified versions of each other</li>
+  <li>members of the same struct/class hierarchy</li>
+  <li>
+    <code>char</code>, <code>unsigned char</code>, or <code>std::byte</code> may be
+    used to inspect the raw bytes of any object
+  </li>
+  <li>
+    <strong>Important:</strong> <code>signed char</code>,
+    <code>uint8_t</code>, <code>uint_least8_t</code>, and <code>char8_t</code>
+    <strong>cannot</strong> be used for inspecting raw bytes.  
+    They are distinct types and do <em>not</em> have the special aliasing exemption.
+  </li>
+</ul>
+
+      <p>
+        If you access an object through a pointer of an unrelated type, the compiler is
+        allowed to assume that this access never happens → undefined behavior.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Why the strict aliasing rule is often ignored</h2>
+      <p>
+        Many programmers come from languages where type punning is harmless, or they
+        learned C from old books that used <code>reinterpret_cast</code>-style tricks.
+      </p>
+
+      <p>
+        As a result, real-world codebases often contain:
+      </p>
+
+      <ul>
+        <li>pointer casts between unrelated types</li>
+        <li>type punning through unions</li>
+        <li>reinterpretation of memory through incorrect pointer types</li>
+      </ul>
+
+      <p>
+        These patterns may “seem to work” on some compilers or architectures, but they
+        are still undefined behavior and can break under optimization.
+      </p>
+
+      <p class="important">
+        <strong>
+          The fact that strict aliasing violations often appear to work does not make
+          them safe.
+        </strong>
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Allowed aliasing</h2>
+
+      <h3>Same type (ignoring const)</h3>
+
+<pre><code class="language-cpp">
+int x{42};
+
+int *p = ::std::addressof(x);
+int const *q = ::std::addressof(x);   // ok
+</code></pre>
+
+      <h3>char / unsigned char / std::byte views</h3>
+
+<pre><code class="language-cpp">
+int x{0x12345678};
+
+unsigned char *bytes =
+    reinterpret_cast<unsigned char*>(::std::addressof(x));
+</code></pre>
+
+      <p>
+        Reading these bytes is always allowed.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Forbidden aliasing (undefined behavior)</h2>
+
+      <h3>Accessing an object through a pointer of an unrelated type</h3>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+
+int *p = reinterpret_cast<int*>(::std::addressof(f));
+
+// *p = 0;   // ❌ undefined behavior
+</code></pre>
+
+      <h3>Type punning through reinterpret_casted pointers</h3>
+
+<pre><code class="language-cpp">
+int x{42};
+
+float *pf = reinterpret_cast<float*>(::std::addressof(x));
+
+// float y = *pf;   // ❌ undefined behavior
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Why strict aliasing exists</h2>
+      <p>
+        Strict aliasing enables aggressive compiler optimizations.
+      </p>
+
+      <p>
+        If the compiler can assume that pointers of unrelated types do not alias, it can:
+      </p>
+
+      <ul>
+        <li>keep values in registers longer</li>
+        <li>reorder loads and stores</li>
+        <li>eliminate redundant memory accesses</li>
+      </ul>
+
+      <p>
+        Violating the rule breaks these assumptions and leads to unpredictable behavior.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Safe ways to inspect raw memory</h2>
+      <p>
+        These patterns are always safe:
+      </p>
+
+      <ul>
+        <li>access an object only through pointers of its own type (or cv‑qualified variants)</li>
+        <li>use <code>char</code>, <code>unsigned char</code>, or <code>std::byte</code> to inspect raw bytes</li>
+        <li>avoid pointer-based type punning</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>8. Safe type punning with ::std::bit_cast</h2>
+      <p>
+        In <a href="/docs/02.basics/13.casting/">Ch2.13: Casting</a>, we introduced
+        <code>::std::bit_cast</code> as the modern, safe way to reinterpret the raw bits
+        of an object. This is the correct replacement for dangerous pointer-based type
+        punning.
+      </p>
+
+      <p class="important">
+        <strong>
+          If you need to reinterpret the bits of a value as another type,
+          use <code>::std::bit_cast</code>. Do not use pointer casts.
+        </strong>
+      </p>
+
+<pre><code class="language-cpp">
+#include <bit>
+
+float f{1.0f};
+
+// Safe: reinterpret the bits of float as std::uint32_t
+std::uint32_t u = ::std::bit_cast<std::uint32_t>(f);
+</code></pre>
+
+      <h3>Incorrect (undefined behavior)</h3>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+std::uint32_t *p = reinterpret_cast<std::uint32_t*>(::std::addressof(f));
+
+// std::uint32_t u = *p;   // ❌ undefined behavior
+</code></pre>
+
+      <h3>Correct</h3>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+std::uint32_t u = ::std::bit_cast<std::uint32_t>(f);   // ✔ safe
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. As a last resort: [[__gnu__::__may_alias__]] (GCC extension)</h2>
+      <p>
+        If you truly must alias through pointers, GCC provides a non‑standard escape
+        hatch: <code>[[__gnu__::__may_alias__]]</code>.
+      </p>
+
+      <p class="important">
+        <strong>
+          This is not standard C++. It is non-portable and should only be used by
+          experts who fully understand strict aliasing.
+        </strong>
+      </p>
+
+<pre><code class="language-cpp">
+// Detect whether [[__gnu__::__may_alias__]] is supported (GCC and Clang)
+#if __has_cpp_attribute(__gnu__::__may_alias__)
+#  define MAY_ALIAS [[__gnu__::__may_alias__]]
+#else
+#  define MAY_ALIAS
+#endif
+
+// Create an alias type for "int*" that is allowed to alias anything
+using may_alias_int_ptr = int * MAY_ALIAS;
+
+float f{1.0f};
+
+// Allowed by GCC and Clang (non-portable)
+may_alias_int_ptr p = reinterpret_cast<may_alias_int_ptr>(::std::addressof(f));
+
+// GCC/Clang will not assume this violates strict aliasing
+int bits = *p;
+</code></pre>
+
+      <p>
+        This attribute disables strict aliasing for that type only.
+      </p>
+
+      <p class="important">
+        <strong>
+          Prefer <code>::std::bit_cast</code> whenever possible.
+        </strong>
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Recommended talk: Type punning in modern C++</h2>
+      <p>
+        For a deep, modern explanation of strict aliasing and type punning, watch this
+        CppCon 2019 talk by Timur Doumler:
+      </p>
+
+      <p><strong>“Type punning in modern C++ – Timur Doumler – CppCon 2019”</strong></p>
+
+      <div class="video-container">
+        <iframe
+          width="560"
+          height="315"
+          src="https://www.youtube.com/embed/_qzMpk-22cc"
+          title="Type punning in modern C++ - Timur Doumler - CppCon 2019"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen>
+        </iframe>
+      </div>
+
+      <p>
+        You do not need to understand every detail yet.  
+        For now, focus on the core message:
+        <strong>type punning through pointers is dangerous, and strict aliasing is the reason why</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>The strict aliasing rule is subtle and often ignored in real-world code.</li>
+        <li>Accessing an object through a pointer of an unrelated type is undefined behavior.</li>
+        <li><code>char</code>, <code>unsigned char</code>, and <code>std::byte</code> may safely inspect raw bytes; <code>signed char</code>, <code>uint8_t</code>, <code>uint_least8_t</code>, and <code>char8_t</code> may not.</li>
+        <li>Pointer-based type punning is almost always undefined behavior.</li>
+        <li><code>::std::bit_cast</code> is the modern, safe way to reinterpret bits.</li>
+        <li><code>[[__gnu__::__may_alias__]]</code> is a GCC/Clang-only escape hatch; it is non‑portable and should not be relied on.</li>
+        <li>Strict aliasing enables aggressive compiler optimizations.</li>
+        <li>Watch Timur Doumler’s CppCon 2019 talk for deeper understanding.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/12.pointersandcontainers/" class="prev-button">← Ch5.12: Pointers with vector, array, and string</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/14.memfunctions/" class="next-button">Ch5.14: memcpy, memset, memcmp →</a>
+    </div>
+  </main>
+</body>
+</html>

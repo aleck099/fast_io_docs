@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.2: Pointer Basics - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.2: Pointer Basics</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A pointer is a variable that stores an <strong>address</strong>. It does not store
+        a value like <code>42</code>; it stores the <em>location</em> of an object in memory.
+      </p>
+
+      <p>
+        In this chapter, we introduce only the syntax of pointers:
+      </p>
+
+      <ul>
+        <li>how to declare pointers (including pointer-to-pointer)</li>
+        <li>how to obtain an address using <code>::std::addressof</code></li>
+        <li>how to store that address in a pointer</li>
+        <li>why pointers must always be initialized</li>
+        <li>how to print pointers with <code>pointervw</code></li>
+        <li>how to visualize pointers with simple pseudo‑graphs</li>
+      </ul>
+
+      <p>
+        We use only simple types such as <code>::std::size_t</code>, <code>int</code>,
+        <code>char</code>, and <code>double</code>. Containers will be covered later in Ch5.12.
+      </p>
+    </section>
+
+    <section>
+      <h2>1. Include &lt;memory&gt; for ::std::addressof</h2>
+      <p>
+        To obtain the address of an object, we use <code>::std::addressof</code>.
+        It is defined in the <code>&lt;memory&gt;</code> header.
+      </p>
+
+<pre><code class="language-cpp">
+#include <memory>   // for ::std::addressof
+</code></pre>
+
+      <p>
+        We use <code>::std::addressof</code> instead of <code>&amp;</code> because:
+      </p>
+
+      <ul>
+        <li>it always returns the true address of the object</li>
+        <li>it works even if a type overloads <code>operator&amp;</code></li>
+        <li>it is the recommended modern C++ approach</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. What is a pointer?</h2>
+      <p>
+        Every object in memory has an address. A pointer is a variable that stores such an address.
+      </p>
+
+<pre><code class="language-text">
+Address:   2000   2001   2002   2003
+Memory:   [  7  ][  7  ][  7  ][  7  ]
+            ↑
+           x lives here
+</code></pre>
+
+<pre><code class="language-cpp">
+#include <memory>
+
+::std::size_t x{7};
+::std::size_t *p = ::std::addressof(x);   // p stores the address of x
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Declaring pointers</h2>
+      <p>
+        A pointer type is written as <code>T*</code>, meaning “pointer to T”.
+        In this tutorial, we prefer writing the <code>*</code> next to the variable name:
+      </p>
+
+<pre><code class="language-cpp">
+int *ip;
+char *cp;
+::std::size_t *sp;
+double *dp;
+</code></pre>
+
+      <h3>Always initialize pointers</h3>
+      <p>
+        <strong>You must always initialize a pointer.</strong>
+        An uninitialized pointer contains an unpredictable address, and using it is undefined behavior.
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;              // safe: p points to nothing
+char *q = nullptr;             // safe
+::std::size_t *r = nullptr;    // safe
+</code></pre>
+
+      <p>
+        Later, when you have a real object, you can assign its address:
+      </p>
+
+<pre><code class="language-cpp">
+int value{42};
+int *p = ::std::addressof(value);
+</code></pre>
+
+      <h3>A common beginner trap</h3>
+      <p>
+        This declaration is misleading:
+      </p>
+
+<pre><code class="language-cpp">
+int* p, q;   // q is NOT a pointer
+</code></pre>
+
+      <p>
+        Only <code>p</code> is a pointer. <code>q</code> is a plain <code>int</code>.
+      </p>
+
+      <p>
+        Writing the <code>*</code> next to the variable name makes the meaning clearer:
+      </p>
+
+<pre><code class="language-cpp">
+int *p, q;   // p is a pointer, q is an int
+</code></pre>
+
+      <p>
+        Even better, declare one pointer per line and always initialize it:
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;
+int *q = nullptr;
+</code></pre>
+    </section>
+
+    <section>
+      <h2>4. Pointer to pointer</h2>
+      <p>
+        A pointer can also store the address of another pointer.
+        This is called a <strong>pointer-to-pointer</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int value{42};
+int *p = ::std::addressof(value);   // p points to value
+int **pp = ::std::addressof(p);     // pp points to p
+</code></pre>
+
+<pre><code class="language-text">
+value:
+Address:   3000
+Memory:   [ 42 ]
+
+p:
+Address:   4000
+Memory:   [ 3000 ]   ← p stores address of value
+
+pp:
+Address:   5000
+Memory:   [ 4000 ]   ← pp stores address of p
+</code></pre>
+
+      <p>
+        You can keep adding more <code>*</code> levels, but pointer-to-pointer is the most common.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. nullptr</h2>
+      <p>
+        A pointer can also store “no address”.
+        This is written as <code>nullptr</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;   // p does not point to anything
+int **pp = nullptr; // pp also does not point to anything
+</code></pre>
+
+      <p>
+        We will explore <code>nullptr</code> more in Ch5.4.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Printing pointers</h2>
+      <p>
+        A pointer stores an address, and sometimes you want to print that address to see
+        where something lives in memory. In <code>fast_io</code>, the recommended way to
+        print a pointer is to use the <code>pointervw</code> manipulator.
+      </p>
+
+      <p>
+        To use it, include the namespace:
+      </p>
+
+<pre><code class="language-cpp">
+using namespace ::fast_io::iomnp;
+</code></pre>
+
+      <p>
+        Then you can print a pointer like this:
+      </p>
+
+<pre><code class="language-cpp">
+#include <memory>
+#include <fast_io.h>
+using namespace ::fast_io::iomnp;
+
+int value{42};
+int *p = ::std::addressof(value);
+
+println(pointervw(p));
+</code></pre>
+
+      <p>
+        This prints the address stored inside <code>p</code> in a readable, consistent format.
+        The exact number depends on your system, but conceptually it looks like:
+      </p>
+
+<pre><code class="language-text">
+0x0000000000007D30
+</code></pre>
+
+      <p>
+        You can print any pointer this way, including pointer-to-pointer:
+      </p>
+
+<pre><code class="language-cpp">
+int **pp = ::std::addressof(p);
+println(pointervw(pp));
+</code></pre>
+
+      <p>
+        Printing pointers is useful for understanding how memory is laid out and how
+        pointers relate to each other.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A pointer stores an address, not a value.</li>
+        <li><code>T*</code> means “pointer to T”.</li>
+        <li>Write <code>int *p;</code> instead of <code>int* p;</code> to avoid confusion.</li>
+        <li>Use <code>::std::addressof</code> (from &lt;memory&gt;) to obtain an address.</li>
+        <li><strong>Always initialize pointers</strong> (use <code>nullptr</code> if needed).</li>
+        <li>Pointers themselves are variables and also have their own addresses.</li>
+        <li>You can have pointer-to-pointer types like <code>int **pp</code>.</li>
+        <li>Use <code>pointervw</code> from <code>::fast_io::iomnp</code> to print pointer values.</li>
+        <li>This chapter focuses only on syntax; containers come later in Ch5.12.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/01.address/" class="prev-button">← Ch5.1: Memory & Addresses</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/03.dereference/" class="next-button">Ch5.3: Dereferencing →</a>
+    </div>
+  </main>
+</body>
+</html>

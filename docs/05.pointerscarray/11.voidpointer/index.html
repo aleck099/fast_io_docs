@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.11: void* - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.11: void*</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A <code>void*</code> (pronounced “void pointer”) is a pointer that can hold the
+        address of any object, regardless of its type. It is a <strong>typeless pointer</strong>.
+        Because it has no type information, C++ restricts what you can do with it.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what <code>void*</code> is</li>
+        <li>why <code>void*</code> cannot be dereferenced</li>
+        <li>why pointer arithmetic is forbidden on <code>void*</code></li>
+        <li>how <code>void*</code> interacts with C‑style arrays and decay</li>
+        <li>why <code>void const*</code> is the correct type for read‑only memory</li>
+        <li>why <code>void*</code> is used in low‑level memory operations</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is a void pointer?</h2>
+      <p>
+        A <code>void*</code> can store the address of any object.  
+        It is the most generic pointer type in C++.
+      </p>
+
+<pre><code class="language-cpp">
+int x{42};
+double y{3.14};
+
+void *p1 = ::std::addressof(x);   // ok
+void *p2 = ::std::addressof(y);   // ok
+</code></pre>
+
+      <p>
+        But because <code>void*</code> has no type, C++ does not know:
+      </p>
+
+      <ul>
+        <li>how large the object is</li>
+        <li>how to interpret the bytes</li>
+        <li>how to perform pointer arithmetic</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. You cannot dereference a void pointer</h2>
+      <p>
+        A <code>void*</code> does not point to a specific type, so C++ does not know
+        what <code>*p</code> would mean.
+      </p>
+
+<pre><code class="language-cpp">
+void *p = ::std::addressof(x);
+
+// *p;   // ❌ error: cannot dereference void*
+</code></pre>
+
+      <p>
+        To access the object, you must convert the pointer to a typed pointer.
+        (Conversions will be introduced later.)
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Pointer arithmetic is forbidden on void*</h2>
+      <p>
+        Pointer arithmetic requires knowing the size of the pointed‑to type.
+        Since <code>void</code> has no size, arithmetic is not allowed.
+      </p>
+
+<pre><code class="language-cpp">
+void *p = ::std::addressof(x);
+
+// p + 1;   // ❌ error: cannot do pointer arithmetic on void*
+</code></pre>
+
+      <p>
+        This restriction prevents accidental misuse.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. void* and C‑style array decay</h2>
+      <p>
+        When a C‑style array decays, it becomes a pointer to its first element.
+        That pointer can be stored in a <code>void*</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{1,2,3};
+
+void *p = a;   // decay: a → &a[0], then stored in void*
+</code></pre>
+
+      <p>
+        But because <code>void*</code> is typeless:
+      </p>
+
+      <ul>
+        <li>you cannot index it</li>
+        <li>you cannot do pointer arithmetic</li>
+        <li>you cannot dereference it</li>
+      </ul>
+
+      <p>
+        It is simply a generic address.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. void const* for read‑only memory</h2>
+      <p>
+        When pointing to memory that must not be modified, use:
+      </p>
+
+<pre><code class="language-cpp">
+void const *p = "Hello";   // pointer to read-only memory
+</code></pre>
+
+      <p>
+        This follows the rule from Ch2.8:
+      </p>
+
+      <p class="important">
+        <strong><code>const</code> applies to the left. Full stop.</strong>
+      </p>
+
+      <p>
+        <code>void const*</code> means “pointer to const void”,  
+        i.e., “pointer to read‑only memory of unknown type”.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Why void* exists</h2>
+      <p>
+        <code>void*</code> is used in low‑level programming where the type of the data
+        is not known in advance. Examples include:
+      </p>
+
+      <ul>
+        <li>raw memory buffers</li>
+        <li>generic storage</li>
+        <li>interfacing with C libraries</li>
+        <li>memory manipulation functions (Ch5.14)</li>
+      </ul>
+
+      <p>
+        <code>void*</code> is a way to store “just an address” without type information.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. void* does not bypass the type system</h2>
+      <p>
+        A <code>void*</code> does not magically allow you to treat memory as any type.
+        It simply removes type information temporarily.
+      </p>
+
+      <p>
+        To use the memory, you must convert the pointer back to the correct type.
+        (Conversions will be introduced later.)
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Summary table</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Allowed?</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Store any object’s address</td>
+            <td>✔ yes</td>
+            <td>void* is typeless</td>
+          </tr>
+          <tr>
+            <td>Dereference</td>
+            <td>❌ no</td>
+            <td>No type information</td>
+          </tr>
+          <tr>
+            <td>Pointer arithmetic</td>
+            <td>❌ no</td>
+            <td>void has no size</td>
+          </tr>
+          <tr>
+            <td>Decay from array</td>
+            <td>✔ yes</td>
+            <td>array decays to &a[0]</td>
+          </tr>
+          <tr>
+            <td>Use for read‑only memory</td>
+            <td>✔ yes</td>
+            <td>use <code>void const*</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>void*</code> is a typeless pointer that can store any address.</li>
+        <li>You cannot dereference a <code>void*</code>.</li>
+        <li>You cannot do pointer arithmetic on a <code>void*</code>.</li>
+        <li>Only the outermost dimension of an array decays, and the result may be stored in <code>void*</code>.</li>
+        <li>Use <code>void const*</code> for read‑only memory.</li>
+        <li><code>void*</code> is used for low‑level memory operations.</li>
+        <li><code>void*</code> does not bypass the type system; it only hides type information temporarily.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/10.constpointer/" class="prev-button">← Ch5.10: const and Pointers</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/12.pointersandcontainers/" class="next-button">Ch5.12: Pointers with vector, array, and string →</a>
+    </div>
+  </main>
+</body>
+</html>

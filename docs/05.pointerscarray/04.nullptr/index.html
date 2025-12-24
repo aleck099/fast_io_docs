@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.4: nullptr - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.4: nullptr</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A pointer must always store either:
+      </p>
+
+      <ul>
+        <li>the address of a valid object, or</li>
+        <li><strong>nullptr</strong>, meaning “no address”.</li>
+      </ul>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what <code>nullptr</code> means</li>
+        <li>why <code>nullptr</code> is safer than older null-pointer constants</li>
+        <li>how to initialize pointers with <code>nullptr</code></li>
+        <li>why dereferencing <code>nullptr</code> is undefined behavior</li>
+        <li>why undefined behavior does <em>not</em> guarantee a crash</li>
+        <li>how sanitizers help detect null dereferences</li>
+        <li>how <code>fast_io</code> prints <code>nullptr</code> and <code>nullptr_t</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is nullptr?</h2>
+      <p>
+        <code>nullptr</code> is a special value that means:
+      </p>
+
+      <p><strong>“this pointer does not point to any object.”</strong></p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;   // p points to nothing
+</code></pre>
+
+      <p>
+        This is the correct way to represent an empty or uninitialized pointer.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Why nullptr exists</h2>
+      <p>
+        Before C++11, programmers used <code>0</code> or <code>NULL</code> to represent a null pointer.
+        These had problems:
+      </p>
+
+      <ul>
+        <li><code>0</code> is an integer, not a pointer</li>
+        <li><code>NULL</code> is often defined as <code>0</code></li>
+        <li>overload resolution could choose the wrong function</li>
+      </ul>
+
+      <p>
+        <code>nullptr</code> fixes all of these issues. It has its own type:
+      </p>
+
+<pre><code class="language-cpp">
+std::nullptr_t
+</code></pre>
+
+      <p>
+        and it converts only to pointer types.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Always initialize pointers with nullptr</h2>
+      <p>
+        An uninitialized pointer contains an unpredictable address.  
+        Using it is <strong>undefined behavior</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+// Bad: uninitialized pointer
+int *p;
+
+// Good: always initialize
+int *q = nullptr;
+</code></pre>
+
+      <p>
+        Later, when you have a real object, assign its address:
+      </p>
+
+<pre><code class="language-cpp">
+#include <memory>
+
+int value{42};
+int *p = ::std::addressof(value);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>4. nullptr has no address</h2>
+      <p>
+        A null pointer does not refer to any memory location.
+      </p>
+
+<pre><code class="language-text">
+p:
+Address:   4000
+Memory:   [ null ]   ← p stores “no address”
+</code></pre>
+
+      <p>
+        The pointer itself lives somewhere in memory, but its <em>value</em> is “no address”.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Printing nullptr</h2>
+      <p>
+        In <code>fast_io</code>, printing a <code>nullptr_t</code> value directly produces
+        the string <code>"nullptr"</code>.
+      </p>
+
+<pre><code class="language-cpp">
+#include <fast_io.h>
+
+std::nullptr_t np = nullptr;
+println(np);     // prints: nullptr
+</code></pre>
+
+      <p>
+        If you want the <em>numeric</em> representation of a null pointer, use
+        <code>pointervw</code>:
+      </p>
+
+<pre><code class="language-cpp">
+#include <fast_io.h>
+using namespace ::fast_io::iomnp;
+
+println(pointervw(nullptr));
+</code></pre>
+
+      <p>
+        This prints the full pointer-width numeric address, zero‑extended to the platform’s
+        pointer size. For example, on a 64‑bit system:
+      </p>
+
+<pre><code class="language-text">
+0x0000000000000000
+</code></pre>
+
+      <p>
+        This ensures consistent formatting for all pointers, including null ones.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. You cannot dereference nullptr</h2>
+      <p>
+        A null pointer does not point to any object.  
+        <strong>You cannot dereference nullptr.</strong>
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;
+
+// *p = 10;   // undefined behavior — never do this
+</code></pre>
+
+      <p>
+        Dereferencing <code>nullptr</code> is <strong>always undefined behavior</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Undefined behavior does NOT guarantee a crash</h2>
+      <p>
+        Many beginners assume that dereferencing <code>nullptr</code> will always crash.
+        This is <strong>false</strong>.
+      </p>
+
+      <p>
+        Undefined behavior means:
+      </p>
+
+      <ul>
+        <li>the program might crash</li>
+        <li>or it might corrupt memory</li>
+        <li>or it might continue running as if nothing happened</li>
+        <li>or the compiler may optimize away code based on incorrect assumptions</li>
+      </ul>
+
+      <h3>Compilers may assume pointers are never null</h3>
+      <p>
+        Modern compilers aggressively optimize code.  
+        They may assume that a pointer is never null and remove checks or reorder code.
+      </p>
+
+      <h3>WebAssembly without memory tagging will NOT trap</h3>
+      <p>
+        On WebAssembly, if memory tagging is not enabled, dereferencing <code>nullptr</code>
+        often does <strong>not</strong> trap.  
+        The VM cannot efficiently detect null dereferences, so the program may continue
+        running with corrupted state.
+      </p>
+
+      <p>
+        This is why dereferencing <code>nullptr</code> is extremely dangerous.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. nullptr in comparisons</h2>
+      <p>
+        You can check whether a pointer is null:
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;
+
+if (p == nullptr)
+{
+    // p does not point to anything
+}
+</code></pre>
+
+      <p>
+        This is often used before dereferencing:
+      </p>
+
+<pre><code class="language-cpp">
+if (p != nullptr)
+{
+    int x = *p;   // safe
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. nullptr and pointer-to-pointer</h2>
+      <p>
+        Pointer-to-pointer types can also be null.
+      </p>
+
+<pre><code class="language-cpp">
+int **pp = nullptr;
+
+// **pp;   // undefined behavior — pp does not point to a pointer
+</code></pre>
+    </section>
+
+    <section>
+      <h2>10. Use sanitizers to detect null dereferences</h2>
+      <p>
+        Modern compilers provide tools that detect null dereferences at runtime.
+      </p>
+
+      <h3>AddressSanitizer</h3>
+<pre><code class="language-text">
+-fsanitize=address
+</code></pre>
+
+      <p>
+        Detects:
+      </p>
+
+      <ul>
+        <li>null dereferences</li>
+        <li>use‑after‑free</li>
+        <li>out‑of‑bounds accesses</li>
+      </ul>
+
+      <h3>Memory Tagging (WebAssembly)</h3>
+<pre><code class="language-text">
+-fsanitize=memtag
+</code></pre>
+
+      <p>
+        Detects:
+      </p>
+
+      <ul>
+        <li>dangling pointer dereferences</li>
+        <li>invalid memory accesses</li>
+      </ul>
+
+      <p>
+        These tools make pointer bugs easier to find and fix.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>nullptr</code> means “this pointer does not point to any object”.</li>
+        <li>Always initialize pointers with <code>nullptr</code> if they have no target yet.</li>
+        <li><strong>You cannot dereference nullptr.</strong></li>
+        <li><strong>Dereferencing nullptr is undefined behavior.</strong></li>
+        <li><strong>Undefined behavior does NOT guarantee a crash.</strong></li>
+        <li>Compilers may assume pointers are never null.</li>
+        <li>WebAssembly without memory tagging will not trap on null dereference.</li>
+        <li><code>fast_io</code> prints <code>nullptr</code> as the string <code>"nullptr"</code>.</li>
+        <li><code>pointervw(nullptr)</code> prints the full pointer-width numeric address.</li>
+        <li>Use <code>-fsanitize=address</code> or <code>-fsanitize=memtag</code> to detect null dereferences.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/03.dereference/" class="prev-button">← Ch5.3: Dereferencing</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/05.pointerarithmetic/" class="next-button">Ch5.5: Pointer Arithmetic →</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.14: memfunctions - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.14: memfunctions</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        C and C++ provide a family of low-level memory manipulation functions:
+        <code>memcpy</code>, <code>memmove</code>, <code>memset</code>,
+        <code>memchr</code>, and <code>memcmp</code>. These operate on raw bytes and
+        completely ignore types.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how each function works</li>
+        <li>why compilers treat them as <strong>intrinsics</strong> or “magic”</li>
+        <li>why trivial <code>memcpy</code> and <code>memmove</code> often optimize to simple <code>mov</code> instructions</li>
+        <li>how <code>memcpy</code> is used for safe type punning</li>
+        <li>why calling these functions with <code>nullptr</code> and non-zero size is undefined behavior</li>
+        <li>why you must check <code>size != 0</code> before calling them</li>
+        <li>how to securely erase secrets using <code>::fast_io::secure_clear</code></li>
+        <li>where to read more about null-terminated byte strings</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. memcpy</h2>
+      <p>
+        <code>memcpy</code> copies raw bytes from one memory region to another.
+      </p>
+
+<pre><code class="language-cpp">
+int src{42};
+int dst{0};
+
+::std::memcpy(::std::addressof(dst),
+              ::std::addressof(src),
+              sizeof(int));
+</code></pre>
+
+      <p>
+        After this call, <code>dst</code> contains the same bits as <code>src</code>.
+      </p>
+
+      <h3>1.1 memcpy ignores types</h3>
+      <p>
+        <code>memcpy</code> does not know or care what types are involved. It only copies
+        bytes. This is why it is safe for type punning.
+      </p>
+
+      <h3>1.2 memcpy is compiler magic</h3>
+      <p>
+        Modern compilers treat <code>memcpy</code> as an intrinsic. If the size is known
+        at compile time and small, the compiler often replaces it with a few
+        <code>mov</code> instructions.
+      </p>
+
+<pre><code class="language-text">
+memcpy(&dst, &src, 4)  →  mov eax, [src]; mov [dst], eax
+</code></pre>
+
+      <p>
+        This is why <code>memcpy</code> is extremely fast.
+      </p>
+
+      <h3>1.3 memcpy for type punning</h3>
+      <p>
+        <code>memcpy</code> is the only pointer-safe way (besides <code>::std::bit_cast</code>)
+        to reinterpret the bits of one object as another type.
+      </p>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+std::uint32_t u{};
+
+::std::memcpy(::std::addressof(u),
+              ::std::addressof(f),
+              sizeof(float));   // ✔ safe
+</code></pre>
+
+      <p>
+        This does not violate strict aliasing because no pointer of the wrong type is used.
+      </p>
+
+      <h3>1.4 memcpy and nullptr</h3>
+      <p class="important">
+        <strong>
+          Calling <code>memcpy</code> with a null pointer and a non-zero size is undefined behavior.
+        </strong>
+      </p>
+
+<pre><code class="language-cpp">
+if (n != 0) {
+    ::std::memcpy(dst, src, n);
+}
+</code></pre>
+
+      <p>
+        Always check <code>n != 0</code> before calling <code>memcpy</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. memmove</h2>
+      <p>
+        <code>memmove</code> is like <code>memcpy</code> but safe for overlapping memory.
+      </p>
+
+<pre><code class="language-cpp">
+::std::memmove(dst, src, n);
+</code></pre>
+
+      <p>
+        If the regions overlap, <code>memcpy</code> is undefined behavior, but
+        <code>memmove</code> handles it correctly.
+      </p>
+
+      <h3>2.1 memmove is also compiler magic</h3>
+      <p>
+        Compilers treat <code>memmove</code> as an intrinsic. If the compiler can prove
+        the regions do not overlap, it may optimize <code>memmove</code> into
+        <code>memcpy</code> or even simple <code>mov</code> instructions.
+      </p>
+
+      <h3>2.2 memmove and nullptr</h3>
+      <p class="important">
+        <strong>
+          Calling <code>memmove</code> with a null pointer and a non-zero size is undefined behavior.
+        </strong>
+      </p>
+
+<pre><code class="language-cpp">
+if (n != 0) {
+    ::std::memmove(dst, src, n);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. memset</h2>
+      <p>
+        <code>memset</code> fills a block of memory with a byte value.
+      </p>
+
+<pre><code class="language-cpp">
+int x{};
+::std::memset(::std::addressof(x), 0, sizeof(int));
+</code></pre>
+
+      <p>
+        This sets all bytes of <code>x</code> to zero.
+      </p>
+
+      <h3>3.1 memset is also compiler magic</h3>
+      <p>
+        If the compiler knows the size at compile time, it often replaces
+        <code>memset</code> with a sequence of <code>mov</code> instructions.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. memchr</h2>
+      <p>
+        <code>memchr</code> searches for a byte value in a block of memory.
+      </p>
+
+<pre><code class="language-cpp">
+unsigned char buffer[8]{1,2,3,4,5,6,7,8};
+
+void *p = ::std::memchr(buffer, 4, 8);   // finds byte 4
+</code></pre>
+
+      <p>
+        <code>memchr</code> is also treated as a compiler intrinsic when possible.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. memcmp</h2>
+      <p>
+        <code>memcmp</code> compares two blocks of memory byte-by-byte. It does not know
+        or care about types, encodings, or null terminators.
+      </p>
+
+<pre><code class="language-cpp">
+int a{42};
+int b{42};
+
+int result = ::std::memcmp(::std::addressof(a),
+                           ::std::addressof(b),
+                           sizeof(int));
+</code></pre>
+
+      <p>
+        The return value is:
+      </p>
+
+      <ul>
+        <li><code>0</code> if all bytes are equal</li>
+        <li><code>&lt; 0</code> if the first differing byte in <code>a</code> is less</li>
+        <li><code>&gt; 0</code> if the first differing byte in <code>a</code> is greater</li>
+      </ul>
+
+      <h3>5.1 memcmp ignores types</h3>
+      <p>
+        <code>memcmp</code> compares raw bytes. Padding bytes, endianness, and bit
+        patterns all affect the result.
+      </p>
+
+      <h3>5.2 memcmp is compiler magic</h3>
+      <p>
+        Compilers often optimize small, constant-size <code>memcmp</code> calls into a
+        few <code>cmp</code> instructions.
+      </p>
+
+      <h3>5.3 memcmp and nullptr</h3>
+      <p class="important">
+        <strong>
+          Calling <code>memcmp</code> with a null pointer and a non-zero size is undefined behavior.
+        </strong>
+      </p>
+
+<pre><code class="language-cpp">
+if (n != 0) {
+    ::std::memcmp(p, q, n);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Further reading: Null-terminated byte strings</h2>
+      <p>
+        Many C library functions operate on <strong>null-terminated byte strings</strong>.
+        These are different from the raw byte functions in this chapter.
+      </p>
+
+      <p>
+        For a complete overview, see:
+      </p>
+
+      <p>
+        <a href="https://en.cppreference.com/w/cpp/string/byte.html" target="_blank">
+          cppreference: Null-terminated byte strings
+        </a>
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Securely clearing secrets with ::fast_io::secure_clear</h2>
+      <p>
+        When dealing with sensitive data such as passwords, cryptographic keys, or
+        authentication material, it is important to securely erase the memory after use.
+      </p>
+
+      <p>
+        A common mistake is to use <code>memset</code>:
+      </p>
+
+<pre><code class="language-cpp">
+char secret[32]{};
+// ... fill secret ...
+::std::memset(secret, 0, sizeof(secret));   // ❌ may be optimized away
+</code></pre>
+
+      <p class="important">
+        <strong>
+          Compilers may remove this <code>memset</code> entirely because the memory is
+          never read afterward.
+        </strong>
+      </p>
+
+      <p>
+        To solve this, <code>::fast_io</code> provides:
+      </p>
+
+      <p class="important">
+        <strong><code>::fast_io::secure_clear</code></strong>
+      </p>
+
+      <p>
+        This function is guaranteed to:
+      </p>
+
+      <ul>
+        <li>actually overwrite the memory</li>
+        <li>not be optimized away</li>
+        <li>work on any trivially copyable type</li>
+        <li>use the correct platform-specific secure clearing mechanism</li>
+      </ul>
+
+      <h3>Example</h3>
+
+<pre><code class="language-cpp">
+char secret[32]{};
+// ... fill secret with sensitive data ...
+
+::fast_io::secure_clear(secret, sizeof(secret));   // ✔ securely erased
+</code></pre>
+
+      <p>
+        This is the correct way to clear secrets in memory.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>memcpy</code>, <code>memmove</code>, <code>memset</code>, <code>memchr</code>, and <code>memcmp</code> operate on raw bytes.</li>
+        <li>Compilers treat these functions as <strong>intrinsics</strong> or “magic”.</li>
+        <li>Trivial <code>memcpy</code> and <code>memmove</code> often optimize to simple <code>mov</code> instructions.</li>
+        <li><code>memcpy</code> is a safe way to type-pun bits (along with <code>::std::bit_cast</code>).</li>
+        <li>Always check <code>n != 0</code> before calling these functions.</li>
+        <li>Calling them with <code>nullptr</code> and non-zero size is undefined behavior.</li>
+        <li><code>memmove</code> is the safe version of <code>memcpy</code> for overlapping memory.</li>
+        <li><code>::fast_io::secure_clear</code> is the correct way to erase secrets.</li>
+        <li>See cppreference for null-terminated byte string functions.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/13.strictaliasing/" class="prev-button">← Ch5.13: Strict Aliasing Rule</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/15.pointerpitfalls/" class="next-button">Ch5.15: Common Pointer Pitfalls →</a>
+    </div>
+  </main>
+</body>
+</html>

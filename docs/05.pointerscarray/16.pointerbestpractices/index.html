@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.16: Pointer Best Practices - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.16: Pointer Best Practices</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        After learning how pointers work and the many pitfalls to avoid, this chapter
+        summarizes the best practices for using pointers safely and clearly in modern
+        C++.
+      </p>
+
+      <p>You will learn:</p>
+
+      <ul>
+        <li>how to initialize pointers correctly</li>
+        <li>how to use const-correctness</li>
+        <li>how to obtain addresses safely</li>
+        <li>how to extract raw pointers from iterators</li>
+        <li>how to type-pun safely</li>
+        <li>how to use memfunctions correctly</li>
+        <li>how to clear secrets securely</li>
+        <li>how to write clear, maintainable pointer code</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Always initialize pointers</h2>
+      <p>
+        A pointer should always be initialized to a valid object or to
+        <code>nullptr</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int x{42};
+int *p = ::std::addressof(x);   // ✔ good
+
+int *q{};                       // ✔ initialized to nullptr
+</code></pre>
+    </section>
+
+    <section>
+      <h2>2. Use T const* for read-only data</h2>
+      <p>
+        This follows the rule from Ch2.8: <strong><code>const</code> applies to the
+        left. Full stop.</strong>
+      </p>
+
+<pre><code class="language-cpp">
+char const *s = "Hello";   // ✔ correct for C-style strings
+</code></pre>
+
+      <p>
+        Const-correctness prevents accidental modification.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Use ::std::addressof instead of &</h2>
+      <p>
+        <code>&</code> can be overloaded. <code>::std::addressof</code> always returns
+        the true address of an object.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Use ::std::to_address for iterators</h2>
+      <p>
+        <code>::std::to_address</code> extracts a raw pointer from any iterator that
+        behaves like a pointer.
+      </p>
+
+<pre><code class="language-cpp">
+auto it = v.begin();
+int *p = ::std::to_address(it);   // ✔ universal pointer extraction
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Use memcpy or ::std::bit_cast for type punning</h2>
+      <p>
+        Never use <code>reinterpret_cast</code> for type punning. It violates strict
+        aliasing (Ch5.13).
+      </p>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+std::uint32_t u = ::std::bit_cast<std::uint32_t>(f);   // ✔ safe
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Use memmove when unsure about overlap</h2>
+      <p>
+        <code>memcpy</code> is undefined behavior for overlapping memory.  
+        <code>memmove</code> is always safe.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Always check size != 0 before memfunctions</h2>
+      <p>
+        Calling <code>memcpy</code>, <code>memmove</code>, <code>memcmp</code>, or
+        <code>memchr</code> with <code>nullptr</code> and non-zero size is undefined
+        behavior.
+      </p>
+
+<pre><code class="language-cpp">
+if (n != 0) {
+    ::std::memcpy(dst, src, n);
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>8. Use ::fast_io::secure_clear for secrets</h2>
+      <p>
+        <code>memset</code> may be optimized away.  
+        <code>::fast_io::secure_clear</code> guarantees that memory is actually erased.
+      </p>
+
+<pre><code class="language-cpp">
+char secret[32]{};
+::fast_io::secure_clear(secret, sizeof(secret));   // ✔ secure
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. Keep pointer arithmetic simple</h2>
+      <p>
+        Prefer indexing when possible. Avoid clever pointer tricks.
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Respect object lifetimes</h2>
+      <p>
+        A pointer does not extend the lifetime of the object it points to.
+      </p>
+    </section>
+
+    <section>
+      <h2>11. Avoid reinterpret_cast</h2>
+      <p>
+        It is almost always wrong.  
+        Use <code>memcpy</code> or <code>::std::bit_cast</code> instead.
+      </p>
+    </section>
+
+    <section>
+      <h2>12. Prefer higher-level abstractions when possible</h2>
+      <p>
+        Pointers are powerful but dangerous. Use them deliberately, not casually.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>Initialize pointers to valid objects or <code>nullptr</code>.</li>
+        <li>Use <code>T const*</code> for read-only data.</li>
+        <li>Use <code>::std::addressof</code> and <code>::std::to_address</code>.</li>
+        <li>Use <code>memcpy</code> or <code>::std::bit_cast</code> for type punning.</li>
+        <li>Use <code>memmove</code> when unsure about overlap.</li>
+        <li>Always check <code>size != 0</code> before memfunctions.</li>
+        <li>Use <code>::fast_io::secure_clear</code> to erase secrets.</li>
+        <li>Keep pointer arithmetic simple and respect lifetimes.</li>
+        <li>Avoid <code>reinterpret_cast</code>.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/15.pointerpitfalls/" class="prev-button">← Ch5.15: Common Pointer Pitfalls</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+    </div>
+  </main>
+</body>
+</html>

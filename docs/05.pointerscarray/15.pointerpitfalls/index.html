@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.15: Common Pointer Pitfalls - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.15: Common Pointer Pitfalls</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        Pointers are powerful but extremely easy to misuse. Many bugs in C++ programs
+        come from incorrect assumptions about pointer validity, lifetime, aliasing,
+        alignment, and arithmetic. This chapter collects the most common mistakes so
+        you can avoid them.
+      </p>
+
+      <p>You will learn:</p>
+
+      <ul>
+        <li>dangling pointers</li>
+        <li>null pointer misuse</li>
+        <li>off-by-one errors</li>
+        <li>misaligned pointers</li>
+        <li>strict aliasing violations</li>
+        <li>overlapping memory hazards</li>
+        <li>pointer arithmetic mistakes</li>
+        <li>lifetime issues</li>
+        <li>type punning mistakes</li>
+        <li>incorrect use of memfunctions</li>
+        <li>pointer comparison pitfalls</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Dangling pointers</h2>
+      <p>
+        A dangling pointer points to an object that no longer exists.
+      </p>
+
+<pre><code class="language-cpp">
+int const *p;
+
+{
+    int x{42};
+    p = ::std::addressof(x);
+} // x is destroyed here
+
+// *p;   // ❌ dangling pointer
+</code></pre>
+
+      <p>
+        A pointer is only valid as long as the object it points to is alive.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Null pointer misuse</h2>
+      <p>
+        Dereferencing <code>nullptr</code> is always undefined behavior.
+      </p>
+
+<pre><code class="language-cpp">
+int *p{nullptr};
+
+// *p = 10;   // ❌ undefined behavior
+</code></pre>
+
+      <p>
+        Also, passing <code>nullptr</code> to <code>memcpy</code>, <code>memmove</code>,
+        <code>memcmp</code>, or <code>memchr</code> with a non-zero size is undefined
+        behavior (see Ch5.14).
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Off-by-one errors</h2>
+      <p>
+        Pointer arithmetic moves in units of the pointed-to type.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{1,2,3};
+
+int *p = a;
+int *end = a + 3;   // one past the end (valid but not dereferenceable)
+
+// *end;   // ❌ undefined behavior
+</code></pre>
+
+      <p>
+        Only the range <code>[a, a + 3)</code> is valid for dereferencing.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Misaligned pointers</h2>
+      <p>
+        Some types require stricter alignment than others. Casting a pointer to a type
+        with stricter alignment requirements can cause undefined behavior.
+      </p>
+
+<pre><code class="language-cpp">
+unsigned char buffer[8]{};
+
+// int *p = reinterpret_cast<int*>(buffer + 1);   // ❌ misaligned
+</code></pre>
+
+      <p>
+        Misaligned access is not allowed for most types.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Strict aliasing violations</h2>
+      <p>
+        Accessing an object through a pointer of an unrelated type is undefined
+        behavior (see Ch5.13).
+      </p>
+
+<pre><code class="language-cpp">
+float f{1.0f};
+int *p = reinterpret_cast<int*>(::std::addressof(f));
+
+// *p;   // ❌ strict aliasing violation
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Overlapping memory hazards</h2>
+      <p>
+        Using <code>memcpy</code> on overlapping memory is undefined behavior.
+      </p>
+
+<pre><code class="language-cpp">
+// memcpy(dst, src, n);   // ❌ if ranges overlap
+</code></pre>
+
+      <p>
+        Use <code>memmove</code> when unsure.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Pointer arithmetic mistakes</h2>
+      <p>
+        Pointer arithmetic is in units of the pointed-to type, not bytes.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{1,2,3};
+
+int *p = a;
+int *q = p + 1;   // moves by sizeof(int) bytes
+</code></pre>
+
+      <p>
+        Also, <code>sizeof(pointer)</code> is not the size of the pointed-to object.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Lifetime issues</h2>
+      <p>
+        A pointer does not extend the lifetime of the object it points to.
+      </p>
+
+<pre><code class="language-cpp">
+int const *p;
+
+{
+    int x{10};
+    p = ::std::addressof(x);
+}
+
+// *p;   // ❌ x is gone
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. Type punning mistakes</h2>
+      <p>
+        Using <code>reinterpret_cast</code> for type punning is almost always undefined
+        behavior. Use <code>memcpy</code> or <code>::std::bit_cast</code> instead.
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Incorrect use of memfunctions</h2>
+      <p>
+        Common mistakes include:
+      </p>
+
+      <ul>
+        <li>forgetting to check <code>size != 0</code></li>
+        <li>passing <code>nullptr</code> with non-zero size</li>
+        <li>using <code>memcpy</code> on overlapping memory</li>
+        <li>using <code>memset</code> to clear secrets (may be optimized away)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>11. Pointer comparison pitfalls</h2>
+      <p>
+        Ordering comparisons (<code>&lt;</code>, <code>&gt;</code>) are only valid for
+        pointers into the same array.
+      </p>
+
+<pre><code class="language-cpp">
+// p < q;   // ❌ undefined behavior if p and q are unrelated
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A pointer is only valid while the object it points to is alive.</li>
+        <li>Never dereference <code>nullptr</code>.</li>
+        <li>Pointer arithmetic is easy to misuse.</li>
+        <li>Misalignment and strict aliasing violations cause undefined behavior.</li>
+        <li>Use <code>memmove</code> for overlapping memory.</li>
+        <li>Use <code>memcpy</code> or <code>::std::bit_cast</code> for type punning.</li>
+        <li>Use <code>::fast_io::secure_clear</code> to erase secrets.</li>
+        <li>Pointer comparisons are only valid within the same array.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/14.memfunctions/" class="prev-button">← Ch5.14: memfunctions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/16.pointerbestpractices/" class="next-button">Ch5.16: Best Practices →</a>
+    </div>
+  </main>
+</body>
+</html>

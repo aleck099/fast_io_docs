@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.8: C‑style Strings - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.8: C‑style Strings</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A C‑style string is a C‑style array of characters terminated by the special
+        character <code>'\0'</code> (the <strong>null terminator</strong>). This
+        convention originates from the C language and remains part of modern C++ for
+        compatibility.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what a C‑style string is</li>
+        <li>how null‑terminated character arrays work</li>
+        <li>string literals and why they are read‑only</li>
+        <li>why C‑style strings decay to pointers</li>
+        <li>why <code>char const*</code> should always be used for pointers to C‑style strings</li>
+        <li>why fast_io prints string literals but not pointers to them</li>
+        <li>how <code>strlen</code> and <code>strnlen</code> work</li>
+        <li>how fast_io provides manipulators for printing C‑style strings</li>
+        <li>how wide and Unicode C‑style strings work</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is a C‑style string?</h2>
+      <p>
+        A C‑style string is simply a C‑style array of <code>char</code> that ends with
+        <code>'\0'</code>.
+      </p>
+
+<pre><code class="language-cpp">
+char s[6]{'H', 'e', 'l', 'l', 'o', '\0'};
+</code></pre>
+
+      <p>Memory layout:</p>
+
+<pre><code class="language-text">
+Address:   2000  2001  2002  2003  2004  2005
+Memory:    [ H ][ e ][ l ][ l ][ o ][ \0 ]
+</code></pre>
+    </section>
+
+    <section>
+      <h2>2. Why C‑style strings must end with '\0'</h2>
+      <p>
+        C‑style strings do not store their length.  
+        Instead, code that processes them scans characters until it finds <code>'\0'</code>.
+      </p>
+
+      <p>If the null terminator is missing:</p>
+
+      <ul>
+        <li>the program reads past the end of the array</li>
+        <li>this is undefined behavior</li>
+        <li>the program may crash or read garbage memory</li>
+      </ul>
+
+<pre><code class="language-cpp">
+char bad[5]{'H', 'e', 'l', 'l', 'o'};  // ❌ no '\0'
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. String literals</h2>
+      <p>
+        A string literal such as <code>"Hello"</code> is stored as a
+        <strong>constant C‑style array of char</strong> with a null terminator.
+      </p>
+
+<pre><code class="language-cpp">
+char const *p = "Hello";
+</code></pre>
+
+      <p>Memory layout:</p>
+
+<pre><code class="language-text">
+"Hello" → [ H ][ e ][ l ][ l ][ o ][ \0 ]
+</code></pre>
+
+      <p>Important rules:</p>
+
+      <ul>
+        <li>string literals have static storage duration</li>
+        <li>string literals are read‑only</li>
+        <li>writing to a string literal is undefined behavior</li>
+      </ul>
+
+<pre><code class="language-cpp">
+// char *p = "Hello";   // allowed to compile, but dangerous
+// p[0] = 'h';          // ❌ undefined behavior
+</code></pre>
+
+      <p>
+        Always write <strong><code>char const*</code></strong> for pointers to C‑style strings.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. C‑style strings are C‑style arrays</h2>
+      <p>
+        A C‑style string is just a C‑style array of <code>char</code>.  
+        Therefore, all rules from previous chapters apply:
+      </p>
+
+      <ul>
+        <li>arrays are contiguous</li>
+        <li>arrays decay to pointers</li>
+        <li>pointer arithmetic works on characters</li>
+        <li>out‑of‑bounds access is undefined behavior</li>
+      </ul>
+
+<pre><code class="language-cpp">
+char s[6]{"Hello"};
+
+char const *p = s;   // decay
+char const *q = p + 1; // points to 'e'
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Why fast_io prints string literals but not pointers to them</h2>
+      <p>
+        A string literal is fundamentally a <strong>C‑style array</strong>.  
+        fast_io recognizes C‑style arrays of characters and prints them as strings.
+      </p>
+
+<pre><code class="language-cpp">
+print("hello world\n");   // ✔ works
+</code></pre>
+
+      <p>
+        However, once the array decays to a pointer, fast_io cannot know whether the
+        pointer refers to a valid C‑style string.  
+        It refuses to print raw pointers directly.
+      </p>
+
+<pre><code class="language-cpp">
+char const *ptr = "hello world\n";
+
+// print(ptr);   // ❌ does NOT work
+</code></pre>
+
+      <p>
+        fast_io must assume:
+      </p>
+
+      <ul>
+        <li>a C‑style array of matching <code>char_type</code> is a string literal</li>
+        <li>a pointer is <strong>not</strong> automatically a C‑style string</li>
+      </ul>
+
+      <p>
+        This is why:
+      </p>
+
+<pre><code class="language-text">
+print("hello");     ✔ works (array)
+print(ptr);         ❌ does not work (pointer)
+</code></pre>
+
+      <p>
+        To print a pointer as a C‑style string, use:
+      </p>
+
+<pre><code class="language-cpp">
+println(os_c_str(ptr));
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. strlen and strnlen</h2>
+      <p>
+        <code>strlen</code> computes the length of a C‑style string by scanning until
+        <code>'\0'</code>.
+      </p>
+
+<pre><code class="language-cpp">
+char s[6]{"Hello"};
+
+std::size_t n = strlen(s);   // returns 5
+</code></pre>
+
+      <p>
+        <strong>Important:</strong>  
+        <code>strlen</code> assumes the string is properly null‑terminated.  
+        If <code>'\0'</code> is missing, it will read past the end → undefined behavior.
+      </p>
+
+      <h3>strnlen</h3>
+      <p>
+        <code>strnlen</code> is similar but stops after a maximum number of characters.
+      </p>
+
+<pre><code class="language-cpp">
+std::size_t n = strnlen(s, 6);   // safe upper bound
+</code></pre>
+
+      <p>
+        <code>strnlen</code> is safer because it prevents scanning unbounded memory.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. fast_io manipulators for C‑style strings</h2>
+      <p>
+        fast_io provides manipulators for printing pointers and C‑style strings.
+      </p>
+
+      <h3>pointervw(ptr)</h3>
+      <p>Prints a pointer value as an address.</p>
+
+<pre><code class="language-cpp">
+char const *p = "Hello";
+println(pointervw(p));   // prints address of p
+</code></pre>
+
+      <h3>os_c_str(ptr)</h3>
+      <p>Prints a null‑terminated C‑style string.</p>
+
+<pre><code class="language-cpp">
+println(os_c_str(p));    // prints "Hello"
+</code></pre>
+
+      <h3>os_c_str(ptr, n)</h3>
+      <p>Prints a C‑style string but stops after at most <code>n</code> characters.</p>
+
+<pre><code class="language-cpp">
+println(os_c_str(p, 3));   // prints "Hel"
+</code></pre>
+    </section>
+
+    <section>
+      <h2>8. Wide and Unicode C‑style strings</h2>
+      <p>
+        C++ supports several character types, each with its own C‑style string form:
+      </p>
+
+      <ul>
+        <li><code>char</code> — narrow string</li>
+        <li><code>wchar_t</code> — wide string</li>
+        <li><code>char8_t</code> — UTF‑8 code units</li>
+        <li><code>char16_t</code> — UTF‑16 code units</li>
+        <li><code>char32_t</code> — UTF‑32 code units</li>
+      </ul>
+
+      <p>Each uses its own null terminator:</p>
+
+      <ul>
+        <li><code>char</code> → <code>'\0'</code></li>
+        <li><code>wchar_t</code> → <code>L'\0'</code></li>
+        <li><code>char8_t</code> → <code>u8'\0'</code></li>
+        <li><code>char16_t</code> → <code>u'\0'</code></li>
+        <li><code>char32_t</code> → <code>U'\0'</code></li>
+      </ul>
+
+<pre><code class="language-cpp">
+wchar_t  ws[]{L"Hello"};
+char16_t u16s[]{u"Hello"};
+char32_t u32s[]{U"Hello"};
+char8_t  u8s[]{u8"Hello"};
+</code></pre>
+
+      <p>
+        All of them follow the same rules:
+      </p>
+
+      <ul>
+        <li>they are C‑style arrays</li>
+        <li>they decay to pointers</li>
+        <li>they must end with a null terminator</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A C‑style string is a C‑style array of characters ending with <code>'\0'</code>.</li>
+        <li>String literals are constant arrays and cannot be modified.</li>
+        <li>Always write <strong><code>char const*</code></strong> for pointers to C‑style strings.</li>
+        <li>C‑style strings decay to pointers in expressions.</li>
+        <li><code>strlen</code> scans until <code>'\0'</code> and is unsafe if the terminator is missing.</li>
+        <li><code>strnlen</code> adds a maximum bound and is safer.</li>
+        <li>fast_io prints C‑style arrays but not pointers unless you use <code>os_c_str</code>.</li>
+        <li>fast_io provides <code>pointervw</code>, <code>os_c_str</code>, and <code>os_c_str(ptr,n)</code>.</li>
+        <li>Wide and Unicode C‑style strings follow the same rules but use different character types.</li>
+        <li>C‑style strings are error‑prone because they do not store their length.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/07.arraydecay/" class="prev-button">← Ch5.7: C‑style Array Decay</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/09.multidim/" class="next-button">Ch5.9: Multi‑dimensional C‑style Arrays →</a>
+    </div>
+  </main>
+</body>
+</html>

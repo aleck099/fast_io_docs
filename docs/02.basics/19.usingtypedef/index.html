@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.19: using and typedef - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.19: using and typedef</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        C++ lets you create <strong>type aliases</strong>: new names for existing types.
+        Historically this was done with <code>typedef</code>. Modern C++ prefers
+        <code>using</code>, which has clearer syntax and avoids many readability issues.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>how <code>typedef</code> works</li>
+        <li>how <code>using</code> works</li>
+        <li>why <code>using</code> is usually better</li>
+        <li>best practices for naming and using type aliases</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is a type alias?</h2>
+      <p>
+        A type alias is simply another name for an existing type. It does not create a
+        new type — it only creates a new name.
+      </p>
+
+<pre><code class="language-cpp">
+int x{42};
+int y{0};   // same type as x
+</code></pre>
+
+      <p>
+        Type aliases are useful when a type is long, repetitive, or used frequently.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. typedef — the old way</h2>
+      <p>
+        <code>typedef</code> is the classic C-style way to create a type alias.
+      </p>
+
+<pre><code class="language-cpp">
+typedef int my_int;
+
+my_int x{42};   // x is an int
+</code></pre>
+
+      <p>
+        The syntax is:
+      </p>
+
+<pre><code class="language-text">
+typedef existing-type new-name;
+</code></pre>
+
+      <p>
+        This works, but becomes confusing with more complex types.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. typedef with references</h2>
+      <p>
+        <code>typedef</code> can also alias reference types.
+      </p>
+
+<pre><code class="language-cpp">
+typedef int& int_ref;
+
+int value{42};
+int_ref r = value;   // r is an int&
+</code></pre>
+
+      <p>
+        The alias <code>int_ref</code> behaves exactly like <code>int&</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. using — the modern way</h2>
+      <p>
+        Modern C++ introduces <code>using</code> for type aliases. Its syntax is clearer:
+      </p>
+
+<pre><code class="language-text">
+using new-name = existing-type;
+</code></pre>
+
+      <p>Example:</p>
+
+<pre><code class="language-cpp">
+using my_int = int;
+
+my_int x{42};   // x is an int
+</code></pre>
+
+      <p>
+        The new name appears on the left, the existing type on the right — similar to
+        assignment. This makes <code>using</code> easier to read.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. using with references</h2>
+      <p>
+        Reference aliases are also clearer with <code>using</code>.
+      </p>
+
+<pre><code class="language-cpp">
+using int_ref = int&;
+
+int value{42};
+int_ref r = value;   // r is an int&
+</code></pre>
+
+      <p>
+        The <code>&</code> clearly belongs to the type on the right-hand side.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Why using is preferred</h2>
+      <p>
+        In modern C++:
+      </p>
+
+      <ul>
+        <li><code>using</code> has clearer, assignment-like syntax</li>
+        <li><code>using</code> avoids the confusing syntax of <code>typedef</code></li>
+        <li><code>using</code> is easier to read and maintain</li>
+      </ul>
+
+      <p>
+        For new code, you should always prefer <code>using</code> over
+        <code>typedef</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Best practices</h2>
+      <ul>
+        <li>use <code>using</code> for all new type aliases</li>
+        <li>only use <code>typedef</code> when reading or maintaining old code</li>
+        <li>choose clear, descriptive alias names</li>
+        <li>avoid hiding reference types in aliases when teaching beginners</li>
+        <li>remember that an alias does <strong>not</strong> create a new type</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A type alias is just a new name for an existing type.</li>
+        <li><code>typedef</code> is the old C-style alias syntax.</li>
+        <li><code>using</code> is the modern, clearer alias syntax.</li>
+        <li>Prefer <code>using</code> for all new code.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/18.endian/" class="prev-button">← Ch2.18: endian</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/02.basics/20.byte/" class="next-button">Ch2.20: ::std::byte →</a>
+    </div>
+  </main>
+</body>
+</html>

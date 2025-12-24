@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.6: Pointer Arithmetic - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.6: Pointer Arithmetic</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        Pointer arithmetic means adding or subtracting an integer from a pointer.
+        This moves the pointer forward or backward by a number of <strong>elements</strong>,
+        not bytes. Pointer arithmetic only makes sense when applied to pointers that
+        refer to elements of the <strong>same C‑style array</strong>.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how pointer arithmetic works</li>
+        <li>why pointer arithmetic moves by elements, not bytes</li>
+        <li>how pointer subtraction works</li>
+        <li>why pointer arithmetic is only valid within the same array</li>
+        <li>why out‑of‑bounds arithmetic is undefined behavior</li>
+        <li>why undefined behavior does <em>not</em> guarantee a crash</li>
+        <li>that pointers are the iterators of C‑style arrays</li>
+        <li>how to use <code>::std::ranges::begin(a)</code> and <code>::std::ranges::end(a)</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Pointer arithmetic moves by elements, not bytes</h2>
+      <p>
+        When you add <code>1</code> to a pointer, it moves to the next element of its type.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = ::std::addressof(a[0]);
+int *q = p + 1;   // moves to a[1]
+</code></pre>
+
+<pre><code class="language-text">
+Example addresses:
+
+a[0] at 1000
+a[1] at 1004
+a[2] at 1008
+
+p = 1000
+p + 1 = 1004   ← moved by sizeof(int)
+</code></pre>
+
+      <p>
+        Pointer arithmetic automatically multiplies by <code>sizeof(T)</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Subtracting pointers</h2>
+      <p>
+        Subtracting two pointers to elements of the <strong>same array</strong> gives the
+        number of elements between them.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = ::std::addressof(a[0]);
+int *q = ::std::addressof(a[2]);
+
+::std::ptrdiff_t diff = q - p;   // diff == 2
+</code></pre>
+
+      <p>
+        The result is measured in <strong>elements</strong>, not bytes.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Pointer arithmetic only works inside the same array</h2>
+      <p>
+        Pointer arithmetic is only valid when the pointer points:
+      </p>
+
+      <ul>
+        <li>to an element of an array, or</li>
+        <li>to <em>one past</em> the last element</li>
+      </ul>
+
+      <p>
+        Anything else is <strong>undefined behavior</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int x{5};
+int *p = ::std::addressof(x);
+
+// p + 1;   // undefined behavior — not part of an array
+</code></pre>
+    </section>
+
+    <section>
+      <h2>4. One‑past‑the‑end pointer</h2>
+      <p>
+        C++ allows a pointer to point <em>one past</em> the last element of an array.
+        But you must never dereference it.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *first = ::std::addressof(a[0]);
+int *end   = first + 3;   // one past the end (valid)
+</code></pre>
+
+<pre><code class="language-cpp">
+// *end;   // undefined behavior — cannot dereference
+</code></pre>
+
+      <p>
+        This pointer exists only so you can compare it or move backwards.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Dereferencing out‑of‑bounds pointers is undefined behavior</h2>
+      <p>
+        Pointer arithmetic that produces an out‑of‑bounds pointer is undefined behavior.
+        Dereferencing such a pointer is also undefined behavior.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = ::std::addressof(a[0]);
+
+int *bad = p + 10;   // undefined behavior — out of bounds
+// *bad;             // undefined behavior
+</code></pre>
+
+      <p>
+        Undefined behavior means:
+      </p>
+
+      <ul>
+        <li>the program might crash</li>
+        <li>or corrupt memory</li>
+        <li>or silently produce wrong results</li>
+        <li>or appear to work</li>
+      </ul>
+
+      <p>
+        You cannot rely on any specific outcome.
+      </p>
+
+      <h3>WebAssembly note</h3>
+      <p>
+        On WebAssembly without memory tagging, out‑of‑bounds pointer arithmetic often
+        <strong>does not trap</strong>, making bugs harder to detect.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Undefined behavior does NOT guarantee a crash</h2>
+      <p>
+        Many beginners assume that invalid pointer arithmetic will crash immediately.
+        This is <strong>false</strong>.
+      </p>
+
+      <p>
+        Compilers may assume:
+      </p>
+
+      <ul>
+        <li>pointers always point to valid objects</li>
+        <li>pointer arithmetic stays within array bounds</li>
+      </ul>
+
+      <p>
+        This can cause the compiler to optimize away checks or reorder code in ways
+        that make debugging extremely difficult.
+      </p>
+
+      <p>
+        Undefined behavior is dangerous precisely because it is unpredictable.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Pointers are the iterators of C‑style arrays</h2>
+      <p>
+        In modern C++, pointers are considered the <strong>highest‑level iterators</strong>.
+        They satisfy all iterator requirements and are used as the iterators for
+        C‑style arrays.
+      </p>
+
+      <p>
+        For an array <code>a</code>, the iterators are simply:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *first = ::std::addressof(a[0]);
+int *last  = first + 3;   // one past the end
+</code></pre>
+
+      <p>
+        These pointers behave exactly like iterators in the C++ ranges library.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Using ::std::ranges::begin(a) and ::std::ranges::end(a)</h2>
+      <p>
+        Modern C++ provides a uniform way to obtain iterators for arrays:
+      </p>
+
+<pre><code class="language-cpp">
+#include <ranges>
+
+int a[3]{10, 20, 30};
+
+int *first = ::std::ranges::begin(a);
+int *last  = ::std::ranges::end(a);
+</code></pre>
+
+      <p>
+        These functions return:
+      </p>
+
+      <ul>
+        <li><code>::std::addressof(a[0])</code> for <code>begin(a)</code></li>
+        <li><code>::std::addressof(a[0]) + 3</code> for <code>end(a)</code></li>
+      </ul>
+
+      <p>
+        This is the preferred modern way to obtain iterators for C‑style arrays.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>Pointer arithmetic moves by <strong>elements</strong>, not bytes.</li>
+        <li>Pointer subtraction gives the number of elements between pointers.</li>
+        <li>Pointer arithmetic is only valid within the same array.</li>
+        <li>You may form a pointer one past the end, but you must never dereference it.</li>
+        <li><strong>Out‑of‑bounds pointer arithmetic is undefined behavior.</strong></li>
+        <li><strong>Dereferencing out‑of‑bounds pointers is undefined behavior.</strong></li>
+        <li>Undefined behavior does NOT guarantee a crash.</li>
+        <li>WebAssembly without memory tagging will not trap on invalid pointer arithmetic.</li>
+        <li>Pointers are the highest‑level iterators in C++.</li>
+        <li>Pointers are the iterators of C‑style arrays.</li>
+        <li>Use <code>::std::ranges::begin(a)</code> and <code>::std::ranges::end(a)</code> to obtain array iterators.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/05.cstylearray/" class="prev-button">← Ch5.5: C‑style Arrays</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/07.carraydecay/" class="next-button">Ch5.7: C-style Array Decay →</a>
+    </div>
+  </main>
+</body>
+</html>

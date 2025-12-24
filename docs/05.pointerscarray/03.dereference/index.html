@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.3: Dereferencing - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.3: Dereferencing</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A pointer stores an <strong>address</strong>. Dereferencing means:
+        <strong>use the pointer to access the object at that address</strong>.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how to dereference a pointer using <code>*p</code></li>
+        <li>how to read and write through a pointer</li>
+        <li>how to dereference pointer-to-pointer</li>
+        <li>why dereferencing invalid pointers is a serious memory‑safety vulnerability</li>
+        <li>how to detect invalid dereferences using sanitizers</li>
+        <li>how to visualize dereferencing with pseudo‑graphs</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What does dereferencing mean?</h2>
+      <p>
+        If a pointer stores an address, dereferencing means “go to that address and
+        access the object stored there”.
+      </p>
+
+<pre><code class="language-text">
+value:
+Address:   3000
+Memory:   [ 42 ]
+
+p:
+Address:   4000
+Memory:   [ 3000 ]   ← p stores address of value
+</code></pre>
+
+<pre><code class="language-cpp">
+#include <memory>
+
+int value{42};
+int *p = ::std::addressof(value);
+
+int x = *p;   // x becomes 42
+</code></pre>
+    </section>
+
+    <section>
+      <h2>2. Reading through a pointer</h2>
+      <p>
+        Dereferencing lets you read the value stored at the pointer’s address.
+      </p>
+
+<pre><code class="language-cpp">
+int n{100};
+int *p = ::std::addressof(n);
+
+int copy = *p;   // copy becomes 100
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Writing through a pointer</h2>
+      <p>
+        Dereferencing also lets you modify the object the pointer refers to.
+      </p>
+
+<pre><code class="language-cpp">
+int n{5};
+int *p = ::std::addressof(n);
+
+*p = 20;   // changes n to 20
+</code></pre>
+    </section>
+
+    <section>
+      <h2>4. Dereferencing pointer-to-pointer</h2>
+      <p>
+        If you have a pointer-to-pointer, you can dereference it twice.
+      </p>
+
+<pre><code class="language-cpp">
+int value{7};
+int *p = ::std::addressof(value);
+int **pp = ::std::addressof(p);
+
+int x = **pp;   // x becomes 7
+</code></pre>
+
+<pre><code class="language-text">
+value:
+Address:   3000
+Memory:   [ 7 ]
+
+p:
+Address:   4000
+Memory:   [ 3000 ]
+
+pp:
+Address:   5000
+Memory:   [ 4000 ]
+
+**pp → *p → value → 7
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Dereferencing nullptr is undefined behavior</h2>
+      <p>
+        A pointer must point to a valid object before you dereference it.
+        Dereferencing <code>nullptr</code> is <strong>undefined behavior</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int *p = nullptr;
+
+// *p = 10;   // undefined behavior — never do this
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Dereferencing invalid pointers is a serious memory‑safety vulnerability</h2>
+      <p>
+        Dereferencing an invalid pointer is not just a bug — it is a
+        <strong>serious memory‑safety vulnerability</strong>. It can lead to:
+      </p>
+
+      <ul>
+        <li>memory corruption</li>
+        <li>data leaks</li>
+        <li>crashes</li>
+        <li>security exploits</li>
+      </ul>
+
+      <p>
+        A pointer is <strong>invalid</strong> if it is:
+      </p>
+
+      <ul>
+        <li><strong>null</strong> (<code>nullptr</code>)</li>
+        <li><strong>uninitialized</strong></li>
+        <li><strong>dangling</strong> (object no longer exists)</li>
+        <li><strong>forged</strong> (manually assigned an arbitrary number)</li>
+        <li><strong>out of bounds</strong></li>
+      </ul>
+
+      <h3>Examples</h3>
+
+<pre><code class="language-cpp">
+// 1. Null pointer
+int *p = nullptr;
+// *p = 10;   // undefined behavior
+
+// 2. Uninitialized pointer
+int *q;
+// *q = 10;   // undefined behavior
+
+// 3. Dangling pointer
+int *r = nullptr;
+{
+    int x{5};
+    r = ::std::addressof(x);
+} // x is destroyed here
+// *r = 10;   // undefined behavior
+
+// 4. Forged pointer
+int *s = reinterpret_cast<int *>(12345);
+// *s = 10;   // undefined behavior
+</code></pre>
+
+      <p>
+        <strong>Rule:</strong>  
+        Only dereference a pointer if you are absolutely certain it points to a valid, alive object.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Use sanitizers to detect invalid dereferences</h2>
+      <p>
+        Modern compilers provide tools that detect invalid pointer dereferences at runtime.
+        You should always enable them during development.
+      </p>
+
+      <h3>AddressSanitizer</h3>
+<pre><code class="language-text">
+-fsanitize=address
+</code></pre>
+
+      <p>
+        Detects:
+      </p>
+
+      <ul>
+        <li>null dereferences</li>
+        <li>use‑after‑free</li>
+        <li>out‑of‑bounds accesses</li>
+        <li>stack and heap buffer overflows</li>
+      </ul>
+
+      <h3>Memory Tagging (WebAssembly)</h3>
+<pre><code class="language-text">
+-fsanitize=memtag
+</code></pre>
+
+      <p>
+        Detects:
+      </p>
+
+      <ul>
+        <li>dangling pointer dereferences</li>
+        <li>incorrect pointer arithmetic</li>
+        <li>invalid memory accesses</li>
+      </ul>
+
+      <p>
+        These tools make pointer bugs easier to find and fix.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Printing dereferenced values</h2>
+      <p>
+        You can print the value obtained by dereferencing just like any other value.
+      </p>
+
+<pre><code class="language-cpp">
+#include <fast_io.h>
+#include <memory>
+
+int n{55};
+int *p = ::std::addressof(n);
+
+println(*p);   // prints 55
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>*p</code> means “the object pointed to by <code>p</code>”.</li>
+        <li>You can read and write through a pointer.</li>
+        <li>Pointer-to-pointer types can be dereferenced multiple times.</li>
+        <li><strong>Dereferencing nullptr is undefined behavior.</strong></li>
+        <li><strong>Dereferencing uninitialized, dangling, forged, or out‑of‑bounds pointers is undefined behavior.</strong></li>
+        <li><strong>Invalid dereferences are serious memory‑safety vulnerabilities.</strong></li>
+        <li>Use <code>-fsanitize=address</code> or <code>-fsanitize=memtag</code> to detect invalid dereferences.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/02.pointerbasics/" class="prev-button">← Ch5.2: Pointer Basics</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/04.nullptr/" class="next-button">Ch5.4: nullptr →</a>
+    </div>
+  </main>
+</body>
+</html>

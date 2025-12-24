@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.12: Pointers with vector, array, and string - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.12: Pointers with vector, array, and string</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        Modern C++ containers provide safe, convenient abstractions over raw memory.
+        However, the three major contiguous containers —
+        <code>::fast_io::vector</code>, <code>::fast_io::array</code>, and
+        <code>::fast_io::string</code> — all expose raw pointers when needed.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>how pointers interact with <code>::fast_io::vector</code></li>
+        <li>how pointers interact with <code>::fast_io::array</code></li>
+        <li>how pointers interact with <code>::fast_io::string</code></li>
+        <li>what <code>.data()</code> returns</li>
+        <li>what <code>.c_str()</code> returns</li>
+        <li>why these containers guarantee contiguous storage</li>
+        <li>how pointer arithmetic works with container storage</li>
+        <li>how <code>::std::to_address</code> extracts raw pointers from iterators</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. ::fast_io::vector and pointers</h2>
+      <p>
+        <code>::fast_io::vector&lt;T&gt;</code> stores its elements in a contiguous block
+        of memory. This means:
+      </p>
+
+      <ul>
+        <li>the elements are laid out like a C‑style array</li>
+        <li>pointer arithmetic works exactly as with C‑style arrays</li>
+        <li><code>v.data()</code> returns a pointer to the first element</li>
+      </ul>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1, 2, 3, 4};
+
+int *p = v.data();   // pointer to v[0]
+int *q = p + 2;      // points to v[2]
+</code></pre>
+
+      <p>
+        Because the memory is contiguous, <code>p + n</code> is valid as long as
+        <code>n</code> stays within the vector’s size.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. ::fast_io::array and pointers</h2>
+      <p>
+        <code>::fast_io::array&lt;T, N&gt;</code> is a fixed‑size container that behaves
+        like a safer C‑style array.
+      </p>
+
+      <p>It provides:</p>
+
+      <ul>
+        <li>contiguous storage</li>
+        <li><strong>bounds‑checked</strong> <code>[]</code> access</li>
+        <li><code>index_unchecked()</code> for intentionally unchecked access</li>
+        <li><code>.data()</code> returning a pointer to the first element</li>
+      </ul>
+
+<pre><code class="language-cpp">
+::fast_io::array<int, 3> a{10, 20, 30};
+
+int *p = a.data();   // pointer to a[0]
+int *q = p + 1;      // points to a[1]
+</code></pre>
+
+      <p>
+        Unlike C‑style arrays, <code>::fast_io::array</code> allows size 0.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. ::fast_io::string and pointers</h2>
+      <p>
+        <code>::fast_io::string</code> stores characters in a contiguous block of memory.
+        This means:
+      </p>
+
+      <ul>
+        <li><code>s.data()</code> returns a pointer to the first character</li>
+        <li><code>s.c_str()</code> returns a <strong>null‑terminated</strong> pointer</li>
+        <li>pointer arithmetic works exactly like with <code>char[]</code></li>
+      </ul>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello"};
+
+char *p = s.data();        // pointer to 'H'
+char const *q = s.c_str(); // pointer to 'H', null-terminated
+</code></pre>
+
+      <p>
+        <strong>Important:</strong>  
+        <code>s.data()</code> may not be null‑terminated.  
+        <code>s.c_str()</code> is always null‑terminated.
+      </p>
+
+      <p>
+        Always write <strong><code>char const*</code></strong> for pointers to C‑style strings.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Contiguous storage guarantees</h2>
+      <p>
+        All three containers guarantee that their elements are stored contiguously:
+      </p>
+
+      <ul>
+        <li><code>::fast_io::vector</code></li>
+        <li><code>::fast_io::array</code></li>
+        <li><code>::fast_io::string</code></li>
+      </ul>
+
+      <p>
+        This means pointer arithmetic is valid as long as you stay within bounds.
+      </p>
+
+<pre><code class="language-cpp">
+int *p = v.data();
+int *end = p + v.size();   // one past the end
+</code></pre>
+
+      <p>
+        This is identical to how C‑style arrays behave.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Containers do not decay</h2>
+      <p>
+        C‑style arrays decay automatically in most expressions.  
+        Containers do <strong>not</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{1,2,3};
+int *p = a;   // decay
+</code></pre>
+
+      <p>
+        But:
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1,2,3};
+
+// int *p = v;   // ❌ does not compile
+</code></pre>
+
+      <p>
+        You must explicitly request a pointer using <code>.data()</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Pointer arithmetic with container storage</h2>
+      <p>
+        Once you obtain a pointer from <code>.data()</code>, pointer arithmetic works
+        exactly as with C‑style arrays.
+      </p>
+
+<pre><code class="language-cpp">
+int *p = a.data();
+int *q = p + 2;   // points to a[2]
+</code></pre>
+
+      <p>
+        The same applies to <code>::fast_io::string</code>:
+      </p>
+
+<pre><code class="language-cpp">
+char *p = s.data();
+char *q = p + 4;   // points to 'o'
+</code></pre>
+
+      <p>
+        As always, going out of bounds is undefined behavior.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. ::std::to_address and container iterators</h2>
+      <p>
+        <code>::std::to_address</code> is the universal way to obtain a raw pointer from
+        anything that behaves like a pointer.  
+        It works on:
+      </p>
+
+      <ul>
+        <li>raw pointers</li>
+        <li>container iterators</li>
+        <li>pointer-like objects</li>
+      </ul>
+
+      <p>
+        This is important because container iterators are <strong>not</strong> raw pointers,
+        even though they behave like them.
+      </p>
+
+      <h3>Example: ::fast_io::vector</h3>
+
+<pre><code class="language-cpp">
+auto it = v.begin();          // iterator
+int *p = ::std::to_address(it);  // extract raw pointer
+</code></pre>
+
+      <h3>Example: ::fast_io::array</h3>
+
+<pre><code class="language-cpp">
+auto it = a.begin();
+int *p = ::std::to_address(it);  // pointer to a[0]
+</code></pre>
+
+      <h3>Example: ::fast_io::string</h3>
+
+<pre><code class="language-cpp">
+auto it = s.begin();
+char *p = ::std::to_address(it);  // pointer to 'H'
+</code></pre>
+
+      <p>
+        <code>::std::to_address</code> is the modern, standard‑approved way to extract a
+        raw pointer from an iterator.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Summary table</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Container</th>
+            <th>Contiguous?</th>
+            <th>Pointer from .data()</th>
+            <th>Null-terminated?</th>
+            <th>Decay?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>::fast_io::vector&lt;T&gt;</code></td>
+            <td>✔ yes</td>
+            <td><code>T*</code></td>
+            <td>❌ no</td>
+            <td>❌ no</td>
+          </tr>
+          <tr>
+            <td><code>::fast_io::array&lt;T,N&gt;</code></td>
+            <td>✔ yes</td>
+            <td><code>T*</code></td>
+            <td>❌ no</td>
+            <td>❌ no</td>
+          </tr>
+          <tr>
+            <td><code>::fast_io::string</code></td>
+            <td>✔ yes</td>
+            <td><code>char*</code></td>
+            <td>✔ via <code>.c_str()</code></td>
+            <td>❌ no</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>::fast_io::vector</code>, <code>::fast_io::array</code>, and <code>::fast_io::string</code> all provide contiguous storage.</li>
+        <li><code>.data()</code> returns a pointer to the first element.</li>
+        <li><code>.c_str()</code> returns a null‑terminated pointer for <code>::fast_io::string</code>.</li>
+        <li>Containers do not decay; you must call <code>.data()</code>.</li>
+        <li>Pointer arithmetic works on container storage exactly like C‑style arrays.</li>
+        <li><code>::std::to_address</code> extracts raw pointers from iterators.</li>
+        <li>Always write <strong><code>char const*</code></strong> for pointers to C‑style strings.</li>
+        <li>Out‑of‑bounds pointer arithmetic is undefined behavior.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/11.voidpointer/" class="prev-button">← Ch5.11: void*</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/13.strictaliasing/" class="next-button">Ch5.13: Strict Aliasing Rule →</a>
+    </div>
+  </main>
+</body>
+</html>

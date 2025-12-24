@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.5: C‑style Arrays - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.5: C‑style Arrays</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A C‑style array is a fixed‑size sequence of elements stored in one
+        <strong>contiguous</strong> block of memory. Arrays are the foundation for
+        pointer arithmetic, array decay, and C‑style strings, so it is essential to
+        understand how they behave in memory.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how to declare and initialize C‑style arrays</li>
+        <li>how arrays are laid out in memory</li>
+        <li>how to access elements safely</li>
+        <li>why out‑of‑bounds access is undefined behavior</li>
+        <li>why <code>::fast_io::array</code> and <code>::fast_io::vector</code> are safer choices</li>
+        <li>why arrays and pointers are related but not the same</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Declaring a C‑style array</h2>
+      <p>
+        A C‑style array is declared by specifying the element type and the number of elements:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3];     // array of 3 ints
+char b[10];   // array of 10 chars
+double c[4];  // array of 4 doubles
+</code></pre>
+
+      <p>
+        The size must be known at compile time, and it must be <strong>greater than 0</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+// int a[0];   // error: C-style arrays cannot have size 0
+</code></pre>
+    </section>
+
+    <section>
+      <h2>2. Initializing arrays</h2>
+      <p>
+        You can initialize arrays using brace‑initialization:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+</code></pre>
+
+      <p>
+        If you provide fewer elements, the rest are zero‑initialized:
+      </p>
+
+<pre><code class="language-cpp">
+int a[5]{1, 2};   // becomes {1, 2, 0, 0, 0}
+</code></pre>
+
+      <p>
+        If you omit the size, the compiler deduces it:
+      </p>
+
+<pre><code class="language-cpp">
+int a[]{10, 20, 30};   // size is 3
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Arrays are contiguous in memory</h2>
+      <p>
+        All elements of an array are stored next to each other in memory.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+</code></pre>
+
+<pre><code class="language-text">
+Example memory layout (addresses vary):
+
+Address:   1000   1004   1008
+Memory:   [ 10 ] [ 20 ] [ 30 ]
+             ↑      ↑      ↑
+            a[0]  a[1]   a[2]
+</code></pre>
+
+      <p>
+        This contiguity is what makes pointer arithmetic possible (covered in Ch5.6).
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Accessing array elements</h2>
+      <p>
+        You access elements using the <code>[]</code> operator:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int x = a[0];   // 10
+int y = a[2];   // 30
+
+a[1] = 99;      // a becomes {10, 99, 30}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Out‑of‑bounds access is undefined behavior</h2>
+      <p>
+        C‑style arrays do <strong>not</strong> perform bounds checking.  
+        Accessing outside the array is <strong>undefined behavior</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+// a[3];    // undefined behavior — out of bounds
+// a[-1];   // undefined behavior
+</code></pre>
+
+      <p>
+        Undefined behavior means:
+      </p>
+
+      <ul>
+        <li>the program might crash</li>
+        <li>or corrupt memory</li>
+        <li>or silently produce wrong results</li>
+        <li>or appear to work</li>
+      </ul>
+
+      <p>
+        You cannot rely on any specific outcome.
+      </p>
+
+      <h3>WebAssembly note</h3>
+      <p>
+        On WebAssembly without memory tagging, out‑of‑bounds array access often
+        <strong>does not trap</strong>, making bugs harder to detect.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. fast_io::array vs C‑style arrays</h2>
+      <p>
+        <code>::fast_io::array</code> is a safer and more flexible alternative to C‑style arrays.
+      </p>
+
+      <ul>
+        <li>It performs <strong>bounds checking</strong> for <code>[]</code> access.</li>
+        <li>It <strong>allows zero‑sized arrays</strong>, which C‑style arrays do not.</li>
+      </ul>
+
+<pre><code class="language-cpp">
+#include <fast_io_dsal/array.h>
+
+::fast_io::array<int, 0> empty;   // valid: zero-sized array
+</code></pre>
+
+      <p>
+        Normal element access is checked:
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::array<int, 3> arr{10, 20, 30};
+
+int x = arr[1];   // safe: bounds checked
+</code></pre>
+
+      <p>
+        If you intentionally want unchecked access (for performance‑critical code),
+        <code>::fast_io::array</code> provides:
+      </p>
+
+<pre><code class="language-cpp">
+int x = arr.index_unchecked(1);   // no bounds checking
+</code></pre>
+
+      <p>
+        For most code, prefer <code>arr[i]</code> with bounds checking.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. fast_io::vector as the default container</h2>
+      <p>
+        For most dynamic sequences of elements, prefer <code>::fast_io::vector</code>.
+        It manages its own size and capacity and also supports bounds‑checked access.
+      </p>
+
+<pre><code class="language-cpp">
+#include <fast_io_dsal/vector.h>
+
+::fast_io::vector<int> vec;
+vec.push_back(10);
+vec.push_back(20);
+
+int x = vec[0];   // bounds checked
+</code></pre>
+
+      <p>
+        When you need unchecked access for performance‑critical code,
+        <code>::fast_io::vector</code> also provides:
+      </p>
+
+<pre><code class="language-cpp">
+int x = vec.index_unchecked(0);   // no bounds checking
+</code></pre>
+
+      <p>
+        For most code, prefer <code>vec[i]</code> with bounds checking and reserve
+        <code>index_unchecked()</code> for carefully reviewed hot paths.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Arrays and pointers are related but not the same</h2>
+      <p>
+        Arrays and pointers are closely related, but they are <strong>not</strong> the same.
+      </p>
+
+      <p>
+        An array:
+      </p>
+
+      <ul>
+        <li>is a fixed block of memory</li>
+        <li>knows its size at compile time</li>
+        <li>cannot be reassigned</li>
+      </ul>
+
+      <p>
+        A pointer:
+      </p>
+
+      <ul>
+        <li>stores an address</li>
+        <li>can point to different objects</li>
+        <li>does not know the size of the array it points to</li>
+      </ul>
+
+      <p>
+        We will explore the relationship between arrays and pointers in detail in
+        <strong>Ch5.7: Array Decay</strong>.
+      </p>
+    </section>
+
+    <section>
+      <h2>9. Getting the address of array elements</h2>
+      <p>
+        You can obtain the address of any element using <code>::std::addressof</code>:
+      </p>
+
+<pre><code class="language-cpp">
+#include <memory>
+
+int a[3]{10, 20, 30};
+
+int *p0 = ::std::addressof(a[0]);
+int *p1 = ::std::addressof(a[1]);
+int *p2 = ::std::addressof(a[2]);
+</code></pre>
+
+<pre><code class="language-text">
+Addresses (example):
+
+p0 = 1000
+p1 = 1004
+p2 = 1008
+</code></pre>
+
+      <p>
+        This layout is what makes pointer arithmetic meaningful (next chapter).
+      </p>
+    </section>
+
+    <section>
+      <h2>10. Arrays cannot be copied or assigned</h2>
+      <p>
+        C‑style arrays cannot be copied or assigned using <code>=</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{1, 2, 3};
+int b[3];
+
+// b = a;   // error: arrays cannot be assigned
+</code></pre>
+
+      <p>
+        Copying arrays requires manual element‑by‑element copying or <code>memcpy</code>
+        (covered in Ch5.14).
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A C‑style array is a fixed‑size, contiguous block of memory.</li>
+        <li>C‑style arrays cannot have size 0.</li>
+        <li>Array elements are accessed with <code>[]</code>.</li>
+        <li><strong>Out‑of‑bounds access is undefined behavior.</strong></li>
+        <li><strong>Undefined behavior does NOT guarantee a crash.</strong></li>
+        <li><code>::fast_io::array</code> performs bounds checking for <code>[]</code> and supports zero‑sized arrays.</li>
+        <li><code>arr.index_unchecked()</code> and <code>vec.index_unchecked()</code> provide unchecked access when needed.</li>
+        <li><strong>Prefer <code>::fast_io::vector</code> as your default container.</strong></li>
+        <li><strong>Prefer <code>::fast_io::array</code> over C‑style arrays.</strong></li>
+        <li>Arrays and pointers are related but not the same.</li>
+        <li>This chapter prepares you for pointer arithmetic (Ch5.6) and array decay (Ch5.7).</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/04.nullptr/" class="prev-button">← Ch5.4: nullptr</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/06.pointerarithmetic/" class="next-button">Ch5.6: Pointer Arithmetic →</a>
+    </div>
+  </main>
+</body>
+</html>

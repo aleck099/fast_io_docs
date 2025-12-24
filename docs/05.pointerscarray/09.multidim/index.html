@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.9: Multi-dimensional C-style Arrays - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.9: Multi-dimensional C-style Arrays</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A multi-dimensional C-style array is simply an array whose elements are
+        themselves C-style arrays. The most common form is the two-dimensional array,
+        which you can think of as a table of rows and columns.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how to declare and initialize multi-dimensional C-style arrays</li>
+        <li>how they are laid out in memory (row-major order)</li>
+        <li>how indexing works</li>
+        <li>how decay works for multi-dimensional arrays</li>
+        <li>why only the outermost dimension decays</li>
+        <li>what pointer types are involved (e.g., <code>int (*)[N]</code>)</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Declaring a multi-dimensional C-style array</h2>
+      <p>
+        A two-dimensional array is declared by specifying both dimensions:
+      </p>
+
+<pre><code class="language-cpp">
+int a[2][3]{
+    {1, 2, 3},
+    {4, 5, 6}
+};
+</code></pre>
+
+      <p>
+        This means:
+      </p>
+
+      <ul>
+        <li>2 rows</li>
+        <li>3 columns per row</li>
+        <li>each row is an array of 3 <code>int</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Memory layout: row-major order</h2>
+      <p>
+        C++ stores multi-dimensional arrays in <strong>row-major order</strong>.
+        This means the entire first row is stored first, then the second row, and so on.
+      </p>
+
+<pre><code class="language-text">
+int a[2][3] = {
+    {1, 2, 3},
+    {4, 5, 6}
+};
+
+Memory (addresses vary):
+
+Address:   1000 1004 1008 1012 1016 1020
+Memory:    [ 1 ][ 2 ][ 3 ][ 4 ][ 5 ][ 6 ]
+              ↑    ↑    ↑    ↑    ↑    ↑
+             a[0][0] ...        ...  a[1][2]
+</code></pre>
+
+      <p>
+        Even though the array looks like a grid, it is stored as one contiguous block.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Indexing multi-dimensional arrays</h2>
+      <p>
+        You access elements using multiple <code>[]</code> operators:
+      </p>
+
+<pre><code class="language-cpp">
+int x = a[0][1];   // 2
+int y = a[1][2];   // 6
+</code></pre>
+
+      <p>
+        The expression <code>a[i]</code> refers to the <strong>i-th row</strong>, which is
+        itself an array of 3 <code>int</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int b[3] = a[0];   // ❌ error: cannot copy arrays
+</code></pre>
+
+      <p>
+        But you can take its address:
+      </p>
+
+<pre><code class="language-cpp">
+int (*row0)[3] = ::std::addressof(a[0]);
+</code></pre>
+
+      <p>
+        The type of <code>a[0]</code> is <code>int[3]</code>.  
+        The type of <code>&a[0]</code> is <code>int (*)[3]</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Decay of multi-dimensional arrays</h2>
+      <p>
+        Just like one-dimensional arrays, multi-dimensional arrays decay in most
+        expressions — but <strong>only the outermost dimension decays</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int a[2][3];
+
+int (*p)[3] = a;   // decay: a → pointer to array of 3 int
+</code></pre>
+
+      <p>
+        Important:
+      </p>
+
+      <ul>
+        <li><code>a</code> decays to <code>int (*)[3]</code></li>
+        <li><code>a[0]</code> does <strong>not</strong> decay until used in an expression</li>
+        <li><code>a[0]</code> is an array of 3 <code>int</code></li>
+      </ul>
+
+      <p>
+        This is why:
+      </p>
+
+<pre><code class="language-cpp">
+int *p0 = a[0];   // decay: a[0] → &a[0][0]
+</code></pre>
+
+      <p>
+        But:
+      </p>
+
+<pre><code class="language-cpp">
+int (*p1)[3] = a;   // pointer to row
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Pointer arithmetic with multi-dimensional arrays</h2>
+      <p>
+        Pointer arithmetic on <code>int (*)[3]</code> moves by <strong>entire rows</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int (*p)[3] = a;
+
+int (*p_next)[3] = p + 1;   // moves to a[1]
+</code></pre>
+
+      <p>
+        Meanwhile, pointer arithmetic on <code>int*</code> moves by individual elements.
+      </p>
+
+<pre><code class="language-cpp">
+int *q = a[0];     // points to a[0][0]
+int *q2 = q + 4;   // points to a[1][1]
+</code></pre>
+
+      <p>
+        This works because the entire 2×3 array is contiguous.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Using ::std::ranges::begin and ::std::ranges::end</h2>
+      <p>
+        You can obtain iterators for the outer dimension:
+      </p>
+
+<pre><code class="language-cpp">
+#include <ranges>
+
+int a[2][3]{{1,2,3},{4,5,6}};
+
+int (*first)[3] = ::std::ranges::begin(a);
+int (*last)[3]  = ::std::ranges::end(a);
+</code></pre>
+
+      <p>
+        These compute:
+      </p>
+
+      <ul>
+        <li><code>&a[0]</code> for <code>begin(a)</code></li>
+        <li><code>&a[0] + 2</code> for <code>end(a)</code></li>
+      </ul>
+
+      <p>
+        They do <strong>not</strong> search for <code>'\0'</code> because this is not a string.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Higher-dimensional arrays</h2>
+      <p>
+        You can extend this to any number of dimensions:
+      </p>
+
+<pre><code class="language-cpp">
+int a[2][3][4];
+</code></pre>
+
+      <p>
+        This is an array of 2 elements,  
+        each of which is an array of 3 elements,  
+        each of which is an array of 4 <code>int</code>.
+      </p>
+
+      <p>
+        The memory is still one contiguous block.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A multi-dimensional C-style array is an array of arrays.</li>
+        <li>C++ stores multi-dimensional arrays in row-major order.</li>
+        <li><code>a[i]</code> is itself an array.</li>
+        <li><code>&a[i]</code> has type <code>int (*)[N]</code> for the inner dimension.</li>
+        <li>Only the outermost dimension decays.</li>
+        <li><code>a</code> decays to <code>int (*)[N]</code>.</li>
+        <li><code>a[i]</code> decays to <code>int*</code> when used in expressions.</li>
+        <li>Pointer arithmetic on <code>int (*)[N]</code> moves by rows.</li>
+        <li>Pointer arithmetic on <code>int*</code> moves by individual elements.</li>
+        <li>Use <code>::std::ranges::begin(a)</code> and <code>::std::ranges::end(a)</code> for the outer dimension.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/08.cstylestring/" class="prev-button">← Ch5.8: C‑style Strings</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/10.pointertoarray/" class="next-button">Ch5.10: Pointer to C‑style Array →</a>
+    </div>
+  </main>
+</body>
+</html>

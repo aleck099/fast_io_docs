@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch5.7: C‑style Array Decay - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch5.7: C‑style Array Decay</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        C‑style arrays have a special behavior called <strong>array decay</strong>.
+        In most expressions, a C‑style array automatically converts (or “decays”) into
+        a pointer to its first element. This is one of the most important rules in C++,
+        and it explains why arrays and pointers often appear interchangeable even though
+        they are not the same.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what C‑style array decay is</li>
+        <li>when decay happens</li>
+        <li>when decay does <em>not</em> happen</li>
+        <li>why <code>sizeof(a)</code> and <code>sizeof(p)</code> differ</li>
+        <li>why function parameters cannot take arrays by value</li>
+        <li>how decay interacts with pointer arithmetic</li>
+        <li>how to use <code>::std::ranges::begin(a)</code> and <code>::std::ranges::end(a)</code></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is C‑style array decay?</h2>
+      <p>
+        When a C‑style array is used in most expressions, it automatically converts into
+        a pointer to its first element.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = a;   // array decays to pointer to a[0]
+</code></pre>
+
+      <p>
+        After decay:
+      </p>
+
+      <ul>
+        <li><code>a</code> becomes <code>&a[0]</code></li>
+        <li>the array’s size information is lost</li>
+      </ul>
+
+<pre><code class="language-text">
+a (array):
+Address:   1000
+Memory:   [ 10 ][ 20 ][ 30 ]
+
+p (pointer):
+Address:   2000
+Memory:   [ 1000 ]   ← pointer to a[0]
+</code></pre>
+    </section>
+
+    <section>
+      <h2>2. Why does decay happen?</h2>
+      <p>
+        C‑style arrays cannot be copied or assigned.  
+        They also cannot be passed by value to functions.
+      </p>
+
+      <p>
+        To allow arrays to be used in expressions and function calls, C++ automatically
+        converts them to pointers.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. When decay happens</h2>
+      <p>
+        Decay happens in most expressions, including:
+      </p>
+
+      <ul>
+        <li>assignment to a pointer</li>
+        <li>passing an array to a function</li>
+        <li>comparison</li>
+        <li>pointer arithmetic</li>
+      </ul>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = a;        // decay
+int *q = a + 1;    // decay, then pointer arithmetic
+bool same = (a == p);  // decay, then compare pointers
+</code></pre>
+    </section>
+
+    <section>
+      <h2>4. When decay does NOT happen</h2>
+      <p>
+        Decay does <strong>not</strong> happen in the following cases:
+      </p>
+
+      <ul>
+        <li><strong>sizeof(a)</strong></li>
+        <li><strong>&a</strong> (address‑of the entire array)</li>
+        <li><strong>decltype(a)</strong></li>
+        <li><strong>template argument deduction</strong> in some contexts</li>
+      </ul>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+std::size_t s1 = sizeof(a);   // 3 * sizeof(int)
+std::size_t s2 = sizeof(a[0]); // sizeof(int)
+
+int *p = a;                   // decay
+std::size_t s3 = sizeof(p);   // size of pointer, NOT array
+</code></pre>
+
+      <p>
+        <strong>Key rule:</strong>  
+        <code>sizeof(a)</code> gives the size of the entire array.  
+        <code>sizeof(p)</code> gives the size of a pointer.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Decay in function parameters</h2>
+      <p>
+        You cannot pass a C‑style array by value to a function.  
+        Instead, the array decays to a pointer.
+      </p>
+
+<pre><code class="language-cpp">
+void f(int *p);   // receives pointer, not array
+
+int a[3]{10, 20, 30};
+f(a);             // a decays to &a[0]
+</code></pre>
+
+      <p>
+        Even if you write:
+      </p>
+
+<pre><code class="language-cpp">
+void g(int a[3]);
+</code></pre>
+
+      <p>
+        it is still interpreted as:
+      </p>
+
+<pre><code class="language-cpp">
+void g(int *a);   // array size is ignored
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Decay and pointer arithmetic</h2>
+      <p>
+        After decay, the pointer behaves like any other pointer to the first element.
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+int *p = a;   // decay
+int *q = p + 2;
+
+int x = *q;   // 30
+</code></pre>
+
+      <p>
+        This is why array indexing works:
+      </p>
+
+<pre><code class="language-cpp">
+a[i]   // means *(a + i)
+</code></pre>
+
+      <p>
+        Because <code>a</code> decays to a pointer.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Using ::std::ranges::begin(a) and ::std::ranges::end(a)</h2>
+      <p>
+        Instead of relying on decay, modern C++ provides explicit functions to obtain
+        iterators for C‑style arrays:
+      </p>
+
+<pre><code class="language-cpp">
+#include <ranges>
+
+int a[3]{10, 20, 30};
+
+int *first = ::std::ranges::begin(a);
+int *last  = ::std::ranges::end(a);   // one past the end
+</code></pre>
+
+      <p>
+        These functions do <strong>not</strong> evaluate <code>a[N]</code>.  
+        They compute the correct pointers safely:
+      </p>
+
+      <ul>
+        <li><code>::std::ranges::begin(a)</code> → <code>&a[0]</code></li>
+        <li><code>::std::ranges::end(a)</code> → <code>&a[0] + N</code></li>
+      </ul>
+
+      <p>
+        This is the preferred modern way to obtain iterators for C‑style arrays.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Why decay can be dangerous</h2>
+      <p>
+        After decay, the pointer no longer knows the array’s size.  
+        This can lead to:
+      </p>
+
+      <ul>
+        <li>out‑of‑bounds pointer arithmetic</li>
+        <li>incorrect <code>sizeof</code> usage</li>
+        <li>loss of type information</li>
+      </ul>
+
+      <p>
+        For example:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+int *p = a;
+
+std::size_t s = sizeof(p);   // size of pointer, NOT array
+</code></pre>
+
+      <p>
+        This is a common source of bugs.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>C‑style arrays automatically decay to pointers in most expressions.</li>
+        <li>Decay converts <code>a</code> into <code>&a[0]</code>.</li>
+        <li>Decay loses the array’s size information.</li>
+        <li><code>sizeof(a)</code> gives the array size; <code>sizeof(p)</code> gives pointer size.</li>
+        <li>Function parameters cannot take arrays by value; they receive pointers.</li>
+        <li>Array indexing <code>a[i]</code> is defined as <code>*(a + i)</code> because of decay.</li>
+        <li>Use <code>::std::ranges::begin(a)</code> and <code>::std::ranges::end(a)</code> to obtain array iterators.</li>
+        <li>Pointers are the iterators of C‑style arrays.</li>
+        <li>Decay can be dangerous because the pointer no longer knows the array size.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/05.pointerscarray/06.pointerarithmetic/" class="prev-button">← Ch5.6: Pointer Arithmetic</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/05.pointerscarray/08.cstylestring/" class="next-button">Ch5.8: C‑style Strings →</a>
+    </div>
+  </main>
+</body>
+</html>
