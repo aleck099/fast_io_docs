@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v27.3"; // bump version here
+const CACHE_NAME = "fast_io-docs-v29"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -42,6 +42,8 @@ const urlsToCache = [
   "/docs/02.basics/16.enumclass/",
   "/docs/02.basics/17.bit/",
   "/docs/02.basics/18.endian/",
+  "/docs/02.basics/19.usingtypedef/",
+  "/docs/02.basics/20.byte/",
   "/docs/03.statements/",
   "/docs/03.statements/01.empty/",
   "/docs/03.statements/02.compound/",
@@ -64,6 +66,22 @@ const urlsToCache = [
   "/docs/04.dsal/03.array/",
   "/docs/04.dsal/04.multidcontainers/",
   "/docs/05.pointerscarray/",
+  "/docs/05.pointerscarray/01.address/",
+  "/docs/05.pointerscarray/02.pointerbasics/",
+  "/docs/05.pointerscarray/03.dereference/",
+  "/docs/05.pointerscarray/04.nullptr/",
+  "/docs/05.pointerscarray/05.cstylearray/",
+  "/docs/05.pointerscarray/06.pointerarithmetic/",
+  "/docs/05.pointerscarray/07.carraydecay/",
+  "/docs/05.pointerscarray/08.cstylestring/",
+  "/docs/05.pointerscarray/09.multidim/",
+  "/docs/05.pointerscarray/10.constpointer/",
+  "/docs/05.pointerscarray/11.voidpointer/",
+  "/docs/05.pointerscarray/12.pointersandcontainers/",
+  "/docs/05.pointerscarray/13.strictaliasing/",
+  "/docs/05.pointerscarray/14.memfunctions/",
+  "/docs/05.pointerscarray/15.pointerpitfalls/",
+  "/docs/05.pointerscarray/16.pointerbestpractices/",
 ];
 
 // Install: pre-cache resources
