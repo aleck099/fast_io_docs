@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.6: Function Overloading - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.6: Function Overloading</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        C++ allows multiple functions to share the same name as long as their
+        <strong>parameter lists differ</strong>. This feature is called
+        <strong>function overloading</strong>.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>what function overloading is</li>
+        <li>how overload resolution works</li>
+        <li>what counts as a different parameter list</li>
+        <li>why return type alone cannot overload a function</li>
+        <li>how references and <code>const</code> affect overload selection</li>
+        <li>how ambiguous overloads occur</li>
+        <li>how overloading interacts with default arguments</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. BASIC OVERLOADING -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Basic function overloading</h2>
+      <p>
+        Two or more functions may have the same name if their parameter types differ.
+      </p>
+
+<pre><code class="language-cpp">
+void print(int x)
+{
+    ::fast_io::println("int: ", x);
+}
+
+void print(double d)
+{
+    ::fast_io::println("double: ", d);
+}
+
+int main()
+{
+    print(42);     // calls print(int)
+    print(3.14);   // calls print(double)
+}
+</code></pre>
+
+      <p>
+        The compiler chooses the correct function based on the argument types.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. WHAT COUNTS AS DIFFERENT -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. What counts as a different parameter list?</h2>
+      <p>
+        Overloads must differ in their <strong>parameter types</strong> or
+        <strong>number of parameters</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+void f(int);
+void f(double);       // OK — different type
+void f(int, int);     // OK — different number of parameters
+</code></pre>
+
+      <p>
+        These are all valid overloads.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. RETURN TYPE DOES NOT OVERLOAD -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Return type does <em>not</em> participate in overloading</h2>
+      <p>
+        Only the <strong>parameter list</strong> determines whether two functions are
+        different overloads.  
+        The <strong>return type is completely ignored</strong> for overload resolution.
+      </p>
+
+<pre><code class="language-cpp">
+int g();
+double g();   // ❌ error — return type alone does not create a new overload
+</code></pre>
+
+      <p>
+        The compiler must choose an overload <strong>before</strong> it knows the return type.
+      </p>
+
+<pre><code class="language-cpp">
+auto x = g();   // which g() should this call?
+</code></pre>
+
+      <p>
+        Because the return type cannot disambiguate the call, this overload set is invalid.
+        <strong>Only the parameters can differ.</strong>
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. CONST AND REFERENCES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Overloading with references and const</h2>
+      <p>
+        References and <code>const</code> qualifiers affect overload resolution.
+      </p>
+
+<pre><code class="language-cpp">
+void h(int &amp; x)
+{
+    ::fast_io::print("non-const reference\n");
+}
+
+void h(int const &amp; x)
+{
+    ::fast_io::print("const reference\n");
+}
+</code></pre>
+
+      <p>
+        Calling <code>h</code> with a const value selects the const overload:
+      </p>
+
+<pre><code class="language-cpp">
+int main()
+{
+    int a{10};
+    int const b{20};
+
+    h(a);  // calls h(int &amp;)
+    h(b);  // calls h(int const &amp;)
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. AMBIGUOUS CALLS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Ambiguous calls</h2>
+      <p>
+        Sometimes the compiler cannot decide which overload is better.
+      </p>
+
+<pre><code class="language-cpp">
+void k(long);
+void k(double);
+
+int main()
+{
+    k(0);   // ❌ ambiguous — 0 can convert to long or double
+}
+</code></pre>
+
+      <p>
+        When two overloads are equally good, the call is ambiguous.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. OVERLOADING WITH DEFAULT ARGUMENTS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Overloading with default arguments</h2>
+      <p>
+        Default arguments and overloading can interact and sometimes create ambiguities.
+      </p>
+
+<pre><code class="language-cpp">
+void m(int x, int y = 0);
+void m(int x);
+</code></pre>
+
+      <p>
+        A call like <code>m(5)</code> is ambiguous:
+      </p>
+
+      <ul>
+        <li>the second overload matches directly as <code>m(int)</code></li>
+        <li>the first overload also matches as <code>m(int, int)</code> using the default value for <code>y</code></li>
+      </ul>
+
+      <p>
+        The compiler cannot prefer one over the other, so the call fails to compile.
+      </p>
+
+      <p>
+        When designing overloads, make sure that calls cannot match multiple overloads
+        in this way. In many cases, you should choose either:
+      </p>
+
+      <ul>
+        <li>a single function with default arguments, or</li>
+        <li>a clear set of overloads without defaults on overlapping signatures</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>Function overloading allows multiple functions with the same name.</li>
+        <li>Overloads must differ in parameter types or number of parameters.</li>
+        <li><strong>Return type alone cannot overload a function.</strong></li>
+        <li><code>const</code> and references affect overload resolution.</li>
+        <li>Ambiguous calls cause compilation errors.</li>
+        <li>Default arguments can make overloads ambiguous if signatures overlap.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/05.defaultarguments/" class="prev-button">← Ch6.5: Default Arguments</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/07.inline/" class="next-button">Ch6.7: Inline Functions →</a>
+    </div>
+  </main>
+</body>
+</html>

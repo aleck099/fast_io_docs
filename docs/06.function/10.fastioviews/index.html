@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.10: fast_io views</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+
+    <h1>Ch6.10: fast_io views</h1>
+
+    <!-- ========================= -->
+    <!-- INTRODUCTION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Why this chapter exists</h2>
+
+      <p>
+        In the previous chapter, you learned that C-style array parameters and
+        pointer+length pairs are error-prone:
+      </p>
+
+      <ul>
+        <li>array size is lost when passed to a function</li>
+        <li>pointer + length pairs are easy to mismatch</li>
+        <li>no bounds checking</li>
+        <li>ownership is unclear</li>
+        <li>encourages unsafe patterns</li>
+      </ul>
+
+      <p>
+        Modern C++ solves this with <strong>view types</strong>: lightweight,
+        non-owning objects that refer to existing memory without copying it.
+      </p>
+
+      <p>
+        The C++ standard library provides <code>std::span</code> and
+        <code>std::string_view</code>, but on Windows x86‑64,
+        <code>std::span</code> suffers from a calling‑convention limitation:
+      </p>
+
+      <ul>
+        <li>the Windows x86‑64 ABI passes all 16‑byte objects via memory</li>
+        <li><code>std::span</code> is 16 bytes (pointer + size)</li>
+        <li>so it cannot be passed in registers</li>
+        <li>this introduces unnecessary memory traffic</li>
+      </ul>
+
+      <p>
+        This ABI behavior was discovered by the author of this tutorial and
+        reported to Microsoft. Until the ABI is fixed, <code>std::span</code> is
+        less efficient on Windows x86‑64 than a simple <code>(ptr, n)</code> pair.
+      </p>
+
+      <h3>The wincall proposal</h3>
+
+      <p>
+        To address these long-standing ABI inefficiencies, the author proposed a
+        new calling convention named <strong>wincall</strong>, designed for
+        x86‑64 Windows under Intel APX. It is documented here:
+      </p>
+
+      <p>
+        <a href="https://developercommunity.visualstudio.com/t/I-present-a-novel-calling-convention-nam/10433601">
+          Microsoft Developer Community: wincall proposal
+        </a>
+      </p>
+
+      <p>
+        and discussed here:
+      </p>
+
+      <p>
+        <a href="https://gcc.gnu.org/pipermail/gcc-help/2023-August/142801.html">
+          GCC mailing list discussion
+        </a>
+      </p>
+
+      <p>
+        The motivation for wincall includes:
+      </p>
+
+      <ul>
+        <li>the current Windows ABI passes too few parameters in registers</li>
+        <li>16‑byte objects (like <code>std::span</code>) are forced onto the stack</li>
+        <li>Herbception (P0709) requires two registers + carry flag for <code>std::error</code></li>
+        <li>Intel APX expands the register file from 16 to 32 registers</li>
+        <li>empty objects should not consume register slots</li>
+        <li>Windows already uses caller-saved registers, making expansion feasible</li>
+      </ul>
+
+      <p>
+        wincall aims to:
+      </p>
+
+      <ul>
+        <li>use more registers for parameter passing</li>
+        <li>avoid penalizing small aggregates</li>
+        <li>remain compatible with the Itanium C++ ABI</li>
+        <li>coexist with stdcall and fastcall for DLL boundaries</li>
+        <li>support efficient return of small user-defined types</li>
+      </ul>
+
+      <p>
+        This chapter does not depend on wincall, but understanding the ABI
+        limitations explains why <code>std::span</code> is inefficient on Windows
+        today.
+      </p>
+
+      <h3>Where fast_io fits in</h3>
+
+      <p>
+        The <code>fast_io</code> library does <strong>not</strong> “fix” the Windows
+        ABI. Instead:
+      </p>
+
+      <ul>
+        <li>fast_io is <strong>not ABI-stable</strong></li>
+        <li>therefore it can choose layouts that avoid the 16‑byte penalty</li>
+        <li>it provides safer semantics (bounds checking, explicit construction)</li>
+        <li>it avoids the pitfalls of raw pointers and pointer+length pairs</li>
+      </ul>
+
+      <p>
+        In this chapter, you will learn how to use the following fast_io view types:
+      </p>
+
+      <ul>
+        <li><code>::fast_io::span&lt;T&gt;</code></li>
+        <li><code>::fast_io::string_view</code></li>
+        <li><code>::fast_io::cstring_view</code></li>
+        <li><code>::fast_io::index_span&lt;T, N&gt;</code></li>
+      </ul>
+
+      <p>
+        These types are safer than raw pointers and avoid the Windows ABI
+        inefficiencies that affect <code>std::span</code>.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. fast_io::span -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. <code>::fast_io::span&lt;T&gt;</code></h2>
+
+      <p>
+        <code>::fast_io::span&lt;T&gt;</code> is a lightweight, non-owning view over a
+        contiguous sequence of <code>T</code>. It stores:
+      </p>
+
+      <ul>
+        <li>a pointer</li>
+        <li>a length</li>
+      </ul>
+
+      <p>
+        Unlike <code>std::span</code>, it is intentionally sized to avoid the
+        Windows x86‑64 16‑byte penalty. Because fast_io is not ABI-stable, it can
+        choose a representation that is efficiently passed in registers on all
+        major platforms.
+      </p>
+
+      <h3>Example: passing a span</h3>
+
+<pre><code class="language-cpp">
+void process(::fast_io::span<int const> s)
+{
+    for(auto e : s)
+        ::fast_io::println(e);
+}
+</code></pre>
+
+      <h3>Example: creating a span from a vector</h3>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1,2,3,4};
+process(::fast_io::span<int const>{v});
+</code></pre>
+
+      <h3>Example: creating a span from a raw array</h3>
+
+<pre><code class="language-cpp">
+int arr[4]{1,2,3,4};
+process(::fast_io::span<int const>{arr});
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. fast_io::string_view -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. <code>::fast_io::string_view</code></h2>
+
+      <p>
+        <code>::fast_io::string_view</code> is similar to <code>std::string_view</code>,
+        but designed to be ABI-friendly on all major platforms, including Windows
+        x86‑64. It:
+      </p>
+
+      <ul>
+        <li>does not allocate</li>
+        <li>does not own memory</li>
+        <li>is efficiently passed to functions</li>
+        <li>integrates with <code>fast_io</code> printing</li>
+      </ul>
+
+      <h3>Example</h3>
+
+<pre><code class="language-cpp">
+void greet(::fast_io::string_view name)
+{
+    ::fast_io::println("Hello, ", name);
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. fast_io::cstring_view -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. <code>::fast_io::cstring_view</code></h2>
+
+      <p>
+        <code>::fast_io::cstring_view</code> is a view over a null-terminated C
+        string. It stores only a pointer and computes the length when needed.
+      </p>
+
+      <p>
+        This is ideal for interfacing with C APIs or legacy code.
+      </p>
+
+      <h3>Example</h3>
+
+<pre><code class="language-cpp">
+void debug(::fast_io::cstring_view s)
+{
+    ::fast_io::println("debug: ", s);
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. fast_io::index_span -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. <code>::fast_io::index_span&lt;T, N&gt;</code></h2>
+
+      <p>
+        <code>::fast_io::index_span&lt;T, N&gt;</code> is a fixed-size view over exactly
+        <code>N</code> elements. It:
+      </p>
+
+      <ul>
+        <li>stores only a pointer</li>
+        <li>performs bounds checking when indexing</li>
+        <li>is useful for slicing without copying</li>
+      </ul>
+
+      <h3>Example</h3>
+
+<pre><code class="language-cpp">
+void print_slice(::fast_io::span<int const> s,
+                 ::fast_io::index_span<std::size_t, 2> idx)
+{
+    for(std::size_t i = idx[0]; i != idx[1]; ++i)
+        ::fast_io::println(s[i]);
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. Performance comparison -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Performance comparison</h2>
+
+      <p>
+        The key difference between <code>std::span</code> and
+        <code>::fast_io::span</code> is how they behave under different ABIs.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Passed in registers (SysV)</th>
+            <th>Passed in registers (Win64)</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>T*</code></td>
+            <td>8 bytes</td>
+            <td>yes</td>
+            <td>yes</td>
+            <td>baseline pointer semantics</td>
+          </tr>
+          <tr>
+            <td><code>(T*, std::size_t)</code></td>
+            <td>16 bytes</td>
+            <td>yes</td>
+            <td><strong>no</strong></td>
+            <td>passed via memory on Win64</td>
+          </tr>
+          <tr>
+            <td><code>std::span&lt;T&gt;</code></td>
+            <td>16 bytes</td>
+            <td>yes</td>
+            <td><strong>no</strong></td>
+            <td>same penalty as (ptr, n)</td>
+          </tr>
+          <tr>
+            <td><code>::fast_io::span&lt;T&gt;</code></td>
+            <td>8 bytes</td>
+            <td>yes</td>
+            <td>yes</td>
+            <td>avoids Win64 memory‑passing penalty</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        <code>::fast_io::span</code> is intentionally sized to behave like a raw
+        pointer at the ABI level, ensuring efficient register passing on all major
+        platforms.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. When to use each type -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. When to use each type</h2>
+
+      <ul>
+        <li>
+          Use <strong><code>::fast_io::span&lt;T&gt;</code></strong> for non-owning
+          views of arrays or vectors.
+        </li>
+        <li>
+          Use <strong><code>::fast_io::string_view</code></strong> for UTF‑8 string
+          slices.
+        </li>
+        <li>
+          Use <strong><code>::fast_io::cstring_view</code></strong> when interfacing
+          with C APIs.
+        </li>
+        <li>
+          Use <strong><code>::fast_io::index_span&lt;T, N&gt;</code></strong> for
+          fixed-size slices and index ranges.
+        </li>
+        <li>
+          Avoid <strong>C-style array parameters</strong> and
+          <strong>pointer+length pairs</strong>.
+        </li>
+        <li>
+          Avoid <strong>std::span</strong> on Windows x86‑64 for performance-critical
+          code.
+        </li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Summary</h2>
+
+      <ul>
+        <li>fast_io view types provide safer alternatives to raw pointers.</li>
+        <li>They avoid the Windows x86‑64 ABI penalty that affects <code>std::span</code>.</li>
+        <li>They behave like raw pointers at the machine level, with no hidden overhead.</li>
+        <li>They integrate naturally with <code>fast_io</code> containers and printing.</li>
+        <li>They should replace C-style array parameters and pointer+length pairs.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/09.cstylearrayparameters/" class="prev-button">← Ch6.9: C-Style Array Parameters</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/11.recursion/" class="next-button">Ch6.11: Recursive Functions →</a>
+    </div>
+
+  </main>
+</body>
+</html>

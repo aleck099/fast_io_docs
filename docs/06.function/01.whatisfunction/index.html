@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.1: What is a Function? - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.1: What is a Function?</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A function is a reusable block of code that performs a specific task.
+        You have already used many functions in earlier chapters:
+        <code>main</code>, <code>::fast_io::println</code>,
+        <code>::fast_io::scan</code>, and constructors of containers.
+      </p>
+
+      <p>
+        Functions allow you to:
+      </p>
+
+      <ul>
+        <li>organize code into meaningful units</li>
+        <li>avoid repeating the same logic</li>
+        <li>give names to operations</li>
+        <li>separate <em>what</em> a program does from <em>how</em> it does it</li>
+      </ul>
+
+      <p>
+        In this chapter, you will learn the basic structure of a function, how to
+        call functions, and how return values work.
+      </p>
+    </section>
+
+    <section>
+      <h2>1. Basic function syntax</h2>
+      <p>
+        A function has four parts:
+      </p>
+
+      <ul>
+        <li>a <strong>return type</strong></li>
+        <li>a <strong>name</strong></li>
+        <li>a <strong>parameter list</strong></li>
+        <li>a <strong>body</strong> enclosed in braces</li>
+      </ul>
+
+<pre><code class="language-cpp">
+int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        This function takes two integers and returns their sum.
+      </p>
+
+      <h3>Calling a function</h3>
+
+<pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+
+int add(int a, int b)
+{
+    return a + b;
+}
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+
+    int result = add(10, 20);
+    println("Result = ", result);
+}
+</code></pre>
+
+      <p>
+        The expression <code>add(10, 20)</code> calls the function and produces a value.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. The <code>void</code> return type</h2>
+      <p>
+        A function that does not return a value uses the <code>void</code> type.
+      </p>
+
+<pre><code class="language-cpp">
+void greet()
+{
+    using namespace ::fast_io::iomnp;
+
+    print("Hello!\n");
+}
+</code></pre>
+
+      <p>
+        A <code>void</code> function is called the same way:
+      </p>
+
+<pre><code class="language-cpp">
+greet();
+</code></pre>
+
+      <p>
+        Because it returns nothing, you cannot write:
+      </p>
+
+<pre><code class="language-cpp">
+// int x = greet();   // ❌ error — greet() returns void
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Parameters and arguments</h2>
+      <p>
+        The variables inside the parentheses of a function definition are called
+        <strong>parameters</strong>. When you call the function, the values you pass
+        in are called <strong>arguments</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+int square(int x)
+{
+    return x * x;
+}
+
+int y = square(5);   // 5 is the argument
+</code></pre>
+
+      <p>
+        Parameters behave like local variables inside the function.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Return statements</h2>
+      <p>
+        A function returns a value using the <code>return</code> statement.
+      </p>
+
+<pre><code class="language-cpp">
+double half(double x)
+{
+    return x / 2.0;
+}
+</code></pre>
+
+      <p>
+        A <code>return</code> statement immediately ends the function.
+      </p>
+
+<pre><code class="language-cpp">
+int test(int x)
+{
+    if(x &lt; 0)
+        return -1;   // function ends here
+
+    return x * 2;    // otherwise return this
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Why functions matter</h2>
+      <p>
+        Functions are the foundation of all higher‑level abstractions in C++.
+        They make programs:
+      </p>
+
+      <ul>
+        <li>easier to read</li>
+        <li>easier to test</li>
+        <li>easier to maintain</li>
+        <li>less repetitive</li>
+      </ul>
+
+      <p>
+        Later chapters will show how functions interact with references, objects,
+        templates, and lambdas. For now, the goal is simply to understand how to
+        define and call them.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>A function groups code into a reusable unit.</li>
+        <li>A function has a return type, name, parameters, and a body.</li>
+        <li><code>void</code> means “returns nothing”.</li>
+        <li>Parameters are local variables inside the function.</li>
+        <li>Arguments are the values passed when calling the function.</li>
+        <li><code>return</code> ends the function and produces a value.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/" class="prev-button">← Ch6: Functions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/02.declarationdefinition/" class="next-button">Ch6.2: Declarations and Definitions →</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.8: Inline Functions - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.8: Inline Functions</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        In the previous chapter, you learned that each <code>.cpp</code> file becomes
+        a separate translation unit, and that each non-inline function definition
+        must appear in exactly <strong>one</strong> translation unit. Otherwise, the
+        linker reports a multiple-definition error.
+      </p>
+
+      <p>
+        But many functions <em>must</em> be defined in headers:
+      </p>
+
+      <ul>
+        <li>template functions</li>
+        <li>small utility functions</li>
+        <li>header-only libraries</li>
+        <li>functions inside module interfaces</li>
+      </ul>
+
+      <p>
+        The <code>inline</code> keyword solves this problem by allowing a function
+        definition to appear in multiple translation units without violating the
+        One Definition Rule (ODR).
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. WHAT INLINE REALLY MEANS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. What <code>inline</code> really means</h2>
+
+      <p>
+        The <code>inline</code> keyword does <strong>not</strong> mean “optimize this
+        function” or “insert the function body at the call site.”
+      </p>
+
+      <p>
+        Instead, <code>inline</code> means:
+      </p>
+
+      <blockquote>
+        <strong>This function may appear in multiple translation units, and the
+        linker must treat all identical definitions as one.</strong>
+      </blockquote>
+
+      <p>
+        In other words, <code>inline</code> is about <strong>ODR safety</strong>,
+        not performance.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. WHY INLINE IS NEEDED -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Why <code>inline</code> is needed</h2>
+
+      <p>
+        Suppose you put a function definition in a header:
+      </p>
+
+<pre><code class="language-cpp">
+// util.hpp
+int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        And include it in two translation units:
+      </p>
+
+<pre><code class="language-cpp">
+// a.cpp
+#include "util.hpp"
+
+// b.cpp
+#include "util.hpp"
+</code></pre>
+
+      <p>
+        The linker sees two definitions of <code>add</code> and reports an error.
+      </p>
+
+      <p>
+        To fix this, mark the function as <code>inline</code>:
+      </p>
+
+<pre><code class="language-cpp">
+// util.hpp
+inline int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        Now all translation units may contain the definition, and the linker will
+        treat them as one.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. WHAT THE LINKER ACTUALLY DOES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. What the linker actually does with inline functions</h2>
+
+      <p>
+        The linker does <strong>not merge</strong> inline function definitions.
+        Instead, it:
+      </p>
+
+      <ol>
+        <li>keeps one definition</li>
+        <li><strong>discards</strong> all other identical definitions</li>
+      </ol>
+
+      <p>
+        This is why inconsistent inline definitions cause <strong>undefined
+        behavior</strong>. If two translation units contain different inline
+        definitions, the linker will arbitrarily discard some and keep one.
+      </p>
+
+      <p>
+        All inline definitions must be <strong>bit-for-bit identical</strong>.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. ODR VIOLATION EXAMPLE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Example: ODR violation</h2>
+
+      <p>
+        Here is a simple example of undefined behavior caused by violating the
+        One Definition Rule:
+      </p>
+
+<pre><code class="language-cpp">
+// a.cpp
+inline int f()
+{
+    return 1;
+}
+</code></pre>
+
+<pre><code class="language-cpp">
+// b.cpp
+inline int f()
+{
+    return 2;
+}
+</code></pre>
+
+      <p>
+        Both translation units compile successfully. But at link time:
+      </p>
+
+      <ul>
+        <li>the linker keeps one definition</li>
+        <li>the linker discards the other</li>
+        <li>which one is kept is unspecified</li>
+      </ul>
+
+      <p>
+        The program may return <code>1</code> or <code>2</code> depending on the
+        linker, build flags, or even the order of object files.
+      </p>
+
+      <p>
+        This is a real ODR violation and results in undefined behavior.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. INLINE AND SYMBOL GENERATION (WITH ASSEMBLY EXAMPLE) -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Inline and symbol generation (with assembly example)</h2>
+
+      <p>
+        A key property of inline functions is that the compiler may choose
+        <strong>not</strong> to emit a callable symbol if the function is never
+        ODR-used.
+      </p>
+
+      <p>
+        Consider the following code:
+      </p>
+
+<pre><code class="language-cpp">
+int square(int num) {
+    return num * num;
+}
+
+inline int inlinesquare(int num) {
+    return num * num;
+}
+</code></pre>
+
+      <p>
+        When compiled with optimizations, the compiler emits a real symbol for
+        <code>square</code>:
+      </p>
+
+<pre><code class="language-text">
+"square(int)":
+        imul    edi, edi
+        mov     eax, edi
+        ret
+</code></pre>
+
+      <p>
+        But <strong>no symbol is emitted</strong> for <code>inlinesquare</code>
+        unless it is actually used.
+      </p>
+
+      <p>
+        This demonstrates the core rule:
+      </p>
+
+      <blockquote>
+        <strong>Inline functions may not generate any assembly at all unless they are used.</strong>
+      </blockquote>
+
+      <p>
+        This is normal and expected behavior.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. INLINE AND LTO -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Inline and link-time optimization (LTO)</h2>
+
+      <p>
+        With <code>-flto</code>, the compiler sees all translation units at once.
+        This allows it to:
+      </p>
+
+      <ul>
+        <li>inline functions across translation units</li>
+        <li>eliminate unused inline functions entirely</li>
+        <li>avoid emitting symbols for inline functions</li>
+        <li>detect more ODR violations</li>
+      </ul>
+
+      <p>
+        LTO does not change the meaning of <code>inline</code>, but it makes symbol
+        emission more predictable.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 7. REAL-WORLD ODR VIOLATION: LIBSTDC++ -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>7. Real-world ODR violation: libstdc++ hardening</h2>
+
+      <p>
+        ODR violations are not just theoretical. They occur in real programs when
+        linking two versions of the <strong>same library</strong> compiled with
+        different configuration flags.
+      </p>
+
+      <p>
+        A common example is GCC’s <code>libstdc++</code> when compiled with:
+      </p>
+
+<pre><code class="language-bash">
+-D_GLIBCXX_ASSERTIONS
+</code></pre>
+
+      <p>
+        This flag enables bounds checking for standard library containers such as
+        <code>std::vector</code>, <code>std::string</code>, and <code>std::array</code>.
+      </p>
+
+      <p>
+        If your program links:
+      </p>
+
+      <ul>
+        <li>one object file compiled with <code>-D_GLIBCXX_ASSERTIONS</code></li>
+        <li>another object file compiled <strong>without</strong> it</li>
+      </ul>
+
+      <p>
+        then the inline definitions inside <code>&lt;vector&gt;</code>,
+        <code>&lt;string&gt;</code>, and other headers are <strong>not identical</strong>.
+      </p>
+
+      <p>
+        The linker will:
+      </p>
+
+      <ul>
+        <li>keep one version of the inline container functions</li>
+        <li><strong>discard</strong> the other version</li>
+        <li>produce a binary where some container operations are hardened and some are not</li>
+      </ul>
+
+      <p>
+        This is a silent ODR violation and leads to undefined behavior. In practice,
+        the bounds‑checked version is often discarded, leaving you with the unchecked
+        version even if you intended to enable hardening.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 8. WHY FAST_IO CONTAINERS AVOID THIS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>8. Why fast_io containers avoid this problem</h2>
+
+      <p>
+        The <code>fast_io</code> library avoids this entire class of ODR problems:
+      </p>
+
+      <ul>
+        <li>its containers are header‑only</li>
+        <li>their inline definitions are stable and consistent</li>
+        <li>they do not depend on global configuration macros like <code>_GLIBCXX_ASSERTIONS</code></li>
+        <li>they do not mix hardened and unhardened builds</li>
+      </ul>
+
+      <p>
+        Because <code>fast_io</code> containers do not rely on hidden inline definitions
+        inside a separately compiled standard library, they are immune to the ODR
+        violations that plague <code>std::vector</code> and other standard containers
+        when mixing different build configurations.
+      </p>
+
+      <p>
+        For safety, consistency, and predictable behavior, it is recommended to prefer
+        <strong>fast_io containers</strong> over standard library containers in
+        performance‑critical or security‑sensitive code.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 9. STORAGE-CLASS AND LINKAGE RULES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>9. Every function must have a storage-class or linkage specifier</h2>
+
+      <p>
+        Modern C++ style follows a simple rule:
+      </p>
+
+      <blockquote>
+        <strong>Every function must be declared with <code>extern</code>,
+        <code>inline</code>, <code>static</code>, or placed in an unnamed
+        namespace.</strong>
+      </blockquote>
+
+      <p>
+        This determines:
+      </p>
+
+      <ul>
+        <li>linkage</li>
+        <li>visibility</li>
+        <li>ODR behavior</li>
+        <li>whether multiple definitions are allowed</li>
+        <li>whether the compiler must emit a symbol</li>
+      </ul>
+
+      <p>
+        You will learn more storage-class rules later in this tutorial, including:
+      </p>
+
+      <ul>
+        <li>every virtual function must be declared <code>virtual</code>, <code>override</code>, or <code>final</code></li>
+        <li>every function should be declared <code>noexcept</code> or <code>throws</code></li>
+        <li>if a function can be <code>constexpr</code>, it should be</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 10. INLINE AND TEMPLATES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>10. Inline and templates</h2>
+
+      <p>
+        Template functions are implicitly <strong>inline</strong>.
+      </p>
+
+<pre><code class="language-cpp">
+template &lt;typename T&gt;
+T twice(T x)
+{
+    return x + x;
+}
+</code></pre>
+
+      <p>
+        This is why templates can be defined in headers without causing
+        multiple-definition errors.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 11. INLINE AND MODULES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>11. Inline and modules</h2>
+
+      <p>
+        Module interface units (<code>.cppm</code>) behave like compiled headers.
+        Functions defined in a module interface are automatically ODR-safe across
+        translation units.
+      </p>
+
+      <p>
+        You do <strong>not</strong> need to write <code>inline</code> inside a module
+        interface:
+      </p>
+
+<pre><code class="language-cpp">
+// math.cppm
+export module math;
+
+export int square(int x)
+{
+    return x * x;   // implicitly ODR-safe
+}
+</code></pre>
+
+      <p>
+        The module system ensures that this definition is emitted only once.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 12. INLINE DOES NOT FORCE INLINING -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>12. <code>inline</code> does <em>not</em> force inlining</h2>
+
+      <p>
+        The compiler is free to inline or not inline a function regardless of the
+        <code>inline</code> keyword.
+      </p>
+
+      <p>
+        Modern compilers decide inlining based on optimization heuristics, not on
+        the presence of <code>inline</code>.
+      </p>
+
+      <p>
+        The keyword exists for <strong>linkage and ODR</strong>, not performance.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>inline</code> allows a function definition to appear in multiple translation units.</li>
+        <li>The linker <strong>discards</strong> duplicate inline definitions; it does not merge them.</li>
+        <li>Inconsistent inline definitions cause undefined behavior.</li>
+        <li>Inline functions may not generate symbols unless ODR-used.</li>
+        <li><code>-flto</code> allows global inlining and symbol elimination.</li>
+        <li>Mixing hardened and unhardened <code>libstdc++</code> builds causes real ODR violations.</li>
+        <li><strong>fast_io containers</strong> avoid these problems entirely.</li>
+        <li>Every function should have a storage-class or linkage specifier.</li>
+        <li>Templates are implicitly inline.</li>
+        <li>Module interface functions are automatically ODR-safe.</li>
+        <li><code>inline</code> does not force the compiler to inline the function body.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/07.translationunits/" class="prev-button">← Ch6.7: Translation Units</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/09.functiontemplates/" class="next-button">Ch6.9: Function Templates →</a>
+    </div>
+  </main>
+</body>
+</html>

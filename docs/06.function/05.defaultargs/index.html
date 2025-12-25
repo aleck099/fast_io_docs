@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.6: Default Arguments - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.6: Default Arguments</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        C++ allows function parameters to have <strong>default values</strong>.
+        When a caller omits an argument, the default value is used instead.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>how to define default arguments</li>
+        <li>why defaults belong in declarations, not definitions</li>
+        <li>rules for ordering parameters with defaults</li>
+        <li>how default arguments interact with overloading</li>
+        <li>when default arguments are evaluated</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. BASIC DEFAULT ARGUMENTS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Basic default arguments</h2>
+      <p>
+        A default argument is specified using <code>= value</code> in the parameter list.
+      </p>
+
+<pre><code class="language-cpp">
+void scale(int x, int factor = 2)
+{
+    ::fast_io::println(x * factor);
+}
+
+int main()
+{
+    scale(10);     // uses default factor = 2
+    scale(10, 5);  // uses factor = 5
+}
+</code></pre>
+
+      <p>
+        Default arguments work best with <strong>built‑in types</strong> because they
+        are cheap and unambiguous.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. DEFAULTS BELONG IN DECLARATIONS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Default arguments belong in declarations</h2>
+      <p>
+        Default arguments should appear in the <strong>function declaration</strong>,
+        not the definition.  
+        This avoids multiple-definition problems and keeps headers self‑contained.
+      </p>
+
+<pre><code class="language-cpp">
+// header (math.hpp)
+int power(int base, int exp = 2);
+
+// source file (math.cpp)
+int power(int base, int exp)
+{
+    int result{1};
+    for(int i{}; i &lt; exp; ++i)
+        result *= base;
+    return result;
+}
+</code></pre>
+
+      <p>
+        If you put defaults in both places, the compiler will reject the code.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. ORDERING RULES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Ordering rules for default arguments</h2>
+      <p>
+        Once a parameter has a default value, all parameters to its right must
+        also have defaults.
+      </p>
+
+<pre><code class="language-cpp">
+void f(int x = 0, int y = 0);   // ✔ OK
+void g(int x = 0, int y);       // ❌ error — y has no default
+</code></pre>
+
+      <p>
+        This rule ensures that calls remain unambiguous.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. INTERACTION WITH OVERLOADING -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Interaction with function overloading</h2>
+      <p>
+        Default arguments and overloading can interact in surprising ways.
+      </p>
+
+<pre><code class="language-cpp">
+void h(int x, int y = 0);
+void h(int x);
+</code></pre>
+
+      <p>
+        A call like <code>h(5)</code> is ambiguous:
+      </p>
+
+      <ul>
+        <li>the second overload matches directly</li>
+        <li>the first overload also matches using the default value</li>
+      </ul>
+
+      <p>
+        Avoid mixing overloads and default arguments unless the design is very clear.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. DEFAULT ARGUMENT EVALUATION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. When default arguments are evaluated</h2>
+      <p>
+        Default arguments are evaluated at the <strong>call site</strong>, not at the
+        function definition.
+      </p>
+
+<pre><code class="language-cpp">
+int next_id()
+{
+    static int counter{};
+    return ++counter;
+}
+
+void assign_id(int id = next_id());
+
+int main()
+{
+    assign_id();  // id = 1
+    assign_id();  // id = 2
+}
+</code></pre>
+
+      <p>
+        Each call evaluates the default expression again.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>Default arguments provide fallback values when callers omit parameters.</li>
+        <li>Defaults belong in declarations, not definitions.</li>
+        <li>Once a parameter has a default, all parameters to its right must also have defaults.</li>
+        <li>Default arguments are evaluated at the call site.</li>
+        <li>Mixing overloads and default arguments can cause ambiguity.</li>
+        <li>Use built‑in types for defaults; avoid heavy user‑defined types.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/04.return/" class="prev-button">← Ch6.4: Returning Values</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/06.overload/" class="next-button">Ch6.7: Function Overloading →</a>
+    </div>
+  </main>
+</body>
+</html>

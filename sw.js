@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v31.2"; // bump version here
+const CACHE_NAME = "fast_io-docs-v33"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -83,6 +83,22 @@ const urlsToCache = [
   "/docs/05.pointerscarray/14.memfunctions/",
   "/docs/05.pointerscarray/15.pointerpitfalls/",
   "/docs/05.pointerscarray/16.pointerbestpractices/",
+  "/docs/06.function/",
+  "/docs/06.function/01.whatisfunction/",
+  "/docs/06.function/02.declarationdefinition/",
+  "/docs/06.function/03.arguments/",
+  "/docs/06.function/04.return/",
+  "/docs/06.function/05.defaultargs/",
+  "/docs/06.function/06.overload/",
+  "/docs/06.function/07.translationunits/",
+  "/docs/06.function/08.inline/",
+  "/docs/06.function/09.carrayparameters/",
+  "/docs/06.function/10.fastioviews/",
+  "/docs/06.function/11.recursion/",
+  "/docs/06.function/12.functionpointers/",
+  "/docs/06.function/13.lambda/",
+  "/docs/06.function/14.higherorder/",
+  "/docs/06.function/15.bestpractices/",
 ];
 
 // Install: pre-cache resources

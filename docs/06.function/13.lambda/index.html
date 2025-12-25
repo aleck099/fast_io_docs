@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.13: Lambdas - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+
+    <h1>Ch6.13: Lambdas</h1>
+
+    <!-- ========================= -->
+    <!-- INTRODUCTION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        A <strong>lambda</strong> is a short way to write a small function directly
+        inside your code. Lambdas are useful when you need a quick function for a
+        one‑time purpose, such as a callback or a small calculation.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how to write a lambda</li>
+        <li>how to call a lambda</li>
+        <li>how captures work</li>
+        <li>how to use lambdas as callbacks</li>
+        <li>how to write recursive lambdas</li>
+        <li>why identical lambdas still generate separate code</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. BASIC LAMBDA SYNTAX -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Basic lambda syntax</h2>
+
+      <p>
+        The simplest lambda looks like this:
+      </p>
+
+<pre><code class="language-cpp">
+auto f = [] {
+    ::fast_io::println("Hello from a lambda!");
+};
+
+f(); // call it like a normal function
+</code></pre>
+
+      <p>
+        The <code>[]</code> part is called the <strong>capture list</strong>.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. LAMBDAS WITH PARAMETERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Lambdas with parameters</h2>
+
+      <p>
+        Lambdas can take parameters just like normal functions.
+      </p>
+
+<pre><code class="language-cpp">
+auto add = [](int a, int b) {
+    return a + b;
+};
+
+::fast_io::println(add(3, 4)); // prints 7
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. CAPTURES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Captures</h2>
+
+      <p>
+        Lambdas can use variables from the surrounding scope. To do this, you must
+        list them in the capture list.
+      </p>
+
+      <h3>3.1 Capture by value</h3>
+
+<pre><code class="language-cpp">
+int x = 10;
+
+auto f = [x] {
+    ::fast_io::println(x);
+};
+
+f(); // prints 10
+</code></pre>
+
+      <p>
+        The lambda stores its own copy of <code>x</code>.
+      </p>
+
+      <h3>3.2 Capture by reference</h3>
+
+<pre><code class="language-cpp">
+int x = 10;
+
+auto f = [&x] {
+    x += 1;
+};
+
+f();
+::fast_io::println(x); // prints 11
+</code></pre>
+
+      <p>
+        The lambda modifies the original variable.
+      </p>
+
+      <h3>3.3 Capture everything</h3>
+
+<pre><code class="language-cpp">
+int a = 1;
+int b = 2;
+
+auto f = [=] { return a + b; }; // capture all used variables by value
+auto g = [&] { a += b; };       // capture all used variables by reference
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. LAMBDAS AND FUNCTION POINTERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Lambdas and function pointers</h2>
+
+      <p>
+        A lambda with <strong>no captures</strong> can be used wherever a function
+        pointer is expected.
+      </p>
+
+<pre><code class="language-cpp">
+int operate(int a, int b, int (*op)(int, int))
+{
+    return op(a, b);
+}
+
+auto add = [](int a, int b) { return a + b; };
+
+::fast_io::println(operate(3, 4, add)); // OK: no captures
+</code></pre>
+
+      <p>
+        A lambda <strong>with captures</strong> cannot be used as a function pointer.
+      </p>
+
+<pre><code class="language-cpp">
+int x = 10;
+auto f = [x](int y) { return x + y; };
+
+operate(3, 4, f); // ERROR: f has captures
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. USING LAMBDAS INLINE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Using lambdas inline</h2>
+
+      <p>
+        You do not need to store a lambda in a variable. You can use it immediately.
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::println(
+    [](int a, int b) { return a * b; }(3, 4)
+); // prints 12
+</code></pre>
+
+      <p>
+        This is useful for quick one‑off operations.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. LAMBDAS AS CALLBACKS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Lambdas as callbacks</h2>
+
+      <p>
+        Lambdas are often used as callbacks. For example:
+      </p>
+
+<pre><code class="language-cpp">
+void repeat(int n, void (*f)())
+{
+    for(int i{}; i != n; ++i)
+        f();
+}
+
+repeat(3, [] { ::fast_io::println("tick"); });
+</code></pre>
+
+      <p>
+        This prints <code>tick</code> three times.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 7. RECURSIVE LAMBDAS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>7. Writing recursive lambdas</h2>
+
+      <p>
+        A lambda cannot refer to itself by name, because it has no name. If you want
+        a recursive lambda, you must store it in a variable first and then call that
+        variable inside the lambda.
+      </p>
+
+      <h3>Example: factorial</h3>
+
+<pre><code class="language-cpp">
+auto fact = [&](int n) {
+    if(n < 0)
+        ::fast_io::fast_terminate();
+    if(n == 0)
+        return 1;
+    return n * fact(n - 1); // call the variable
+};
+
+::fast_io::println(fact(5)); // prints 120
+</code></pre>
+
+      <p>
+        The <code>&amp;</code> capture is required so the lambda can call itself.
+      </p>
+
+      <h3>Example: countdown</h3>
+
+<pre><code class="language-cpp">
+auto countdown = [&](int n) {
+    if(n < 0)
+        return;
+    ::fast_io::println(n);
+    countdown(n - 1);
+};
+
+countdown(5);
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 8. IDENTICAL LAMBDAS ARE STILL DIFFERENT -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>8. Identical-looking lambdas are still different</h2>
+
+      <p>
+        Even if two lambdas look exactly the same, the compiler treats each lambda
+        expression as a separate function. For example:
+      </p>
+
+<pre><code class="language-cpp">
+auto f1 = [] { return 1; };
+auto f2 = [] { return 1; };
+auto f3 = [] { return 1; };
+</code></pre>
+
+      <p>
+        These three lambdas look identical, but they are three different functions.
+        The compiler generates separate code for each one.
+      </p>
+
+      <p>
+        If you write many lambdas inside a frequently used function, this can
+        increase the size of your program. To avoid unnecessary code growth:
+      </p>
+
+      <ul>
+        <li>reuse the same lambda instead of creating many identical ones</li>
+        <li>use a normal function when the logic is simple and repeated</li>
+        <li>avoid lambdas inside hot loops unless necessary</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Summary</h2>
+
+      <ul>
+        <li>A lambda is a short way to write a small function.</li>
+        <li>Lambdas can take parameters and return values.</li>
+        <li>Captures allow lambdas to use surrounding variables.</li>
+        <li>Captureless lambdas can be used as function pointers.</li>
+        <li>Recursive lambdas must capture themselves by reference.</li>
+        <li>Identical-looking lambdas still generate separate code.</li>
+        <li>Lambdas are ideal for callbacks and one‑off operations.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/12.functionpointers/" class="prev-button">← Ch6.12: Function Pointers</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/14.higherorder/" class="next-button">Ch6.14: Higher‑Order Functions →</a>
+    </div>
+
+  </main>
+</body>
+</html>

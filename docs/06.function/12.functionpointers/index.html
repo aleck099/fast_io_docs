@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.12: Function Pointers - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+
+    <h1>Ch6.12: Function Pointers</h1>
+
+    <!-- ========================= -->
+    <!-- INTRODUCTION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        A <strong>function pointer</strong> is a pointer that refers to a function
+        instead of data. Function pointers allow you to:
+      </p>
+
+      <ul>
+        <li>call functions indirectly</li>
+        <li>pass functions to other functions</li>
+        <li>store functions in arrays or tables</li>
+        <li>select behavior at runtime</li>
+        <li>interface with C APIs</li>
+      </ul>
+
+      <p>
+        In this chapter, you will learn how function pointers work, how to declare
+        them, how to call them, and how to print their addresses using the
+        <code>::fast_io::funcvw()</code> manipulator.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. FUNCTION TYPES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Function types</h2>
+
+      <p>
+        A function has a type based on its parameter list and return type.
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b);
+</code></pre>
+
+      <p>
+        The type of <code>add</code> is:
+      </p>
+
+<pre><code>
+int(int, int)
+</code></pre>
+
+      <p>
+        This means: “a function taking two <code>int</code>s and returning an
+        <code>int</code>.”
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. FUNCTIONS DECAY TO POINTERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Functions decay to pointers</h2>
+
+      <p>
+        Just like arrays decay to pointers, the name of a function decays to a
+        pointer to that function.
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b)
+{
+    return a + b;
+}
+
+int (*p)(int, int) = add; // function pointer
+</code></pre>
+
+      <p>
+        The type of <code>p</code> is “pointer to function taking two ints and
+        returning int.”
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. CALLING THROUGH A FUNCTION POINTER -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Calling through a function pointer</h2>
+
+      <p>
+        You can call a function pointer exactly like a normal function.
+      </p>
+
+<pre><code class="language-cpp">
+int result = p(3, 4);   // calls add(3, 4)
+</code></pre>
+
+      <p>
+        You may also write:
+      </p>
+
+<pre><code class="language-cpp">
+int result = (*p)(3, 4); // equivalent
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. PASSING FUNCTION POINTERS TO FUNCTIONS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Passing function pointers to functions</h2>
+
+      <p>
+        A function pointer can be used as a parameter type.
+      </p>
+
+<pre><code class="language-cpp">
+int operate(int a, int b, int (*op)(int, int))
+{
+    return op(a, b);
+}
+</code></pre>
+
+      <p>
+        Usage:
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b) { return a + b; }
+int mul(int a, int b) { return a * b; }
+
+::fast_io::println(operate(3, 4, add)); // 7
+::fast_io::println(operate(3, 4, mul)); // 12
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. USING TYPEDEFS OR USING ALIASES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Using <code>using</code> aliases for clarity</h2>
+
+      <p>
+        Function pointer syntax is verbose. You can simplify it with a
+        <code>using</code> alias.
+      </p>
+
+<pre><code class="language-cpp">
+using binary_op = int(*)(int, int);
+
+int operate(int a, int b, binary_op op)
+{
+    return op(a, b);
+}
+</code></pre>
+
+      <p>
+        This makes code easier to read and maintain.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. RETURNING FUNCTION POINTERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Returning function pointers</h2>
+
+      <p>
+        A function can return a function pointer.
+      </p>
+
+<pre><code class="language-cpp">
+binary_op choose(bool multiply)
+{
+    if(multiply)
+        return mul;
+    return add;
+}
+</code></pre>
+
+      <p>
+        Usage:
+      </p>
+
+<pre><code class="language-cpp">
+auto f = choose(true);
+::fast_io::println(f(3, 4)); // 12
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 7. ARRAYS OF FUNCTION POINTERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>7. Arrays of function pointers</h2>
+
+      <p>
+        You can store multiple functions in an array.
+      </p>
+
+<pre><code class="language-cpp">
+binary_op ops[2]{add, mul};
+
+::fast_io::println(ops[0](3, 4)); // add
+::fast_io::println(ops[1](3, 4)); // mul
+</code></pre>
+
+      <p>
+        This is useful for jump tables, interpreters, and dispatch systems.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 8. PRINTING FUNCTION ADDRESSES WITH fast_io::funcvw -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>8. Printing function addresses with <code>::fast_io::funcvw()</code></h2>
+
+      <p>
+        The <code>fast_io</code> library provides a special manipulator named
+        <code>funcvw()</code> that prints the address of a function or function
+        pointer. This is extremely useful for debugging, teaching, and verifying
+        that two function pointers refer to the same function.
+      </p>
+
+      <h3>Example: printing a function’s address</h3>
+
+<pre><code class="language-cpp">
+int add(int a, int b) { return a + b; }
+
+println(funcvw(add));
+</code></pre>
+
+      <p>
+        This prints the address of the <code>add</code> function.
+      </p>
+
+      <h3>Example: printing a function pointer’s address</h3>
+
+<pre><code class="language-cpp">
+int (*p)(int, int) = add;
+
+println(funcvw(p));
+</code></pre>
+
+      <p>
+        This prints the address stored in <code>p</code>. It should match the
+        address printed for <code>add</code>.
+      </p>
+
+      <p>
+        <code>funcvw()</code> works for:
+      </p>
+
+      <ul>
+        <li>function names (which decay to pointers)</li>
+        <li>function pointer variables</li>
+        <li>arrays of function pointers</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 9. WHY FUNCTION POINTERS MATTER -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>9. Why function pointers matter</h2>
+
+      <p>
+        Function pointers are essential in:
+      </p>
+
+      <ul>
+        <li>low-level C and C++ APIs</li>
+        <li>callback-based libraries</li>
+        <li>signal handlers</li>
+        <li>plugin systems</li>
+        <li>interpreters and virtual machines</li>
+        <li>jump tables for performance-critical code</li>
+      </ul>
+
+      <p>
+        They are also the foundation for more advanced features such as:
+      </p>
+
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Summary</h2>
+
+      <ul>
+        <li>Functions have types, and function names decay to pointers.</li>
+        <li>Function pointers allow calling functions indirectly.</li>
+        <li>You can pass function pointers to functions and return them.</li>
+        <li><code>using</code> aliases make function pointer syntax manageable.</li>
+        <li><code>::fast_io::funcvw()</code> prints function addresses for debugging.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/11.recursion/" class="prev-button">← Ch6.11: Recursive Functions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/13.lambdas/" class="next-button">Ch6.13: Lambdas →</a>
+    </div>
+
+  </main>
+</body>
+</html>

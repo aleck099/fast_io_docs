@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.3: Passing Arguments - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.3: Passing Arguments</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        When you call a function, you pass <strong>arguments</strong> to its
+        <strong>parameters</strong>. C++ provides several ways to pass arguments,
+        each with different behavior and performance characteristics.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>pass‑by‑value</li>
+        <li>pass‑by‑reference (<code>&amp;</code>)</li>
+        <li>pass‑by‑const‑reference (<code>T const &amp;</code>)</li>
+        <li>why some functions cannot work without references</li>
+        <li>how <code>::std::ranges::swap</code> and <code>::std::ranges::iter_swap</code> work</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. PASS BY VALUE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Pass‑by‑value</h2>
+      <p>
+        When you pass an argument <strong>by value</strong>, the function receives
+        its own <strong>copy</strong> of the argument.
+      </p>
+
+<pre><code class="language-cpp">
+void increment(int x)
+{
+    ++x;   // modifies the copy
+}
+
+int main()
+{
+    int a{5};
+    increment(a);
+    // a is still 5
+}
+</code></pre>
+
+      <p>
+        Pass‑by‑value is simple and safe, but copying large objects can be expensive.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. PASS BY REFERENCE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Pass‑by‑reference (<code>&amp;</code>)</h2>
+      <p>
+        When you pass an argument <strong>by reference</strong>, the function receives
+        an alias to the original object. No copy is made.
+      </p>
+
+<pre><code class="language-cpp">
+void increment(int &amp; x)
+{
+    ++x;   // modifies the original
+}
+
+int main()
+{
+    int a{5};
+    increment(a);
+    // a is now 6
+}
+</code></pre>
+
+      <p>
+        Pass‑by‑reference allows the function to modify the caller’s variable.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. PASS BY CONST REFERENCE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Pass‑by‑const‑reference (<code>T const &amp;</code>)</h2>
+      <p>
+        When you pass an argument by <strong>const reference</strong>, the function
+        receives a reference to the original object, but cannot modify it.
+      </p>
+
+<pre><code class="language-cpp">
+void print_twice(::fast_io::string const &amp; s)
+{
+    ::fast_io::println(s);
+    ::fast_io::println(s);
+}
+</code></pre>
+
+      <p>
+        This is ideal for large objects such as:
+      </p>
+
+      <ul>
+        <li><code>::fast_io::string</code></li>
+        <li><code>::fast_io::vector&lt;T&gt;</code></li>
+        <li>structs and classes</li>
+      </ul>
+
+      <p>
+        It avoids copying while guaranteeing that the function cannot change the data.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. WHY PASS-BY-VALUE CANNOT MODIFY CALLER -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Why pass‑by‑value cannot modify the caller (swap example)</h2>
+      <p>
+        A classic example is a <code>swap</code> function. If you write it using
+        pass‑by‑value, it will <strong>not</strong> work.
+      </p>
+
+<pre><code class="language-cpp">
+void bad_swap(int a, int b)
+{
+    int temp{a};
+    a = b;
+    b = temp;
+}
+
+int main()
+{
+    int x{10};
+    int y{20};
+
+    bad_swap(x, y);
+    // x is still 10, y is still 20
+}
+</code></pre>
+
+      <p>
+        This fails because <code>a</code> and <code>b</code> are <strong>copies</strong>.
+      </p>
+
+      <h3>Correct swap using references</h3>
+
+<pre><code class="language-cpp">
+void good_swap(int &amp; a, int &amp; b)
+{
+    int temp{a};
+    a = b;
+    b = temp;
+}
+
+int main()
+{
+    int x{10};
+    int y{20};
+
+    good_swap(x, y);
+    // x is now 20, y is now 10
+}
+</code></pre>
+
+      <p>
+        Here, <code>a</code> and <code>b</code> refer to the original variables.
+      </p>
+
+      <h3>Swap using ::std::ranges::swap (preferred for objects)</h3>
+
+<pre><code class="language-cpp">
+#include &lt;concepts&gt;  // defines ::std::ranges::swap
+
+int main()
+{
+    int x{10};
+    int y{20};
+
+    ::std::ranges::swap(x, y);
+
+    // x is now 20, y is now 10
+}
+</code></pre>
+
+      <p>
+        <code>::std::ranges::swap</code> is the modern, standard way to swap objects.
+      </p>
+
+      <h3>Swap using pointers and ::std::ranges::iter_swap</h3>
+      <p>
+        When you have pointers or iterators, use <code>::std::ranges::iter_swap</code>.
+      </p>
+
+<pre><code class="language-cpp">
+#include &lt;iterator&gt;  // defines ::std::ranges::iter_swap
+
+int main()
+{
+    int x{10};
+    int y{20};
+
+    int * px{::std::addressof(x)};
+    int * py{::std::addressof(y)};
+
+    ::std::ranges::iter_swap(px, py);  // swaps *px and *py
+
+    // x is now 20, y is now 10
+}
+</code></pre>
+
+      <p>
+        <code>::std::ranges::iter_swap</code> swaps the values pointed to by the
+        iterators or pointers.
+      </p>
+
+      <h3>Where these functions are defined</h3>
+
+<pre><code class="language-cpp">
+#include &lt;concepts&gt;  // ::std::ranges::swap
+#include &lt;iterator&gt;  // ::std::ranges::iter_swap
+</code></pre>
+
+      <p>
+        These headers provide the concepts and iterator utilities that power the
+        <code>ranges</code> versions of swap.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. WHEN TO USE WHICH -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. When to use each method</h2>
+
+      <h3>Use pass‑by‑value when:</h3>
+      <ul>
+        <li>the parameter is small (e.g., <code>int</code>, <code>double</code>)</li>
+        <li>you need a local copy anyway</li>
+      </ul>
+
+      <h3>Use pass‑by‑reference when:</h3>
+      <ul>
+        <li>the function must modify the caller’s variable</li>
+      </ul>
+
+      <h3>Use pass‑by‑const‑reference when:</h3>
+      <ul>
+        <li>the object is large</li>
+        <li>you do not want to copy it</li>
+        <li>the function should not modify it</li>
+      </ul>
+
+      <p>
+        These three forms cover almost all function parameter usage in modern C++.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li>Pass‑by‑value copies the argument.</li>
+        <li>Pass‑by‑reference allows modification of the original.</li>
+        <li>Pass‑by‑const‑reference avoids copying while preventing modification.</li>
+        <li>Use <code>T const &amp;</code> for large objects such as strings and vectors.</li>
+        <li>Pass‑by‑value is fine for small types like <code>int</code> and <code>double</code>.</li>
+        <li>A swap written with pass‑by‑value does not work.</li>
+        <li>Use <code>::std::ranges::swap</code> for objects.</li>
+        <li>Use <code>::std::ranges::iter_swap</code> for pointers and iterators.</li>
+        <li><code>::std::ranges::swap</code> is defined in <code>&lt;concepts&gt;</code>.</li>
+        <li><code>::std::ranges::iter_swap</code> is defined in <code>&lt;iterator&gt;</code>.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/02.declarationdefinition/" class="prev-button">← Ch6.2: Declarations and Definitions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/04.return/" class="next-button">Ch6.4: Returning Values →</a>
+    </div>
+  </main>
+</body>
+</html>

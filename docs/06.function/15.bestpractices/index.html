@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.15: Best Practices - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+
+    <h1>Ch6.15: Best Practices for Functions</h1>
+
+    <section>
+      <h2>1. Keep functions short and focused</h2>
+
+      <p>
+        A function should do one thing well. If a function grows too large or tries
+        to do too many things, split it into smaller functions.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Prefer clear names</h2>
+
+      <p>
+        A function name should describe what the function does. Avoid abbreviations
+        unless they are universally understood.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Avoid unnecessary lambdas</h2>
+
+      <p>
+        Lambdas are convenient, but creating many identical lambdas can increase
+        code size. Prefer reusing the same lambda or writing a normal function when
+        the logic is simple.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Use captureless lambdas for callbacks</h2>
+
+      <p>
+        Captureless lambdas can be used as function pointers. If you need captures,
+        consider whether a normal function or a different design is clearer.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Avoid deep recursion</h2>
+
+      <p>
+        Recursion uses the call stack. Deep recursion can cause stack overflow.
+        Prefer loops when the depth is large or unpredictable.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Use fast_io view types instead of raw pointers</h2>
+
+      <p>
+        <code>::fast_io::span</code>, <code>::fast_io::string_view</code>,
+        <code>::fast_io::cstring_view</code>, and
+        <code>::fast_io::index_span</code> provide safer and clearer function
+        parameters than raw pointers or C‑style arrays.
+      </p>
+    </section>
+
+    <section>
+      <h2>7. Avoid unnecessary copying</h2>
+
+      <p>
+        Pass large objects by reference when possible. Avoid copying unless you
+        truly need a separate copy.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Keep function signatures simple</h2>
+
+      <p>
+        Prefer a small number of parameters. If a function needs many parameters,
+        consider grouping related values together or rethinking the design.
+      </p>
+    </section>
+
+    <section>
+      <h2>9. Use early returns for clarity</h2>
+
+      <p>
+        Early returns can make code easier to read by handling special cases first.
+      </p>
+
+<pre><code class="language-cpp">
+int divide(int a, int b)
+{
+    if(b == 0)
+        ::fast_io::fast_terminate();
+    return a / b;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>10. Document assumptions</h2>
+
+      <p>
+        If a function assumes something (e.g., “pointer must not be null”), document
+        it clearly. This prevents misuse and makes your code easier to maintain.
+      </p>
+    </section>
+
+    <section>
+      <h2>Summary</h2>
+
+      <ul>
+        <li>Write small, focused functions.</li>
+        <li>Use clear names and simple signatures.</li>
+        <li>Prefer fast_io view types over raw pointers.</li>
+        <li>Use lambdas carefully to avoid code bloat.</li>
+        <li>Use recursion only when appropriate.</li>
+        <li>Use function pointers and captureless lambdas for callbacks.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/14.higherorder/" class="prev-button">← Ch6.14: Higher‑Order Functions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/07.compiletimeprogramming/" class="next-button">Ch7: Compile Time Programming →</a>
+    </div>
+
+  </main>
+</body>
+</html>

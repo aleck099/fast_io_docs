@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.11: Recursive Functions - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+
+    <h1>Ch6.11: Recursive Functions</h1>
+
+    <!-- ========================= -->
+    <!-- INTRODUCTION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        A <strong>recursive function</strong> is a function that calls itself.
+        Recursion is a natural way to express problems that can be broken down into
+        smaller subproblems of the same form.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what recursion is</li>
+        <li>how to write a correct recursive function</li>
+        <li>the importance of base cases</li>
+        <li>how recursion uses the call stack</li>
+        <li>why tail recursion is not guaranteed to be optimized in C++</li>
+        <li>when recursion is appropriate and when iteration is better</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. WHAT IS RECURSION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. What is recursion?</h2>
+
+      <p>
+        A recursive function solves a problem by solving a smaller version of the
+        same problem. Every recursive function must have:
+      </p>
+
+      <ul>
+        <li>a <strong>base case</strong> — when to stop</li>
+        <li>a <strong>recursive case</strong> — how to reduce the problem</li>
+      </ul>
+
+      <p>
+        Without a base case, recursion never ends and the program eventually crashes
+        due to stack exhaustion.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. SIMPLE EXAMPLE: FACTORIAL -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Example: factorial</h2>
+
+      <p>
+        The factorial function is defined mathematically as:
+      </p>
+
+      <pre><code>
+n! = n × (n - 1)!  
+0! = 1
+      </code></pre>
+
+      <p>
+        This definition is naturally recursive.
+      </p>
+
+<pre><code class="language-cpp">
+int factorial(int n)
+{
+    if(n < 0)
+        ::fast_io::fast_terminate(); // factorial is undefined for negatives
+
+    if(n == 0)
+        return 1;                    // base case
+
+    return n * factorial(n - 1);     // recursive case
+}
+</code></pre>
+
+      <p>
+        Each call reduces the problem until it reaches the base case.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. CALL STACK BEHAVIOR -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. How recursion uses the call stack</h2>
+
+      <p>
+        Every function call creates a new <strong>stack frame</strong> containing:
+      </p>
+
+      <ul>
+        <li>parameters</li>
+        <li>local variables</li>
+        <li>return address</li>
+      </ul>
+
+      <p>
+        Recursive functions create one stack frame per recursive call. For example:
+      </p>
+
+<pre><code>
+factorial(4)
+ ├─ factorial(3)
+ │   ├─ factorial(2)
+ │   │   ├─ factorial(1)
+ │   │   │   └─ factorial(0)
+</code></pre>
+
+      <p>
+        When the base case returns, the stack unwinds in reverse order.
+      </p>
+
+      <p>
+        If recursion goes too deep, the program will crash due to stack overflow.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. TAIL RECURSION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Tail recursion</h2>
+
+      <p>
+        A <strong>tail-recursive</strong> function is one where the recursive call is
+        the last operation in the function.
+      </p>
+
+<pre><code class="language-cpp">
+int sum_tail(int n, int acc)
+{
+    if(n == 0)
+        return acc;          // base case
+
+    return sum_tail(n - 1, acc + n); // tail call
+}
+</code></pre>
+
+      <p>
+        In some languages, tail recursion is optimized into a loop. However:
+      </p>
+
+      <p><strong>C++ does not guarantee tail-call optimization.</strong></p>
+
+      <p>
+        Compilers may optimize tail recursion, but you must not rely on it. If you
+        need guaranteed constant stack usage, write an explicit loop instead.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. WHEN TO USE RECURSION -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. When recursion is appropriate</h2>
+
+      <p>
+        Recursion is a good fit when:
+      </p>
+
+      <ul>
+        <li>the problem is naturally recursive (trees, graphs, divide-and-conquer)</li>
+        <li>the recursive structure matches the mathematical definition</li>
+        <li>the depth is small and predictable</li>
+      </ul>
+
+      <p>
+        Recursion is a poor fit when:
+      </p>
+
+      <ul>
+        <li>the depth may be large or unbounded</li>
+        <li>stack usage is a concern</li>
+        <li>iteration is simpler and clearer</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. MORE EXAMPLES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. More examples</h2>
+
+      <h3>6.1 Fibonacci (inefficient recursive version)</h3>
+
+<pre><code class="language-cpp">
+int fib(int n)
+{
+    if(n < 0)
+        ::fast_io::fast_terminate();
+
+    if(n <= 1)
+        return n;
+
+    return fib(n - 1) + fib(n - 2);
+}
+</code></pre>
+
+      <p>
+        This version is extremely slow because it recomputes values repeatedly.
+        Iterative or memoized versions are better.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Summary</h2>
+
+      <ul>
+        <li>A recursive function calls itself to solve smaller subproblems.</li>
+        <li>Every recursive function needs a base case and a recursive case.</li>
+        <li>Recursion uses the call stack; deep recursion risks stack overflow.</li>
+        <li>C++ does not guarantee tail-call optimization.</li>
+        <li>Use recursion when it matches the problem structure; use iteration when it is simpler or safer.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/10.fastio_views/" class="prev-button">← Ch6.10: fast_io Views</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/12.functionpointers/" class="next-button">Ch6.12: Function Pointers →</a>
+    </div>
+
+  </main>
+</body>
+</html>

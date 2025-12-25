@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.9: C-Style Array Parameters - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.9: C-Style Array Parameters</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        In C++, arrays behave differently from most other types. When you pass an
+        array to a function, the array <strong>decays</strong> into a pointer to its
+        first element. This means that functions cannot know the size of the array
+        unless you pass it explicitly.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>how arrays decay to pointers</li>
+        <li>why <code>int const arr[]</code> is exactly <code>int const* arr</code></li>
+        <li>why you should avoid the misleading <code>[]</code> syntax in parameters</li>
+        <li>how to correctly declare functions that take arrays</li>
+        <li>why array size information is lost</li>
+        <li>how multidimensional arrays work</li>
+        <li>how pointer arithmetic relates to array indexing</li>
+        <li>why C-style array parameters are unsafe</li>
+        <li>why <code>::fast_io::array</code> and <code>::fast_io::vector</code> are safer alternatives</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. ARRAYS DECAY TO POINTERS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Arrays decay to pointers</h2>
+
+      <p>
+        When you pass an array to a function, it automatically converts (decays)
+        into a pointer to its first element.
+      </p>
+
+<pre><code class="language-cpp">
+void print_first(int const* p)
+{
+    ::fast_io::println("first element = ", *p);
+}
+
+int main()
+{
+    int arr[3]{10, 20, 30};
+    print_first(arr);  // arr decays to int*
+}
+</code></pre>
+
+      <p>
+        Inside <code>print_first</code>, the function has no idea how large the
+        original array was.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. DO NOT LET [] FOOL YOU -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Do not let <code>[]</code> fool you</h2>
+
+      <p>
+        In a function parameter list, the syntax <code>int arr[]</code> or
+        <code>int const arr[]</code> does <strong>not</strong> mean “an array is
+        passed.” It is simply another way of writing a pointer.
+      </p>
+
+      <p>
+        These three declarations are <strong>100% identical</strong>:
+      </p>
+
+<pre><code class="language-cpp">
+void f(int const arr[]);
+void f(int const arr[10]);
+void f(int const* arr);
+</code></pre>
+
+      <p>
+        All three mean:
+      </p>
+
+      <blockquote>
+        <strong>“f takes a pointer to const int.”</strong>
+      </blockquote>
+
+      <p>
+        The brackets in a function parameter list do not preserve array size and do
+        not change the type. They exist only for readability.
+      </p>
+
+      <p>
+        In this tutorial, we will <strong>avoid</strong> the misleading
+        <code>arr[]</code> syntax in real code, but we will still show it in examples
+        when teaching pitfalls—because you will see it in the wild.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. ARRAY SIZE IS LOST -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Array size is lost</h2>
+
+      <p>
+        Because arrays decay to pointers, the function cannot know the array size.
+      </p>
+
+      <p>
+        This example intentionally uses <code>int const arr[]</code> to demonstrate
+        the trap:
+      </p>
+
+<pre><code class="language-cpp">
+void print_size(int const arr[])
+{
+    ::fast_io::println(sizeof(arr));
+    // prints sizeof(int*) — NOT the size of the array!
+}
+</code></pre>
+
+      <p>
+        This is why you should not use <code>arr[]</code> in real code.
+      </p>
+
+      <p>
+        You must pass the size explicitly:
+      </p>
+
+<pre><code class="language-cpp">
+void print_all(int const* arr, std::size_t n)
+{
+    for(std::size_t i{}; i != n; ++i)
+        ::fast_io::println(arr[i]);
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. MULTIDIMENSIONAL ARRAYS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Multidimensional arrays</h2>
+
+      <p>
+        Only the first dimension decays. The remaining dimensions must be known.
+      </p>
+
+<pre><code class="language-cpp">
+void print_matrix(int const (*arr)[4], std::size_t rows)
+{
+    for(std::size_t r{}; r != rows; ++r)
+        for(std::size_t c{}; c != 4; ++c)
+            ::fast_io::print(arr[r][c], ' ');
+}
+</code></pre>
+
+      <p>
+        This is valid because the compiler knows the size of each row.
+      </p>
+
+      <p>
+        But this is invalid:
+      </p>
+
+<pre><code class="language-cpp">
+void bad(int const arr[][]);  // ❌ error — second dimension unknown
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. POINTER ARITHMETIC -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Pointer arithmetic</h2>
+
+      <p>
+        Inside a function, array indexing is just pointer arithmetic:
+      </p>
+
+<pre><code class="language-cpp">
+void demo(int const* p)
+{
+    ::fast_io::println(p[2]);   // same as *(p + 2)
+}
+</code></pre>
+
+      <p>
+        This is why C-style array parameters are powerful but also dangerous.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. CONST CORRECTNESS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Const correctness</h2>
+
+      <p>
+        If the function should not modify the array, use <code>int const*</code>.
+      </p>
+
+<pre><code class="language-cpp">
+void print_all(int const* arr, std::size_t n);
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 7. WHY C-STYLE ARRAY PARAMETERS ARE UNSAFE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>7. Why C-style array parameters are unsafe</h2>
+
+      <p>
+        C-style array parameters have several problems:
+      </p>
+
+      <ul>
+        <li>the size is lost</li>
+        <li>no bounds checking</li>
+        <li>no ownership information</li>
+        <li>easy to accidentally overflow</li>
+        <li>easy to mismatch pointer types</li>
+      </ul>
+
+      <p>
+        For these reasons, modern C++ code avoids raw array parameters whenever
+        possible.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 8. USE FAST_IO CONTAINERS INSTEAD -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>8. Prefer <code>::fast_io::array</code> and <code>::fast_io::vector</code></h2>
+
+      <p>
+        The <code>fast_io</code> library provides safer, less verbose containers that
+        can be passed into or returned from functions easily.
+      </p>
+
+      <h3>Fixed-size arrays</h3>
+
+<pre><code class="language-cpp">
+void process(::fast_io::array&lt;int, 4&gt; arr)
+{
+    for(auto e : arr)
+        ::fast_io::println(e);
+}
+</code></pre>
+
+      <h3>Dynamic-size arrays</h3>
+
+<pre><code class="language-cpp">
+void process(::fast_io::vector&lt;int&gt; v)
+{
+    for(auto e : v)
+        ::fast_io::println(e);
+}
+</code></pre>
+
+      <h3>Returning a vector</h3>
+
+<pre><code class="language-cpp">
+::fast_io::vector&lt;::std::size_t&gt; make_sequence(std::size_t n)
+{
+    ::fast_io::vector&lt;::std::size_t&gt; v;
+
+    for(std::size_t i{}; i != n; ++i)
+        v.push_back(i);
+
+    return v;  // efficient: NRVO + move semantics
+}
+</code></pre>
+
+      <h3>Passing a vector by const reference</h3>
+
+<pre><code class="language-cpp">
+void process(::fast_io::vector&lt;int&gt; const& v)
+{
+    for(auto e : v)
+        ::fast_io::println(e);
+}
+</code></pre>
+
+      <p>
+        These containers:
+      </p>
+
+      <ul>
+        <li>carry their size with them</li>
+        <li>are easy to pass by value or reference</li>
+        <li>avoid pointer decay</li>
+        <li>avoid ODR issues caused by standard library containers</li>
+        <li>are header-only and consistent across translation units</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 9. COST OF PASSING BY VALUE VS REFERENCE -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>9. Cost of passing by value vs passing by reference</h2>
+
+      <p>
+        Understanding the cost of parameter passing helps you write efficient code.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Pass by value</th>
+            <th>Pass by reference</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>int const arr[]</code> / <code>int const* arr</code></td>
+            <td>cheap (pointer copy)</td>
+            <td>cheap (reference copy)</td>
+          </tr>
+          <tr>
+            <td><code>::fast_io::vector&lt;T&gt;</code></td>
+            <td>cheap (3-pointer struct)</td>
+            <td>cheapest</td>
+          </tr>
+          <tr>
+            <td><code>::fast_io::array&lt;T, N&gt;</code></td>
+            <td>copies all N elements</td>
+            <td>cheap</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        <code>::fast_io::vector</code> is designed to be cheap to pass around. It
+        behaves like a small struct containing three pointers (begin, end, capacity).
+      </p>
+
+      <p>
+        <code>::fast_io::array</code> is fixed-size, so passing it by value copies
+        all elements. Passing by reference avoids this cost.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+
+      <ul>
+        <li>Arrays decay to pointers when passed to functions.</li>
+        <li><code>int const arr[]</code> is exactly <code>int const* arr</code>.</li>
+        <li>Array size information is lost; you must pass it explicitly.</li>
+        <li>Only the first dimension of a multidimensional array decays.</li>
+        <li>Array indexing is pointer arithmetic.</li>
+        <li>C-style array parameters are unsafe and error-prone.</li>
+        <li><code>::fast_io::array</code> and <code>::fast_io::vector</code> are safer, less verbose alternatives.</li>
+        <li>Passing <code>::fast_io::vector</code> by value is cheap; passing by reference is cheapest.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/08.inline/" class="prev-button">← Ch6.8: Inline Functions</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/10.functionpointers/" class="next-button">Ch6.10: Function Pointers →</a>
+    </div>
+  </main>
+</body>
+</html>

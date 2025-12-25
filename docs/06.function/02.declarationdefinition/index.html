@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.2: Declarations and Definitions - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.2: Declarations and Definitions</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        In C++, every function must be <strong>declared</strong> before it is used.
+        A function may also be <strong>defined</strong> separately. Understanding the
+        difference between declarations and definitions is essential for organizing
+        code across multiple files, and even in small programs it helps clarify how
+        the compiler reads your code.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>what a function declaration is</li>
+        <li>what a function definition is</li>
+        <li>why declarations are needed</li>
+        <li>how declarations enable calling functions before their definitions</li>
+        <li>why declarations usually go in headers</li>
+        <li>why <code>int x();</code> is a function declaration, not a variable</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Function definition</h2>
+      <p>
+        A <strong>definition</strong> provides the full body of the function.
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        This both <em>declares</em> and <em>defines</em> the function.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Function declaration</h2>
+      <p>
+        A <strong>declaration</strong> tells the compiler that a function exists,
+        but does not provide the body.
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b);   // declaration
+</code></pre>
+
+      <p>
+        A declaration ends with a semicolon and has no body.
+      </p>
+
+      <p>
+        Later, the function is defined:
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b)    // definition
+{
+    return a + b;
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Why declarations are needed</h2>
+      <p>
+        The compiler reads your program from top to bottom.  
+        If you call a function before the compiler has seen it, you must provide a
+        declaration first.
+      </p>
+
+<pre><code class="language-cpp">
+#include &lt;fast_io.h&gt;
+
+int add(int a, int b);   // declaration
+
+int main()
+{
+    using namespace ::fast_io::iomnp;
+    println(add(3, 4));  // OK
+}
+
+int add(int a, int b)    // definition
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        Without the declaration, the call inside <code>main</code> would be an error.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Declarations usually go in headers</h2>
+      <p>
+        In real projects, declarations are placed in <strong>header files</strong>
+        (<code>.h</code> or <code>.hpp</code>), and definitions go in
+        <strong>source files</strong> (<code>.cpp</code>).
+      </p>
+
+<pre><code class="language-text">
+math.hpp:
+-----------
+int add(int a, int b);
+
+math.cpp:
+-----------
+int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        This allows multiple source files to use the same function by including the
+        header.
+      </p>
+    </section>
+
+    <section>
+      <h3>4.1 A common mistake: <code>int x();</code> is a function declaration</h3>
+      <p>
+        In C++, the syntax <code>int x();</code> does <strong>not</strong> create a
+        variable. It declares a <strong>function</strong> named <code>x</code> that
+        takes no arguments and returns an <code>int</code>.
+      </p>
+
+<pre><code class="language-cpp">
+int main()
+{
+    int x();                 // ❌ NOT a variable — this declares a function
+    ::fast_io::string str(); // ❌ also a function declaration
+}
+</code></pre>
+
+      <p>
+        This rule applies to <strong>any</strong> type, including user‑defined types and
+        <code>::fast_io::string</code>.
+      </p>
+
+      <h4>Correct ways to define variables</h4>
+
+      <p><strong>For built‑in types:</strong></p>
+
+<pre><code class="language-cpp">
+int x{};   // ✔ value-initialized variable
+</code></pre>
+
+      <p><strong>For <code>::fast_io::string</code>:</strong></p>
+
+<pre><code class="language-cpp">
+::fast_io::string str;   // ✔ default-constructed string
+</code></pre>
+
+      <p>
+        In modern C++, prefer <code>{}</code> initialization for built‑in types to avoid
+        confusion with function declarations.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Summary</h2>
+      <ul>
+        <li>A <strong>declaration</strong> introduces a function’s name, parameters, and return type.</li>
+        <li>A <strong>definition</strong> provides the function body.</li>
+        <li>A definition also counts as a declaration.</li>
+        <li>You need a declaration before calling a function.</li>
+        <li>Declarations usually go in headers; definitions go in source files.</li>
+        <li><code>int x();</code> declares a function, not a variable.</li>
+        <li>Use <code>{}</code> for built‑in variable initialization.</li>
+        <li>Use <code>::fast_io::string str;</code> to create a string variable.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/01.whatisfunction/" class="prev-button">← Ch6.1: What is a Function?</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/03.arguments/" class="next-button">Ch6.3: Passing Arguments →</a>
+    </div>
+  </main>
+</body>
+</html>

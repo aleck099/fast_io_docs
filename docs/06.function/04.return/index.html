@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch6.4: Returning Values - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch6.4: Returning Values</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        A function may produce a value and give it back to the caller using the
+        <code>return</code> statement. Understanding how return values work is
+        essential for writing meaningful functions.
+      </p>
+
+      <p>In this chapter, you will learn:</p>
+
+      <ul>
+        <li>how <code>return</code> works</li>
+        <li>how to return built‑in types</li>
+        <li>how to return objects</li>
+        <li>how early returns work</li>
+        <li>why returning references is sometimes useful</li>
+        <li>why returning references to local variables is always wrong</li>
+      </ul>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 1. BASIC RETURN -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>1. Basic return</h2>
+      <p>
+        A function with a non‑void return type must return a value.
+      </p>
+
+<pre><code class="language-cpp">
+int add(int a, int b)
+{
+    return a + b;
+}
+</code></pre>
+
+      <p>
+        The expression after <code>return</code> becomes the value of the function call.
+      </p>
+
+<pre><code class="language-cpp">
+int x = add(3, 4);   // x == 7
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 2. RETURNING OBJECTS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>2. Returning objects</h2>
+      <p>
+        Functions can return objects just like they return integers.
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::string greet()
+{
+    return ::fast_io::string("Hello from fast_io!");
+}
+
+int main()
+{
+    ::fast_io::string s = greet();
+    ::fast_io::println(s);
+}
+</code></pre>
+
+      <p>
+        Modern C++ performs return value optimization (RVO), so returning objects is efficient.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 3. EARLY RETURN -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>3. Early return</h2>
+      <p>
+        A function may contain multiple <code>return</code> statements.  
+        The first one that executes ends the function immediately.
+      </p>
+
+<pre><code class="language-cpp">
+int classify(int x)
+{
+    if(x &lt; 0)
+        return -1;
+
+    if(x == 0)
+        return 0;
+
+    return 1;
+}
+</code></pre>
+
+      <p>
+        Early returns are often clearer than deeply nested <code>if</code> statements.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 4. RETURNING REFERENCES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>4. Returning references</h2>
+      <p>
+        A function may return a reference.  
+        This allows the caller to access or modify the original object.
+      </p>
+
+<pre><code class="language-cpp">
+int &amp; max_ref(int &amp; a, int &amp; b)
+{
+    return (a &gt; b) ? a : b;
+}
+
+int main()
+{
+    int x{10};
+    int y{20};
+
+    int &amp; r = max_ref(x, y);
+    r = 100;   // modifies y
+
+    // x == 10, y == 100
+}
+</code></pre>
+
+      <p>
+        Returning references is powerful, but must be used carefully.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 5. NEVER RETURN REFERENCES TO LOCALS -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>5. Never return references to local variables</h2>
+      <p>
+        A local variable is destroyed when the function ends.  
+        Returning a reference to it creates a dangling reference.
+      </p>
+
+<pre><code class="language-cpp">
+int &amp; bad()
+{
+    int x{42};
+    return x;   // ❌ ERROR — x is destroyed when the function ends
+}
+</code></pre>
+
+      <p>
+        Using such a reference is undefined behavior.
+      </p>
+
+      <p>
+        If you need to return a value, return it by value instead:
+      </p>
+
+<pre><code class="language-cpp">
+int good()
+{
+    int x{42};
+    return x;   // ✔ OK — returns a copy
+}
+</code></pre>
+    </section>
+
+    <!-- ========================= -->
+    <!-- 6. RETURNING CONST REFERENCES -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>6. Returning <code>T const &amp;</code></h2>
+      <p>
+        Returning a <strong>const reference</strong> is useful when:
+      </p>
+
+      <ul>
+        <li>the object is large</li>
+        <li>the object lives longer than the function call</li>
+        <li>you want to avoid copying</li>
+      </ul>
+
+<pre><code class="language-cpp">
+::fast_io::string const &amp; get_global()
+{
+    static ::fast_io::string g("Hello");
+    return g;   // ✔ OK — static objects live for the entire program
+}
+</code></pre>
+
+      <p>
+        Returning a reference to a static object is safe because it never goes out of scope.
+      </p>
+    </section>
+
+    <!-- ========================= -->
+    <!-- SUMMARY -->
+    <!-- ========================= -->
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>return</code> ends the function and produces a value.</li>
+        <li>Functions can return built‑in types or objects.</li>
+        <li>Early returns improve clarity.</li>
+        <li>Returning references allows modifying the original object.</li>
+        <li>Never return references to local variables.</li>
+        <li>Returning <code>T const &amp;</code> is useful for large, long‑lived objects.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/06.function/03.arguments/" class="prev-button">← Ch6.3: Passing Arguments</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/06.function/05.defaultargs/" class="next-button">Ch6.5: Default Arguments →</a>
+    </div>
+  </main>
+</body>
+</html>
