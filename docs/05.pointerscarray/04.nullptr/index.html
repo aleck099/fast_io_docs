@@ -133,7 +133,8 @@ Memory:   [ null ]   ← p stores “no address”
       </p>
 
 <pre><code class="language-cpp">
-#include <fast_io.h>
+#include &lt;fast_io.h&gt;
+#include &lt;cstddef&gt;
 
 std::nullptr_t np = nullptr;
 println(np);     // prints: nullptr
@@ -145,7 +146,7 @@ println(np);     // prints: nullptr
       </p>
 
 <pre><code class="language-cpp">
-#include <fast_io.h>
+#include &lt;fast_io.h&gt;
 using namespace ::fast_io::iomnp;
 
 println(pointervw(nullptr));

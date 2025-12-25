@@ -36,12 +36,12 @@ label:
       <h2>Basic Example</h2>
 
       <pre><code class="language-cpp">
-println("A");
+print("A\n");
 goto skip;
-println("B");   // skipped
+print("B\n");   // skipped
 
 skip:
-println("C");
+print("C\n");
 </code></pre>
 
       <p>
@@ -64,10 +64,10 @@ C
       <pre><code class="language-cpp">
 goto end;
 
-println("never printed");
+print("never printed\n");
 
 end:
-println("done");
+print("done\n");
 </code></pre>
 
       <h3>Backward jump (loop-like)</h3>

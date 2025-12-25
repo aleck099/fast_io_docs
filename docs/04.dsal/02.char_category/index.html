@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch4.2: ::fast_io::char_category - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch4.2: ::fast_io::char_category</h1>
+
+    <section>
+      <h2>Overview</h2>
+      <p>
+        The <code>::fast_io::char_category</code> module provides a set of
+        <strong>constexpr character classification and transformation functions</strong>.
+        These functions determine whether a character is lowercase, uppercase, a digit,
+        whitespace, punctuation, and more.
+      </p>
+
+      <p>
+        All functions follow the <strong>execution charset</strong> of the program.
+        This ensures correct behavior on both ASCII-based and EBCDIC-based systems.
+      </p>
+    </section>
+
+    <section>
+      <h2>1. Source charset vs execution charset</h2>
+      <p>
+        C++ distinguishes between:
+      </p>
+
+      <ul>
+        <li><strong>source charset</strong> — how characters in your source file are encoded</li>
+        <li><strong>execution charset</strong> — how characters are represented at runtime</li>
+      </ul>
+
+      <p>
+        <code>::fast_io::char_category</code> always uses the <strong>execution charset</strong>.
+      </p>
+
+      <p>
+        This means:
+      </p>
+
+      <ul>
+        <li>If <code>'A'</code> has value <code>0x41</code>, ASCII rules apply.</li>
+        <li>If <code>'A'</code> has an EBCDIC value (not <code>0x41</code>), EBCDIC rules apply.</li>
+        <li>All other charsets (UTF‑8, GB18030, Shift‑JIS, etc.) use the ASCII rule for
+            code points <code>[0, 127]</code>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. ::fast_io::char_literal_v and char_literal</h2>
+      <p>
+        The primary way to create a character constant that respects the execution
+        charset is <code>::fast_io::char_literal_v</code>. It takes a <code>char8_t</code>
+        value at compile time and produces a character in the execution charset.
+      </p>
+
+<pre><code class="language-cpp">
+char c = ::fast_io::char_literal_v&lt;u8'a', char&gt;;
+</code></pre>
+
+      <p>
+        Use this form whenever you have a compile‑time character literal.
+      </p>
+
+      <p>
+        There is also a function form <code>::fast_io::char_literal</code> that takes
+        a <code>char8_t</code> value at runtime:
+      </p>
+
+<pre><code class="language-cpp">
+char8_t runtime_ch{/* ... */};
+char c = ::fast_io::char_literal&lt;char&gt;(runtime_ch);
+</code></pre>
+
+      <p>
+        This version is more flexible but may be slower, because it must execute at
+        runtime. Prefer <code>char_literal_v</code> when you have a literal known at
+        compile time.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. ::fast_io::arithmetic_char_literal_v and arithmetic_char_literal</h2>
+      <p>
+        <code>::fast_io::arithmetic_char_literal</code> behaves like
+        <code>char_literal</code>, but is intended for arithmetic expressions,
+        especially when <code>wchar_t</code> uses a non‑UTF execution charset.
+      </p>
+
+<pre><code class="language-cpp">
+char8_t runtime_ch{/* ... */};
+char c = ::fast_io::arithmetic_char_literal&lt;char&gt;(runtime_ch);
+</code></pre>
+
+      <p>
+        The shorthand form <code>arithmetic_char_literal_v</code> is the
+        compile‑time variant:
+      </p>
+
+<pre><code class="language-cpp">
+wchar_t w = ::fast_io::arithmetic_char_literal_v&lt;u8'b', wchar_t&gt;;
+</code></pre>
+
+      <p>
+        Use <code>arithmetic_char_literal_v</code> when you have a compile‑time
+        <code>char8_t</code> literal and need a value suitable for arithmetic in
+        the execution charset.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Basic classification</h2>
+      <p>
+        Each classification function takes a single character and returns
+        <code>true</code> or <code>false</code>.
+      </p>
+
+<pre><code class="language-cpp">
+bool b1 = ::fast_io::char_category::is_c_lower('a');
+bool b2 = ::fast_io::char_category::is_c_upper('A');
+bool b3 = ::fast_io::char_category::is_c_digit('7');
+bool b4 = ::fast_io::char_category::is_c_space(' ');
+</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Using char_category with ::fast_io::string</h2>
+      <p>
+        <code>::fast_io::string</code> stores characters contiguously, so you can
+        iterate through it and apply any classification function.
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello World"};
+
+for(char ch : s)
+{
+    if(::fast_io::char_category::is_c_lower(ch))
+    {
+        // lowercase letter
+    }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>6. Example: counting lowercase letters</h2>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello fast_io!"};
+
+std::size_t count{};
+
+for(char ch : s)
+{
+    if(::fast_io::char_category::is_c_lower(ch))
+    {
+        ++count;
+    }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>7. Why not compare ranges directly?</h2>
+      <p>
+        You might try to detect lowercase letters by comparing against a range:
+      </p>
+
+<pre><code class="language-cpp">
+if(ch &gt;= ::fast_io::char_literal_v&lt;u8'a', char&gt; &&
+   ch &lt;= ::fast_io::char_literal_v&lt;u8'z', char&gt;)
+{
+    ++count;
+}
+</code></pre>
+
+      <p>
+        Even though this uses <code>char_literal_v</code> and respects the execution
+        charset for the endpoints, it still assumes that all lowercase letters form
+        a single contiguous range. This is true for ASCII, but it is <strong>not</strong>
+        guaranteed for all execution charsets (such as EBCDIC).
+      </p>
+
+      <p>
+        Always prefer:
+      </p>
+
+<pre><code class="language-cpp">
+if(::fast_io::char_category::is_c_lower(ch))
+{
+    ++count;
+}
+</code></pre>
+
+      <p>
+        <code>is_c_lower</code> is implemented with correct knowledge of the execution
+        charset and does not rely on naïve range assumptions.
+      </p>
+    </section>
+
+    <section>
+      <h2>8. Example: filtering alphabetic characters</h2>
+
+<pre><code class="language-cpp">
+::fast_io::string input{"Hello 123 World!"};
+::fast_io::string letters{};
+
+for(char ch : input)
+{
+    if(::fast_io::char_category::is_c_alpha(ch))
+    {
+        letters.push_back(ch);
+    }
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. Transforming an entire string</h2>
+      <p>
+        The <code>::fast_io::char_category::ranges</code> namespace provides
+        functions that operate on an entire range at once.
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello FAST_IO!"};
+
+::fast_io::char_category::ranges::to_c_lower(s);
+</code></pre>
+
+      <p>
+        After this call, <code>s</code> becomes <code>"hello fast_io!"</code>.
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::char_category::ranges::to_c_upper(s);
+::fast_io::char_category::ranges::to_c_halfwidth(s);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>10. Character classification functions</h2>
+
+      <table>
+        <thead>
+          <tr><th>Function</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>is_c_alnum</code></td><td>Letter or digit</td></tr>
+          <tr><td><code>is_c_alpha</code></td><td>Alphabetic letter</td></tr>
+          <tr><td><code>is_c_blank</code></td><td>Space or tab</td></tr>
+          <tr><td><code>is_c_cntrl</code></td><td>Control character</td></tr>
+          <tr><td><code>is_c_digit</code></td><td>Digit 0–9</td></tr>
+          <tr><td><code>is_c_fullwidth</code></td><td>Full‑width character</td></tr>
+          <tr><td><code>is_c_graph</code></td><td>Visible (non‑space) character</td></tr>
+          <tr><td><code>is_c_halfwidth</code></td><td>Half‑width character</td></tr>
+          <tr><td><code>is_c_lower</code></td><td>Lowercase letter</td></tr>
+          <tr><td><code>is_c_print</code></td><td>Printable character</td></tr>
+          <tr><td><code>is_c_punct</code></td><td>Punctuation</td></tr>
+          <tr><td><code>is_c_space</code></td><td>Whitespace</td></tr>
+          <tr><td><code>is_c_upper</code></td><td>Uppercase letter</td></tr>
+          <tr><td><code>is_c_xdigit</code></td><td>Hex digit</td></tr>
+          <tr><td><code>is_html_whitespace</code></td><td>HTML whitespace</td></tr>
+          <tr><td><code>is_dos_file_invalid_character</code></td><td>Invalid in DOS filenames</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>11. Character transformation functions</h2>
+
+      <table>
+        <thead>
+          <tr><th>Function</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>to_c_lower</code></td><td>Convert a single character to lowercase</td></tr>
+          <tr><td><code>to_c_upper</code></td><td>Convert a single character to uppercase</td></tr>
+          <tr><td><code>to_c_halfwidth</code></td><td>Convert a single character to half‑width</td></tr>
+
+          <tr><td><code>ranges::to_c_lower</code></td><td>Convert an entire range to lowercase</td></tr>
+          <tr><td><code>ranges::to_c_upper</code></td><td>Convert an entire range to uppercase</td></tr>
+          <tr><td><code>ranges::to_c_halfwidth</code></td><td>Convert an entire range to half‑width</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>12. Using char_category_family and char_category_traits</h2>
+
+      <h3>12.1 char_category_family definition</h3>
+
+<pre><code class="language-cpp">
+enum class char_category_family : ::std::uint_least32_t
+{
+    c_alnum,                    // Alphanumeric characters (letters and digits)
+    c_alpha,                    // Alphabetic Character
+    c_blank,                    // Space or tab
+    c_cntrl,                    // Control characters (ASCII 0x00-0x1F, 0x7F or EBCDIC equivalents)
+    c_digit,                    // Numeric digits (0-9)
+    c_fullwidth,                // Full-width character
+    c_graph,                    // Graphical characters (alphanumeric + punctuation)
+    c_halfwidth,                // Half-width character
+    c_lower,                    // Lowercase alphabetic characters
+    c_print,                    // Printable characters (includes space)
+    c_punct,                    // Punctuation characters
+    c_space,                    // Whitespace characters (space, tab, newline, etc.)
+    c_upper,                    // Uppercase alphabetic characters
+    c_xdigit,                   // Hexadecimal digits (0-9, A-F, a-f)
+    dos_file_invalid_character, // DOS Path invalid character
+    html_whitespace             // HTML whitespace
+};
+</code></pre>
+
+      <h3>12.2 Creating a classifier</h3>
+
+<pre><code class="language-cpp">
+using lower_pred =
+    ::fast_io::char_category::char_category_traits&lt;
+        ::fast_io::char_category::char_category_family::c_lower,
+        false
+    &gt;;
+
+lower_pred pred{};
+bool a = pred('a');   // true
+bool b = pred('Z');   // false
+</code></pre>
+
+      <h3>12.3 Negated classifiers</h3>
+
+<pre><code class="language-cpp">
+using not_lower_pred =
+    ::fast_io::char_category::char_category_traits&lt;
+        ::fast_io::char_category::char_category_family::c_lower,
+        true
+    &gt;;
+
+not_lower_pred pred{};
+bool a = pred('A');   // true (because 'A' is NOT lowercase)
+</code></pre>
+
+      <h3>12.4 Using traits with ::fast_io::string</h3>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"Hello 123 World"};
+
+using digit_pred =
+    ::fast_io::char_category::char_category_traits&lt;
+        ::fast_io::char_category::char_category_family::c_digit,
+        false
+    &gt;;
+
+auto it = digit_pred::find(s.begin(), s.end());
+if(it != s.end())
+{
+    // *it is the first digit in the string
+}
+</code></pre>
+
+      <p>
+        This gives you a flexible, generic way to classify and search text while
+        still respecting the execution charset.
+      </p>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+      <ul>
+        <li><code>::fast_io::char_category</code> always follows the execution charset.</li>
+        <li>EBCDIC systems use EBCDIC rules; all other systems use ASCII rules for code points <code>[0,127]</code>.</li>
+        <li><code>char_literal_v</code> is the primary way to create execution‑charset literals from <code>char8_t</code>.</li>
+        <li><code>char_literal</code> and <code>arithmetic_char_literal</code> are for runtime <code>char8_t</code> values.</li>
+        <li><code>arithmetic_char_literal_v</code> is useful for arithmetic with wide characters.</li>
+        <li>Classification and transformation functions are <strong>constexpr</strong> and predictable.</li>
+        <li>Range‑based functions let you transform entire strings in place.</li>
+        <li>Avoid manual range checks; use <code>is_c_lower</code> and related functions instead.</li>
+        <li><code>char_category_family</code> and <code>char_category_traits</code> let you build generic, execution‑charset‑aware predicates.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/04.dsal/01.string/" class="prev-button">← Ch4.1: string</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/04.dsal/03.vector/" class="next-button">Ch4.3: vector →</a>
+    </div>
+  </main>
+</body>
+</html>

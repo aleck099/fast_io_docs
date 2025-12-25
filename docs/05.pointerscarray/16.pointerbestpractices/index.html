@@ -95,7 +95,7 @@ int *p = ::std::to_address(it);   // ✔ universal pointer extraction
 
 <pre><code class="language-cpp">
 float f{1.0f};
-std::uint32_t u = ::std::bit_cast<std::uint32_t>(f);   // ✔ safe
+std::uint32_t u = ::std::bit_cast&lt;std::uint32_t&gt;(f);   // ✔ safe
 </code></pre>
     </section>
 

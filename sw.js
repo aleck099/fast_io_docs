@@ -1,4 +1,4 @@
-const CACHE_NAME = "fast_io-docs-v29.4"; // bump version here
+const CACHE_NAME = "fast_io-docs-v30"; // bump version here
 const urlsToCache = [
   "/",
   "/style.css",
@@ -62,9 +62,10 @@ const urlsToCache = [
   "/docs/03.statements/15.featuretesting/",
   "/docs/04.dsal/",
   "/docs/04.dsal/01.string/",
-  "/docs/04.dsal/02.vector/",
-  "/docs/04.dsal/03.array/",
-  "/docs/04.dsal/04.multidcontainers/",
+  "/docs/04.dsal/02.char_category/",
+  "/docs/04.dsal/03.vector/",
+  "/docs/04.dsal/04.array/",
+  "/docs/04.dsal/05.multidcontainers/",
   "/docs/05.pointerscarray/",
   "/docs/05.pointerscarray/01.address/",
   "/docs/05.pointerscarray/02.pointerbasics/",

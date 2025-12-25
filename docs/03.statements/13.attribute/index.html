@@ -164,9 +164,9 @@ void f();
 
       <pre><code class="language-cpp">
 if (x > 0) [[likely]] {
-    println("positive");
+    print("positive\n");
 } else [[unlikely]] {
-    println("non-positive");
+    print("non-positive\n");
 }
 </code></pre>
 
@@ -226,7 +226,7 @@ if (x > 0) [[likely]] {
         <li><strong>Attributes provide hints:</strong> they do not change program meaning.</li>
         <li><strong>Standard syntax:</strong> <code>[[attribute]]</code>.</li>
         <li><strong>Multiple attributes:</strong> <code>[[a, b]]</code> or stacked blocks.</li>
-        <li><strong>Namespaces:</strong> <code>std::</code>, <code>gnu::</code>, <code>clang::</code>, <code>msvc::</code>.</li>
+        <li><strong>Namespaces:</strong> <code>gnu::</code>, <code>clang::</code>, <code>msvc::</code>.</li>
         <li><strong>Using-attribute syntax:</strong> <code>[[using CC: opt(1), debug]]</code>.</li>
         <li><strong>Statement attributes:</strong> <code>if (cond) [[likely]] { ... }</code>.</li>
         <li><strong>Standard attributes:</strong> list included.</li>

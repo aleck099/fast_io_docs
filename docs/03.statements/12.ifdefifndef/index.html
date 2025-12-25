@@ -39,11 +39,11 @@
 
       <pre><code class="language-cpp">
 #ifdef DEBUG
-println("debug mode");
+print("debug mode\n");
 #endif
 
 #ifndef RELEASE
-println("not release mode");
+print("not release mode\n");
 #endif
 </code></pre>
     </section>
@@ -54,11 +54,11 @@ println("not release mode");
 
       <pre><code class="language-cpp">
 #if defined(FAST_IO)
-println("fast_io enabled");
+print("fast_io enabled\n");
 #elif defined(USE_SIMD)
-println("SIMD enabled");
+print("SIMD enabled\n");
 #else
-println("default configuration");
+print("default configuration\n");
 #endif
 </code></pre>
 
@@ -157,7 +157,7 @@ void f();
 static constexpr auto data =
 #embed "resource.bin";
 #else
-println("embed not supported");
+print("embed not supported\n");
 #endif
 </code></pre>
 
@@ -175,7 +175,7 @@ println("embed not supported");
       </p>
 
       <pre><code class="language-cpp">
-#include <cassert>
+#include &lt;cassert&gt;
 
 void f(int x) {
     assert(x != 0);

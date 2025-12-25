@@ -51,7 +51,7 @@ Memory:   [ 3000 ]   ← p stores address of value
 </code></pre>
 
 <pre><code class="language-cpp">
-#include <memory>
+#include &lt;memory&gt;
 
 int value{42};
 int *p = ::std::addressof(value);
@@ -239,8 +239,8 @@ int *s = reinterpret_cast<int *>(12345);
       </p>
 
 <pre><code class="language-cpp">
-#include <fast_io.h>
-#include <memory>
+#include &lt;fast_io.h&gt;
+#include &lt;memory&gt;
 
 int n{55};
 int *p = ::std::addressof(n);
