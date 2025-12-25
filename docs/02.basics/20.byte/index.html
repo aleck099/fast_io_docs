@@ -57,7 +57,7 @@
 
 <pre><code class="language-cpp">
 ::std::byte a{};                 // zero
-::std::byte b{static_cast<unsigned char>(42)};
+::std::byte b{static_cast&lt;unsigned char&gt;(42)};
 </code></pre>
 
       <p>
@@ -74,8 +74,8 @@
       </p>
 
 <pre><code class="language-cpp">
-::std::byte b{static_cast<unsigned char>(7)};
-unsigned int x = ::std::to_integer<unsigned int>(b);
+::std::byte b{static_cast&lt;unsigned char&gt;(7)};
+unsigned int x = ::std::to_integer&lt;unsigned int&gt;(b);
 </code></pre>
 
       <p>
@@ -118,8 +118,8 @@ unsigned int x = ::std::to_integer<unsigned int>(b);
       </ul>
 
 <pre><code class="language-cpp">
-::std::byte b{static_cast<unsigned char>(1)};
-b = b << 2;   // shift left
+::std::byte b{static_cast&lt;unsigned char&gt;(1)};
+b = b &lt;&lt; 2;   // shift left
 </code></pre>
 
       <p>
