@@ -144,13 +144,13 @@ int main() {
     println("~a = ", notv, " ", bin&lt;true,true&gt;(notv)); 
     // ~a = (platform-dependent). For 32-bit unsigned: 4294967285 0b11111111111111111111111111110101
 
-    auto lshift{a << 1};
-    println("a << 1 = ", lshift, " ", bin&lt;true,true&gt;(lshift)); 
-    // a << 1 = 20 0b00010100
+    auto lshift{a &lt;&lt; 1};
+    println("a &lt;&lt; 1 = ", lshift, " ", bin&lt;true,true&gt;(lshift)); 
+    // a &lt;&lt; 1 = 20 0b00010100
 
-    auto rshift{b >> 2};
-    println("b >> 2 = ", rshift, " ", bin&lt;true,true&gt;(rshift)); 
-    // b >> 2 = 3 0b00000011
+    auto rshift{b &gt;&gt; 2};
+    println("b &gt;&gt; 2 = ", rshift, " ", bin&lt;true,true&gt;(rshift)); 
+    // b &gt;&gt; 2 = 3 0b00000011
 }
 </code></pre>
     </section>
