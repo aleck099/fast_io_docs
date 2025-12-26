@@ -240,7 +240,7 @@ repeat(3, [] { ::fast_io::println("tick"); });
 
 <pre><code class="language-cpp">
 auto fact = [&](int n) {
-    if(n < 0)
+    if(n &lt; 0)
         ::fast_io::fast_terminate();
     if(n == 0)
         return 1;
@@ -258,7 +258,7 @@ auto fact = [&](int n) {
 
 <pre><code class="language-cpp">
 auto countdown = [&](int n) {
-    if(n < 0)
+    if(n &lt; 0)
         return;
     ::fast_io::println(n);
     countdown(n - 1);

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch8.1: Ranges & Range‑Based Algorithms - C++ Tutorial with fast_io</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch8.1: Ranges & Range‑Based Algorithms</h1>
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        A <strong>range</strong> is any object that provides a beginning and an end.
+        All containers introduced so far —
+        <code>::fast_io::vector</code>,
+        <code>::fast_io::string</code>,
+        <code>::fast_io::array</code>,
+        <code>::fast_io::span</code>,
+        <code>::fast_io::string_view</code>,
+        <code>::fast_io::cstring_view</code>,
+        <code>::fast_io::index_span</code>,
+        and C‑style arrays —
+        are <strong>contiguous ranges</strong>.
+      </p>
+
+      <p>
+        A <em>range‑based algorithm</em> is an operation that works on an entire
+        range at once. Instead of writing loops manually, you can call functions
+        such as sorting, searching, reversing, copying, or counting.
+      </p>
+
+      <p>
+        In this chapter, you will learn:
+      </p>
+
+      <ul>
+        <li>what a range is</li>
+        <li>how to call range‑based algorithms</li>
+        <li>how algorithms work uniformly across containers</li>
+        <li>how to customize algorithms with comparators</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. What is a range?</h2>
+
+      <p>
+        A range is defined by two iterators:
+      </p>
+
+      <ul>
+        <li>a beginning iterator</li>
+        <li>an ending iterator</li>
+      </ul>
+
+      <p>Examples of ranges you already know:</p>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1, 2, 3};
+int a[3]{4, 5, 6};
+::fast_io::span<int> s{a, 3};
+::fast_io::string str{"abc"};
+::fast_io::string_view sv{"hello"};
+</code></pre>
+
+      <p>
+        All of these are valid ranges.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Sorting a range</h2>
+
+      <p>
+        The simplest example is sorting:
+      </p>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{3, 1, 2};
+
+::std::ranges::sort(v);   // ascending
+</code></pre>
+
+      <p>
+        To sort in reverse order, use <code>::std::ranges::greater</code>:
+      </p>
+
+<pre><code class="language-cpp">
+::std::ranges::sort(v, ::std::ranges::greater{});
+</code></pre>
+
+      <p>
+        This works for any range, including C‑style arrays:
+      </p>
+
+<pre><code class="language-cpp">
+int a[5]{5, 1, 4, 3, 2};
+::std::ranges::sort(a, ::std::ranges::greater{});
+</code></pre>
+    </section>
+
+    <section>
+      <h2>3. Concept‑constrained comparators (&lt;functional&gt;)</h2>
+
+      <p>
+        C++20 provides standardized comparison function objects in
+        <code>&lt;functional&gt;</code> that work naturally with range algorithms:
+      </p>
+
+      <ul>
+        <li><code>std::ranges::equal_to</code> — <code>x == y</code></li>
+        <li><code>std::ranges::not_equal_to</code> — <code>x != y</code></li>
+        <li><code>std::ranges::less</code> — <code>x &lt; y</code></li>
+        <li><code>std::ranges::less_equal</code> — <code>x &lt;= y</code></li>
+        <li><code>std::ranges::greater</code> — <code>x &gt; y</code></li>
+        <li><code>std::ranges::greater_equal</code> — <code>x &gt;= y</code></li>
+        <li><code>std::compare_three_way</code> — <code>x &lt;=&gt; y</code></li>
+      </ul>
+
+      <p>
+        These are concept‑checked, reusable, and avoid generating extra code.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Using lambdas as comparators</h2>
+
+      <p>
+        You can use a lambda as a comparator:
+      </p>
+
+<pre><code class="language-cpp">
+::std::ranges::sort(v, [](int a, int b) noexcept {
+    return a > b;
+});
+</code></pre>
+
+      <p>
+        Always mark comparator lambdas <code>noexcept</code>.  
+        If a comparator throws, the C++ standard requires the program to terminate.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. Lambdas are clearly not zero‑overhead</h2>
+
+      <p>
+        Each lambda expression is a <strong>unique type</strong>, and the compiler
+        generates <strong>separate code</strong> for each one, even if they look identical:
+      </p>
+
+<pre><code class="language-cpp">
+::std::ranges::sort(v,  [](int a, int b) noexcept { return a > b; });
+::std::ranges::sort(v1, [](int a, int b) noexcept { return a > b; });
+::std::ranges::sort(v2, [](int a, int b) noexcept { return a > b; });
+</code></pre>
+
+      <p>
+        These three lambdas look the same but produce three different comparator
+        objects and three separate code paths. This increases:
+      </p>
+
+      <ul>
+        <li>binary size</li>
+        <li>instruction cache pressure</li>
+        <li>cold‑start time</li>
+        <li>update time</li>
+        <li>network transfer size (WASM/PWA)</li>
+      </ul>
+
+      <p>
+        This overhead becomes <strong>much worse</strong> when lambdas appear inside
+        templates (which we will introduce later), because templates instantiate
+        separately for each distinct lambda type.
+      </p>
+
+      <p>
+        If a standard comparator such as <code>::std::ranges::greater{}</code> works,
+        you should always prefer it over writing a new lambda.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Searching a range</h2>
+
+<pre><code class="language-cpp">
+int a[5]{10, 20, 30, 40, 50};
+
+auto it = ::std::ranges::find(a, 30);
+
+if (it != ::std::ranges::end(a)) {
+    // found
+}
+</code></pre>
+    </section>
+
+    <section>
+      <h2>7. Reversing a range</h2>
+
+<pre><code class="language-cpp">
+::fast_io::string s{"hello"};
+
+::std::ranges::reverse(s);   // "olleh"
+</code></pre>
+    </section>
+
+    <section>
+      <h2>8. Copying a range</h2>
+
+<pre><code class="language-cpp">
+int a[3]{1, 2, 3};
+int b[3]{};
+
+::std::ranges::copy(a, b);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>9. Counting elements</h2>
+
+<pre><code class="language-cpp">
+::fast_io::vector<int> v{1, 2, 2, 3};
+
+std::size_t n = ::std::ranges::count(v, 2);  // n = 2
+</code></pre>
+    </section>
+
+    <section>
+      <h2>10. Using ::std::ranges::begin and ::std::ranges::end</h2>
+
+      <p>
+        These functions work for all ranges, including C‑style arrays:
+      </p>
+
+<pre><code class="language-cpp">
+int a[3]{10, 20, 30};
+
+auto first = ::std::ranges::begin(a);
+auto last  = ::std::ranges::end(a);
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Key takeaways</h2>
+
+      <ul>
+        <li>A range is defined by a beginning and an end.</li>
+        <li>All fast_io containers and C‑style arrays are contiguous ranges.</li>
+        <li>Range‑based algorithms operate on entire ranges.</li>
+        <li>Algorithms do not depend on container type.</li>
+        <li><code>&lt;functional&gt;</code> provides reusable, concept‑checked comparators.</li>
+        <li><code>std::ranges::greater</code> is preferred over writing a lambda.</li>
+        <li>Lambdas are <strong>not zero‑overhead</strong> because each one generates new code.</li>
+        <li>Templates make lambda bloat much worse.</li>
+        <li>Comparator lambdas must be <code>noexcept</code>.</li>
+        <li><code>std::ranges::begin</code> and <code>std::ranges::end</code> work for all ranges.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/08.algorithm/" class="prev-button">← Ch8: Algorithms</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/08.algorithm/02.rangecategories/" class="next-button">Ch8.2: Range Categories →</a>
+    </div>
+
+  </main>
+</body>
+</html>
