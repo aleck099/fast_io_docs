@@ -220,13 +220,21 @@
         Meanwhile, VLC’s installer is over 100 MB.  
         SMPlayer is similar.  
         Updates are expensive.  
-        Startup is slower because the entire application must be loaded.
+        Startup is slower because the entire application must be loaded from disk.
       </p>
 
       <p>
-        My PWA Player demonstrates that a thin JavaScript layer over Chromium
-        can outperform many native apps simply because the browser is already
-        booted and shared across processes.
+        My PWA Player is a concrete demonstration of this. The player itself is under
+        100 KB, while the browser’s media engine — written in highly optimized
+        C/C++/assembly — is already loaded in memory and shared across processes.
+        The PWA does not re‑implement a media engine; it simply uses the one the
+        browser already provides.
+      </p>
+
+      <p>
+        This architecture allows a lightweight PWA to outperform heavyweight native
+        apps in startup time, update cost, and distribution convenience. It directly
+        contradicts the simplistic “C++ is always faster” narrative.
       </p>
 
       <p>
@@ -235,48 +243,10 @@
           https://pwa-player.pages.dev/
         </a>
       </p>
-
-      <p>
-        This is the opposite of the “C++ is always faster” narrative.
-      </p>
     </section>
 
     <section>
-      <h2>8. Dedicated example: PWA Player</h2>
-
-      <p>
-        The PWA Player is a concrete demonstration of how a lightweight,
-        browser‑based application can outperform heavyweight native apps.
-      </p>
-
-      <p>
-        The player itself is under 100 KB.  
-        VLC’s installer is over 100 MB.  
-        SMPlayer is similar.  
-        Updates are instant because the browser handles caching and sandboxing.
-      </p>
-
-      <p>
-        The PWA Player does not try to re‑implement a media engine. It simply
-        uses the browser’s built‑in media stack — which is already written in
-        highly optimized C/C++ and assembly, already loaded in memory, and
-        already shared across processes.
-      </p>
-
-      <p>
-        This is a perfect example of why “native is always faster” is a myth.
-      </p>
-
-      <p>
-        You can try it here:
-        <a href="https://pwa-player.pages.dev/" target="_blank">
-          https://pwa-player.pages.dev/
-        </a>
-      </p>
-    </section>
-
-    <section>
-      <h2>9. Economic cost is real overhead</h2>
+      <h2>8. Economic cost is real overhead</h2>
 
       <p>
         Adding features like exception handling consumes:
