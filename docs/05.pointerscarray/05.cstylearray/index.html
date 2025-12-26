@@ -171,9 +171,9 @@ int a[3]{10, 20, 30};
       </ul>
 
 <pre><code class="language-cpp">
-#include <fast_io_dsal/array.h>
+#include &lt;fast_io_dsal/array.h&gt;
 
-::fast_io::array<int, 0> empty;   // valid: zero-sized array
+::fast_io::array&lt;int, 0&gt; empty;   // valid: zero-sized array
 </code></pre>
 
       <p>
@@ -181,7 +181,7 @@ int a[3]{10, 20, 30};
       </p>
 
 <pre><code class="language-cpp">
-::fast_io::array<int, 3> arr{10, 20, 30};
+::fast_io::array&lt;int, 3&gt; arr{10, 20, 30};
 
 int x = arr[1];   // safe: bounds checked
 </code></pre>
@@ -208,9 +208,9 @@ int x = arr.index_unchecked(1);   // no bounds checking
       </p>
 
 <pre><code class="language-cpp">
-#include <fast_io_dsal/vector.h>
+#include &lt;fast_io_dsal/vector.h&gt;
 
-::fast_io::vector<int> vec;
+::fast_io::vector&lt;int&gt; vec;
 vec.push_back(10);
 vec.push_back(20);
 
@@ -271,7 +271,7 @@ int x = vec.index_unchecked(0);   // no bounds checking
       </p>
 
 <pre><code class="language-cpp">
-#include <memory>
+#include &lt;memory&gt;
 
 int a[3]{10, 20, 30};
 
