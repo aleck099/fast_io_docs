@@ -182,29 +182,28 @@ range
 
       <p>
         Range categories are compile‑time properties.
-        You can detect them using <code>if constexpr</code> and the standard concepts,
-        without using templates.
+        You can detect them using <code>if constexpr</code> and the standard concepts.
       </p>
 
 <pre><code class="language-cpp">
 void analyze_vector(::fast_io::vector<int>& v)
 {
-    if constexpr(contiguous_range<decltype(v)>)
+    if constexpr(::std::ranges::contiguous_range&lt;decltype(v)&gt;)
         print("vector is a contiguous range\n");
 
-    if constexpr(random_access_range<decltype(v)>)
+    if constexpr(::std::ranges::random_access_range&lt;decltype(v)&gt;)
         print("vector is a random_access range\n");
 
-    if constexpr(bidirectional_range<decltype(v)>)
+    if constexpr(::std::ranges::bidirectional_range&lt;decltype(v)&gt;)
         print("vector is a bidirectional range\n");
 
-    if constexpr(forward_range<decltype(v)>)
+    if constexpr(::std::ranges::forward_range&lt;decltype(v)&gt;)
         print("vector is a forward range\n");
 
-    if constexpr(input_range<decltype(v)>)
+    if constexpr(::std::ranges::input_range&lt;decltype(v)&gt;)
         print("vector is an input range\n");
 
-    if constexpr(output_range<decltype(v), int>)
+    if constexpr(::std::ranges::output_range&lt;decltype(v), int&gt;)
         print("vector is an output range for int\n");
 }
 </code></pre>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ch2.21: struct - C++ Tutorial</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/webp" href="/icons/logo.webp">
+</head>
+<body>
+  <main>
+    <h1>Ch2.21: <code>struct</code></h1>
+
+    <section>
+      <h2>Overview</h2>
+
+      <p>
+        A <code>struct</code> lets you group several values together under a single name.
+        In this chapter, we define the simplest kind of <code>struct</code>:
+        an <em>aggregate</em>. An aggregate contains only data members and has no hidden behavior.
+      </p>
+
+      <p>
+        You will learn:
+      </p>
+
+      <ul>
+        <li>how to define a <code>struct</code> aggregate</li>
+        <li>how to create an object of that type</li>
+        <li>how to read and write its members</li>
+        <li>how aggregate initialization works</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>1. Defining a <code>struct</code> aggregate</h2>
+
+      <p>
+        A <code>struct</code> with only data members is an aggregate.
+      </p>
+
+<pre><code class="language-cpp">
+struct Point {
+    int x;
+    int y;
+};  // ← do not forget this semicolon
+</code></pre>
+
+      <p>
+        The semicolon is required. Forgetting it is a very common beginner mistake.
+      </p>
+
+      <p>
+        This defines a new type named <code>Point</code> with two members:
+        <code>x</code> and <code>y</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Creating a struct object</h2>
+
+      <p>
+        You can create a <code>Point</code> using brace initialization:
+      </p>
+
+<pre><code class="language-cpp">
+Point p{3, 4};
+</code></pre>
+
+      <p>
+        This sets <code>p.x = 3</code> and <code>p.y = 4</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>3. Accessing and modifying members</h2>
+
+      <p>
+        Use the dot operator (<code>.</code>) to read or write members.
+      </p>
+
+<pre><code class="language-cpp">
+Point p{3, 4};
+
+print("x=", p.x, " y=", p.y);
+
+p.x = 10;
+p.y = 20;
+
+print("x=", p.x, " y=", p.y);
+</code></pre>
+
+      <p>
+        Each member behaves like a normal variable.
+      </p>
+    </section>
+
+    <section>
+      <h2>4. Designated initialization</h2>
+
+      <p>
+        Aggregates support designated initializers:
+      </p>
+
+<pre><code class="language-cpp">
+Point a{.x = 1, .y = 2};
+</code></pre>
+
+      <p>
+        This sets the members by name.
+      </p>
+    </section>
+
+    <section>
+      <h2>5. What we are <em>not</em> covering yet</h2>
+
+      <p>
+        In this chapter, we intentionally avoid:
+      </p>
+
+      <ul>
+        <li><code>class</code></li>
+        <li><code>public</code> / <code>private</code></li>
+        <li>member functions</li>
+        <li>constructors</li>
+        <li>methods</li>
+        <li>containers</li>
+        <li>loops</li>
+      </ul>
+
+      <p>
+        A <code>struct</code> aggregate is simply a group of values with no hidden behavior.
+      </p>
+    </section>
+
+    <section>
+      <h2>6. Key takeaways</h2>
+
+      <ul>
+        <li>A <code>struct</code> with only data members is an aggregate.</li>
+        <li>Aggregates support simple brace initialization.</li>
+        <li>Members are accessed using <code>.</code>.</li>
+        <li>Aggregates contain no hidden behavior.</li>
+      </ul>
+    </section>
+
+    <script src="/sw-register.js"></script>
+    <div class="page-navigation">
+      <a href="/docs/02.basics/20.byte/" class="prev-button">← Ch2.20: ::std::byte</a>
+      <a href="/" class="main-button">↑ Main Page</a>
+      <a href="/docs/03.statements/" class="next-button">Ch3: statements →</a>
+    </div>
+
+  </main>
+</body>
+</html>

@@ -62,9 +62,9 @@
       <p>Examples of ranges you already know:</p>
 
 <pre><code class="language-cpp">
-::fast_io::vector<int> v{1, 2, 3};
+::fast_io::vector&lt;int&gt; v{1, 2, 3};
 int a[3]{4, 5, 6};
-::fast_io::span<int> s{a, 3};
+::fast_io::span&lt;int&gt; s{a, 3};
 ::fast_io::string str{"abc"};
 ::fast_io::string_view sv{"hello"};
 </code></pre>
@@ -82,7 +82,7 @@ int a[3]{4, 5, 6};
       </p>
 
 <pre><code class="language-cpp">
-::fast_io::vector<int> v{3, 1, 2};
+::fast_io::vector&lt;int&gt; v{3, 1, 2};
 
 ::std::ranges::sort(v);   // ascending
 </code></pre>
@@ -137,7 +137,7 @@ int a[5]{5, 1, 4, 3, 2};
 
 <pre><code class="language-cpp">
 ::std::ranges::sort(v, [](int a, int b) noexcept {
-    return a > b;
+    return a &gt; b;
 });
 </code></pre>
 
@@ -156,9 +156,9 @@ int a[5]{5, 1, 4, 3, 2};
       </p>
 
 <pre><code class="language-cpp">
-::std::ranges::sort(v,  [](int a, int b) noexcept { return a > b; });
-::std::ranges::sort(v1, [](int a, int b) noexcept { return a > b; });
-::std::ranges::sort(v2, [](int a, int b) noexcept { return a > b; });
+::std::ranges::sort(v,  [](int a, int b) noexcept { return a &gt; b; });
+::std::ranges::sort(v1, [](int a, int b) noexcept { return a &gt; b; });
+::std::ranges::sort(v2, [](int a, int b) noexcept { return a &gt; b; });
 </code></pre>
 
       <p>
@@ -225,7 +225,7 @@ int b[3]{};
       <h2>9. Counting elements</h2>
 
 <pre><code class="language-cpp">
-::fast_io::vector<int> v{1, 2, 2, 3};
+::fast_io::vector&lt;int&gt; v{1, 2, 2, 3};
 
 std::size_t n = ::std::ranges::count(v, 2);  // n = 2
 </code></pre>
