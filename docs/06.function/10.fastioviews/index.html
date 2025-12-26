@@ -170,10 +170,10 @@
       <h3>Example: passing a span</h3>
 
 <pre><code class="language-cpp">
-void process(::fast_io::span<int const> s)
+void process(::fast_io::span&lt;int const&gt; s)
 {
     for(auto e : s)
-        ::fast_io::println(e);
+        ::fast_io::io::println(e);
 }
 </code></pre>
 
@@ -243,7 +243,7 @@ void greet(::fast_io::string_view name)
 <pre><code class="language-cpp">
 void debug(::fast_io::cstring_view s)
 {
-    ::fast_io::println("debug: ", s);
+    ::fast_io::io::println("debug: ", s);
 }
 </code></pre>
     </section>
@@ -269,11 +269,10 @@ void debug(::fast_io::cstring_view s)
       <h3>Example</h3>
 
 <pre><code class="language-cpp">
-void print_slice(::fast_io::span<int const> s,
-                 ::fast_io::index_span<std::size_t, 2> idx)
+void print_slice(::fast_io::index_span&lt;std::size_t, 5&gt; idx)
 {
-    for(std::size_t i = idx[0]; i != idx[1]; ++i)
-        ::fast_io::println(s[i]);
+    for(std::size_t i{}, n{idx.size()}; i != n; ++i)
+        ::fast_io::io::println(idx[i]);
 }
 </code></pre>
     </section>
