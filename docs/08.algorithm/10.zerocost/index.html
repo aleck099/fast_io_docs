@@ -126,19 +126,39 @@
     </section>
 
     <section>
-      <h2>4. span and string_view are not zero‑overhead everywhere</h2>
+    <h2>4. span and string_view are not zero‑overhead on Windows x64</h2>
 
-      <p>
-        On x86‑64 Windows, <code>std::span</code> and <code>std::string_view</code>
-        are not zero‑overhead because the Windows API uses 32‑bit lengths and
-        64‑bit pointers. Conversions and bounds checks introduce real costs.
-      </p>
+    <p>
+        A common claim is that <code>std::span</code> and <code>std::string_view</code>
+        are “zero‑overhead” abstractions. This is not true on Windows x86‑64, and the
+        reason is very concrete: the Windows x64 calling convention only passes
+        arguments of size 1, 2, 4, or 8 bytes in registers.
+    </p>
 
-      <p>
-        Abstractions that are “zero‑overhead” on Linux may not be zero‑overhead
-        on Windows. Platform differences matter.
-      </p>
+    <p>
+        Both <code>std::span</code> and <code>std::string_view</code> are 16‑byte
+        aggregates (a pointer plus a size) on 64‑bit platforms. On Windows x64, such
+        16‑byte types do <strong>not</strong> qualify for register passing and are
+        therefore always passed <strong>by memory</strong>. This is purely an ABI
+        rule, not an STL or MSVC bug.
+    </p>
+
+    <p>
+        On 32‑bit (i686) and Windows on ARM, and on SysV x86‑64 (Linux, BSD, macOS),
+        16‑byte aggregates <em>can</em> be passed in registers, so the same
+        <code>span</code>/<code>string_view</code> code has different calling‑convention
+        costs across platforms. The Godbolt examples demonstrate this difference
+        clearly for 64‑bit Windows vs 32‑bit and SysV ABIs.
+    </p>
+
+    <p>
+        The key point is that “zero‑overhead” is not a universal property of an
+        abstraction; it depends on the ABI. An abstraction that looks “zero‑overhead”
+        on SysV can be measurably more expensive on Windows x64. Platform rules win
+        over slogans.
+    </p>
     </section>
+
 
     <section>
       <h2>5. Instruction ordering and optimizer complexity</h2>
